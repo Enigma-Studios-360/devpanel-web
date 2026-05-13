@@ -1,0 +1,30 @@
+/* Design tokens — dark by default. Mirrors the CSS custom properties exposed in styles.scss */
+
+/* Surface palette */
+$dp-bg:        #0B1020;
+$dp-surface:   #111827;
+$dp-surface-2: #172033;
+$dp-border:    #1F2937;
+$dp-text:      #E5E7EB;
+$dp-text-muted:#9CA3AF;
+
+/* Accents */
+$dp-accent-blue:   #3B82F6;
+$dp-accent-purple: #8B5CF6;
+$dp-accent-green:  #22C55E;
+$dp-accent-red:    #EF4444;
+$dp-accent-yellow: #F59E0B;
+
+/* Project status */
+$dp-status-planning:    #64748B;
+$dp-status-development: $dp-accent-blue;
+$dp-status-testing:     $dp-accent-yellow;
+$dp-status-production:  $dp-accent-green;
+$dp-status-archived:    #4B5563;
+
+/* Task status */
+$dp-task-todo:        #6B7280;
+$dp-task-in-progress: $dp-accent-blue;
+$dp-task-review:      $dp-accent-purple;
+$dp-task-blocked:     $dp-accent-red;
+$dp-task-done:        $dp-accent-green;

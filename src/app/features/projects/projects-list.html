@@ -1,0 +1,181 @@
+<dp-page-header
+  title="Proyectos"
+  subtitle="Crea y organiza los proyectos del equipo."
+>
+  <a [routerLink]="['/app/teams', teamId()]" class="dp-btn dp-btn--ghost">
+    <i class="pi pi-arrow-left"></i>
+    <span>Volver al equipo</span>
+  </a>
+  <button
+    type="button"
+    class="dp-btn dp-btn--primary"
+    (click)="openCreate()"
+    data-tour="create-project"
+  >
+    <i class="pi pi-plus"></i>
+    <span>Crear proyecto</span>
+  </button>
+</dp-page-header>
+
+@if (subscription(); as s) {
+  <div class="dp-projects-quota" data-tour="plan-quota">
+    <span><i class="pi pi-tag"></i> Plan <strong>{{ s.plan }}</strong></span>
+    <span class="dp-text-muted">·</span>
+    <span>
+      {{ activeCount() }} / {{ s.limits.maxProjects }} proyecto(s) activo(s)
+    </span>
+    @if (!canCreate()) {
+      <a [routerLink]="['/app/pricing']" [queryParams]="{ teamId: teamId() }"
+         class="dp-projects-quota__upgrade">
+        Cambiar plan →
+      </a>
+    }
+  </div>
+}
+
+@if (loading()) {
+  <dp-loading-state label="Cargando proyectos…" />
+} @else {
+  @if (projects().length === 0) {
+    <dp-empty-state
+      title="Aún no hay proyectos en este equipo"
+      description="Crea tu primer proyecto para empezar a organizar tareas, documentación y deploy."
+      icon="pi-folder-open"
+      actionLabel="Crear proyecto"
+      (action)="openCreate()"
+    />
+  } @else {
+    <div class="dp-projects-grid" data-tour="projects-list">
+      @for (p of projects(); track p._id) {
+        <article class="dp-project-card" [style.--accent]="p.color || '#3B82F6'">
+          <header>
+            <div class="dp-project-card__icon"><i class="pi pi-box"></i></div>
+            <div class="dp-project-card__head">
+              <h3>{{ p.name }}</h3>
+              <span class="dp-text-muted dp-text-sm">{{ p.slug }}</span>
+            </div>
+            <dp-status-badge kind="project" [status]="p.status" [label]="p.status" data-tour="project-status" />
+          </header>
+          @if (p.description) {
+            <p class="dp-project-card__desc">{{ p.description }}</p>
+          }
+          @if (p.stack && p.stack.length > 0) {
+            <ul class="dp-project-card__stack" data-tour="project-stack">
+              @for (s of p.stack; track s) {
+                <li>{{ s }}</li>
+              }
+            </ul>
+          }
+          <footer>
+            @if (p.dueDate) {
+              <span class="dp-project-card__due">
+                <i class="pi pi-calendar"></i> {{ formatDate(p.dueDate) }}
+              </span>
+            } @else {
+              <span class="dp-text-muted dp-text-sm">Sin fecha límite</span>
+            }
+            <a [routerLink]="['/app/projects', p._id, 'overview']" class="dp-btn dp-btn--ghost">
+              Abrir
+              <i class="pi pi-arrow-right"></i>
+            </a>
+          </footer>
+        </article>
+      }
+    </div>
+
+    <div class="dp-projects-learn">
+      <dp-learn-more-card
+        [title]="('learn.project.title' | t)"
+        [body]="('learn.project.body' | t)"
+      />
+    </div>
+  }
+}
+
+@if (modalOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeCreate()">
+    <form
+      class="dp-modal dp-modal--lg"
+      data-tour="create-project-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+      <header>
+        <h2>Crear proyecto</h2>
+        <button type="button" class="dp-modal__close" (click)="closeCreate()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      <label class="dp-modal__field" data-tour="create-project-name">
+        <span>Nombre <em>*</em></span>
+        <input type="text" formControlName="name" placeholder="Mi nuevo proyecto" />
+      </label>
+
+      <label class="dp-modal__field">
+        <span>Descripción</span>
+        <textarea formControlName="description" placeholder="Una línea breve de qué resuelve"></textarea>
+      </label>
+
+      <div class="dp-modal__row" data-tour="create-project-status">
+        <label class="dp-modal__field">
+          <span>Estado</span>
+          <select formControlName="status">
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </label>
+        <label class="dp-modal__field">
+          <span>Fecha límite</span>
+          <input type="date" formControlName="dueDate" />
+        </label>
+      </div>
+
+      <label class="dp-modal__field" data-tour="create-project-stack">
+        <span>Stack (separado por comas)</span>
+        <input type="text" formControlName="stack" placeholder="Angular, Express, MongoDB" />
+      </label>
+
+      <label class="dp-modal__field">
+        <span>URL del repositorio</span>
+        <input type="url" formControlName="repositoryUrl" placeholder="https://github.com/usuario/repo" />
+      </label>
+
+      @if (limitInfo(); as li) {
+        <div class="dp-projects-limit">
+          <i class="pi pi-lock"></i>
+          <div>
+            <strong>Límite del plan alcanzado.</strong>
+            <p>
+              Tu plan actual permite hasta <strong>{{ li.max }}</strong> proyecto(s) activo(s)
+              y ya tienes <strong>{{ li.active }}</strong>. Archiva uno o cambia de plan.
+            </p>
+            <button type="button" class="dp-btn dp-btn--primary" (click)="goToPricing()">
+              <i class="pi pi-tag"></i> Ver planes
+            </button>
+          </div>
+        </div>
+      } @else if (createError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ createError() }}
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeCreate()">Cancelar</button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          data-tour="create-project-submit"
+          [disabled]="form.invalid || creating()"
+        >
+          @if (creating()) { <span class="dp-spinner"></span> }
+          Crear proyecto
+        </button>
+      </footer>
+    </form>
+  </div>
+}

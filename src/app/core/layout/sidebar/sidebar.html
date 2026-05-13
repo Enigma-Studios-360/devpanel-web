@@ -1,0 +1,64 @@
+<aside class="dp-sidebar">
+  <div class="dp-sidebar__brand" data-tour="sidebar-brand">
+    <span class="dp-sidebar__logo">
+      <i class="pi pi-bolt"></i>
+    </span>
+    <div class="dp-sidebar__brand-text">
+      <span class="dp-sidebar__brand-name">DevPanel</span>
+      <span class="dp-sidebar__brand-tag">{{ 'app.tagline' | t }}</span>
+    </div>
+  </div>
+
+  <nav class="dp-sidebar__nav" aria-label="Main navigation">
+    <div class="dp-sidebar__group">
+      <span class="dp-sidebar__group-label">Workspace</span>
+      <ul>
+        @for (item of mainNav; track item.link) {
+          <li>
+            <a
+              [routerLink]="item.link"
+              routerLinkActive="dp-sidebar__link--active"
+              class="dp-sidebar__link"
+              [attr.data-tour]="item.tour"
+            >
+              <i [class]="'pi ' + item.icon"></i>
+              <span>{{ item.labelKey | t }}</span>
+              @if (item.badge) {
+                <span class="dp-sidebar__badge">{{ item.badge }}</span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="dp-sidebar__group">
+      <span class="dp-sidebar__group-label">Integraciones</span>
+      <ul>
+        @for (item of integrationNav; track item.link) {
+          <li>
+            <a
+              [routerLink]="item.link"
+              routerLinkActive="dp-sidebar__link--active"
+              class="dp-sidebar__link"
+              [attr.data-tour]="item.tour"
+            >
+              <i [class]="'pi ' + item.icon"></i>
+              <span>{{ item.labelKey | t }}</span>
+              @if (item.badge) {
+                <span class="dp-sidebar__badge">{{ item.badge }}</span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </nav>
+
+  <footer class="dp-sidebar__foot">
+    <div class="dp-sidebar__phase">
+      <span class="dp-sidebar__phase-pill">Fase 2</span>
+      <span class="dp-sidebar__phase-text">SaaS base funcional</span>
+    </div>
+  </footer>
+</aside>

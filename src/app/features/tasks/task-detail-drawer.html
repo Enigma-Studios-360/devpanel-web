@@ -1,0 +1,191 @@
+@if (task; as t) {
+  <div class="dp-drawer__backdrop" (click)="close.emit()"></div>
+  <aside
+    class="dp-drawer"
+    role="dialog"
+    aria-modal="true"
+    (click)="$event.stopPropagation()"
+    data-tour="task-detail"
+  >
+    <header class="dp-drawer__head">
+      <div class="dp-drawer__title-row">
+        @if (!editing()) {
+          <h2 class="dp-drawer__title">{{ t.title }}</h2>
+        } @else {
+          <div class="dp-drawer__title-edit">Editando tarea</div>
+        }
+        <button
+          type="button"
+          class="dp-drawer__close"
+          (click)="close.emit()"
+          aria-label="Cerrar"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="dp-drawer__badges">
+        <span data-tour="status-menu" class="dp-drawer__status">
+          <button
+            type="button"
+            class="dp-drawer__status-trigger"
+            (click)="toggleStatusMenu()"
+            [attr.aria-expanded]="statusMenuOpen()"
+          >
+            <dp-status-badge kind="task" [status]="t.status" [label]="t.status" />
+            <i class="pi pi-angle-down"></i>
+          </button>
+          @if (statusMenuOpen()) {
+            <ul class="dp-drawer__status-menu" role="menu">
+              @for (s of statuses; track s) {
+                <li>
+                  <button
+                    type="button"
+                    class="dp-drawer__status-option"
+                    [class.dp-drawer__status-option--current]="s === t.status"
+                    (click)="changeStatus(s)"
+                  >
+                    {{ s }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </span>
+        <dp-priority-badge [priority]="t.priority" />
+        @if (t.dueDate) {
+          <span class="dp-drawer__pill">
+            <i class="pi pi-calendar"></i>
+            {{ formatDate(t.dueDate) }}
+          </span>
+        }
+      </div>
+    </header>
+
+    @if (opError()) {
+      <div class="dp-drawer__error">
+        <i class="pi pi-exclamation-circle"></i> {{ opError() }}
+      </div>
+    }
+
+    <section class="dp-drawer__body">
+      @if (!editing()) {
+        <div class="dp-drawer__section">
+          <h3>Descripción</h3>
+          @if (t.description) {
+            <p class="dp-drawer__desc">{{ t.description }}</p>
+          } @else {
+            <p class="dp-drawer__desc dp-drawer__desc--empty">Sin descripción.</p>
+          }
+        </div>
+
+        <div class="dp-drawer__section dp-drawer__meta-grid">
+          <div>
+            <dt>Asignados</dt>
+            <dd>{{ assigneesText() }}</dd>
+          </div>
+          <div>
+            <dt>Creada por</dt>
+            <dd>{{ createdByName() }}</dd>
+          </div>
+          <div>
+            <dt>Creada</dt>
+            <dd>{{ formatDate(t.createdAt) }}</dd>
+          </div>
+        </div>
+
+        <div class="dp-drawer__actions">
+          <button type="button" class="dp-btn dp-btn--ghost" (click)="startEditing()">
+            <i class="pi pi-pencil"></i> Editar tarea
+          </button>
+        </div>
+      } @else {
+        <form
+          class="dp-drawer__edit-form"
+          [formGroup]="editForm"
+          (ngSubmit)="saveEdit()"
+          novalidate
+        >
+          <label class="dp-modal__field">
+            <span>Título</span>
+            <input type="text" formControlName="title" />
+          </label>
+          <label class="dp-modal__field">
+            <span>Descripción</span>
+            <textarea formControlName="description"></textarea>
+          </label>
+          <div class="dp-modal__row">
+            <label class="dp-modal__field">
+              <span>Prioridad</span>
+              <select formControlName="priority">
+                @for (p of priorities; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </label>
+            <label class="dp-modal__field">
+              <span>Fecha límite</span>
+              <input type="date" formControlName="dueDate" />
+            </label>
+          </div>
+          <div class="dp-drawer__actions">
+            <button type="button" class="dp-btn dp-btn--ghost" (click)="cancelEdit()">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="dp-btn dp-btn--primary"
+              [disabled]="editForm.invalid || savingEdit()"
+            >
+              @if (savingEdit()) { <span class="dp-spinner"></span> }
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      }
+
+      <div class="dp-drawer__section" data-tour="task-comments">
+        <h3>Comentarios <span class="dp-drawer__count">{{ comments().length }}</span></h3>
+
+        @if (loadingComments()) {
+          <dp-loading-state [inline]="true" label="Cargando…" />
+        } @else if (comments().length === 0) {
+          <p class="dp-drawer__desc dp-drawer__desc--empty">
+            Aún no hay comentarios. Sé el primero en aportar contexto.
+          </p>
+        } @else {
+          <ul class="dp-comments">
+            @for (c of comments(); track c._id) {
+              <li>
+                <div class="dp-comments__avatar">{{ commenterInitial(c) }}</div>
+                <div class="dp-comments__body">
+                  <header>
+                    <strong>{{ commenterName(c) }}</strong>
+                    <span class="dp-text-muted dp-text-sm">{{ relativeTime(c.createdAt) }}</span>
+                  </header>
+                  <p>{{ c.message }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+
+        <form class="dp-drawer__comment-form" [formGroup]="commentForm" (ngSubmit)="sendComment()" novalidate>
+          <textarea
+            formControlName="message"
+            placeholder="Escribe un comentario…"
+            rows="2"
+          ></textarea>
+          <button
+            type="submit"
+            class="dp-btn dp-btn--primary"
+            [disabled]="commentForm.invalid || sendingComment()"
+          >
+            @if (sendingComment()) { <span class="dp-spinner"></span> }
+            <i class="pi pi-send"></i>
+            Enviar
+          </button>
+        </form>
+      </div>
+    </section>
+  </aside>
+}

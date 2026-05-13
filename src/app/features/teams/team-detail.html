@@ -1,0 +1,77 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando equipo…" />
+} @else if (error()) {
+  <div class="dp-modal__error">{{ error() }}</div>
+} @else if (team(); as t) {
+  <dp-page-header
+    [title]="t.name"
+    [subtitle]="'Equipo · plan ' + t.plan"
+  >
+    <a [routerLink]="['/app/teams', t._id, 'projects']" class="dp-btn dp-btn--primary">
+      <i class="pi pi-folder-open"></i>
+      <span>Ver proyectos</span>
+    </a>
+    <a [routerLink]="['/app/pricing']" [queryParams]="{ teamId: t._id }" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-tag"></i>
+      <span>Cambiar plan</span>
+    </a>
+  </dp-page-header>
+
+  <div class="dp-team-detail">
+    <section class="dp-card">
+      <h3 class="dp-team-detail__section-title">Resumen</h3>
+      <dl class="dp-team-detail__meta">
+        <div>
+          <dt>Plan actual</dt>
+          <dd>{{ t.plan }}</dd>
+        </div>
+        <div>
+          <dt>Tu rol</dt>
+          <dd>{{ role() ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Slug</dt>
+          <dd class="dp-text-mono">{{ t.slug }}</dd>
+        </div>
+        @if (subscription(); as s) {
+          <div>
+            <dt>Proyectos máx.</dt>
+            <dd>{{ s.limits.maxProjects }}</dd>
+          </div>
+          <div>
+            <dt>Integrantes máx.</dt>
+            <dd>{{ s.limits.maxMembers }}</dd>
+          </div>
+          <div>
+            <dt>Almacenamiento</dt>
+            <dd>{{ s.limits.maxStorageMb }} MB</dd>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <section class="dp-card">
+      <header class="dp-team-detail__row">
+        <h3 class="dp-team-detail__section-title">Integrantes</h3>
+        <span class="dp-text-muted dp-text-sm">{{ members().length }} miembro(s)</span>
+      </header>
+      <ul class="dp-members">
+        @for (m of members(); track m._id) {
+          <li>
+            <div class="dp-members__avatar">{{ memberName(m).charAt(0).toUpperCase() }}</div>
+            <div class="dp-members__info">
+              <strong>{{ memberName(m) }}</strong>
+              <span class="dp-text-muted dp-text-sm">{{ memberEmail(m) }}</span>
+            </div>
+            <span class="dp-members__role">{{ m.role }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <dp-learn-more-card
+      title="¿Cómo funciona un equipo?"
+      body="Un equipo agrupa a varios usuarios con roles distintos. Cada equipo tiene su propio plan y sus proyectos. En esta versión inicial cada usuario puede crear varios equipos y ver los suyos."
+    />
+  </div>
+}

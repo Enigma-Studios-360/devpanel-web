@@ -1,0 +1,106 @@
+<dp-page-header
+  title="Planes"
+  subtitle="Estructura freemium. Los pagos reales llegan en la Fase 9; aquí el upgrade es simulado."
+></dp-page-header>
+
+@if (authenticated() && teams().length > 0) {
+  <div class="dp-pricing__team-bar" data-tour="pricing-team-selector">
+    <label>
+      <span class="dp-text-muted dp-text-sm">Aplicar plan a:</span>
+      <select [ngModel]="selectedTeamId()" (ngModelChange)="onTeamChange($event)">
+        @for (t of teams(); track t.team._id) {
+          <option [value]="t.team._id">
+            {{ t.team.name }} · {{ t.role }}
+          </option>
+        }
+      </select>
+    </label>
+    @if (subscription(); as s) {
+      <span class="dp-pricing__current">
+        Plan actual: <strong>{{ s.plan }}</strong>
+      </span>
+    }
+    @if (!canUpgrade() && selectedTeamId()) {
+      <span class="dp-pricing__hint">
+        <i class="pi pi-info-circle"></i> Solo OWNER o ADMIN pueden cambiar el plan.
+      </span>
+    }
+  </div>
+
+  @if (notice()) {
+    <div class="dp-pricing__notice">
+      <i class="pi pi-info-circle"></i> {{ notice() }}
+    </div>
+  }
+}
+
+@if (loading()) {
+  <dp-loading-state label="Cargando planes…" />
+} @else if (error()) {
+  <div class="dp-pricing__error dp-card">
+    <i class="pi pi-exclamation-triangle"></i>
+    {{ error() }}
+  </div>
+} @else {
+  <div class="dp-pricing__grid" data-tour="pricing-plans">
+    @for (plan of plans(); track plan.code) {
+      <article
+        class="dp-pricing__card"
+        [class.dp-pricing__card--featured]="plan.code === 'PRO'"
+        [class.dp-pricing__card--current]="isCurrentPlan(plan.code)"
+      >
+        <header>
+          <span class="dp-pricing__pill">{{ plan.code }}</span>
+          <h3>{{ plan.name }}</h3>
+          <p class="dp-text-muted dp-text-sm">{{ plan.description }}</p>
+        </header>
+        <div class="dp-pricing__price">
+          @if (plan.priceMonthly === null) {
+            <span>Personalizado</span>
+          } @else if (plan.priceMonthly === 0) {
+            <span>Gratis</span>
+          } @else {
+            <span class="dp-pricing__price-num">${{ plan.priceMonthly }}</span>
+            <span class="dp-text-muted dp-text-sm">/ mes</span>
+          }
+        </div>
+        <ul class="dp-pricing__features">
+          @for (h of plan.highlights; track h) {
+            <li><i class="pi pi-check"></i><span>{{ h }}</span></li>
+          }
+        </ul>
+
+        @if (authenticated() && selectedTeamId()) {
+          @if (isCurrentPlan(plan.code)) {
+            <button class="dp-pricing__cta dp-pricing__cta--current" disabled>
+              <i class="pi pi-check-circle"></i> Plan actual
+            </button>
+          } @else if (plan.priceMonthly === null) {
+            <button class="dp-pricing__cta" disabled>
+              Contactar
+            </button>
+          } @else if (canUpgrade()) {
+            <button
+              class="dp-pricing__cta dp-pricing__cta--active"
+              [disabled]="upgrading() !== null"
+              (click)="upgrade(plan.code)"
+            >
+              @if (upgrading() === plan.code) {
+                <span class="dp-spinner"></span>
+              }
+              Simular cambio a {{ plan.name }}
+            </button>
+          } @else {
+            <button class="dp-pricing__cta" disabled>
+              Solo OWNER/ADMIN
+            </button>
+          }
+        } @else {
+          <button class="dp-pricing__cta" disabled>
+            {{ 'common.comingSoon' | t }}
+          </button>
+        }
+      </article>
+    }
+  </div>
+}

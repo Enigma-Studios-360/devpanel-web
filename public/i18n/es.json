@@ -1,0 +1,130 @@
+{
+  "app": {
+    "name": "DevPanel",
+    "tagline": "Centraliza tu flujo de desarrollo"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Proyectos",
+    "tasks": "Tareas",
+    "teams": "Equipos",
+    "docs": "Documentación",
+    "activity": "Actividad",
+    "github": "GitHub",
+    "deploy": "Deploy",
+    "files": "Archivos",
+    "pricing": "Planes",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta"
+  },
+  "landing": {
+    "hero": {
+      "title": "El panel de control para tus proyectos de desarrollo.",
+      "subtitle": "Equipos, proyectos, tareas, documentación y deploy en un solo lugar.",
+      "ctaPrimary": "Empezar gratis",
+      "ctaSecondary": "Ver planes"
+    },
+    "features": {
+      "title": "Hecho para developers que quieren orden",
+      "f1": {
+        "title": "Proyectos organizados",
+        "desc": "Tareas, documentación, archivos y actividad por proyecto, no en 5 herramientas."
+      },
+      "f2": {
+        "title": "Equipos con roles",
+        "desc": "Owner, admin, developer o viewer. Cada quien ve lo suyo."
+      },
+      "f3": {
+        "title": "Documentación guiada",
+        "desc": "Checklist por sección y README generado automáticamente."
+      },
+      "f4": {
+        "title": "Deploy Wizard",
+        "desc": "Pasos claros para publicar en Vercel sin tropezar."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de vuelta",
+      "subtitle": "Inicia sesión para continuar",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "createOne": "Crear una"
+    },
+    "register": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Empieza gratis con DevPanel",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Crear cuenta",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "signIn": "Iniciar sesión"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Resumen general de tu workspace",
+    "stats": {
+      "projects": "Proyectos",
+      "tasks": "Tareas abiertas",
+      "team": "Integrantes",
+      "storage": "Almacenamiento"
+    },
+    "apiStatus": {
+      "title": "Estado de la API",
+      "connected": "API conectada",
+      "disconnected": "API caída",
+      "checking": "Verificando...",
+      "environment": "Entorno",
+      "uptime": "Tiempo activo",
+      "database": "Base de datos",
+      "retry": "Reintentar"
+    },
+    "empty": {
+      "title": "Aún no tienes actividad",
+      "desc": "Crea tu primer proyecto para empezar a usar DevPanel."
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "comingSoon": "Próximamente",
+    "phase": "Fase"
+  },
+  "learn": {
+    "readme": {
+      "title": "¿Qué es un README?",
+      "body": "Un README es el archivo principal de documentación de un proyecto. Explica qué hace el sistema, cómo se instala, cómo se ejecuta y qué tecnologías utiliza."
+    },
+    "project": {
+      "title": "¿Qué es un proyecto?",
+      "body": "Un proyecto agrupa tareas, documentación, integrantes, archivos e integraciones relacionadas con una aplicación o producto en desarrollo."
+    },
+    "team": {
+      "title": "¿Qué es un equipo?",
+      "body": "Un equipo representa un grupo de usuarios que colaboran sobre uno o varios proyectos. Cada integrante puede tener un rol diferente."
+    },
+    "saas": {
+      "title": "¿Qué es SaaS?",
+      "body": "SaaS significa Software as a Service. Es un modelo donde el usuario accede a una aplicación desde internet y normalmente paga por planes, límites o funciones."
+    },
+    "deploy": {
+      "title": "¿Qué es deploy?",
+      "body": "Deploy es el proceso de publicar una aplicación en un entorno accesible para usuarios, normalmente en internet."
+    },
+    "envVar": {
+      "title": "¿Qué es una variable de entorno?",
+      "body": "Una variable de entorno almacena configuración que cambia según el ambiente, como URLs, claves privadas o datos de conexión. No debe exponerse públicamente."
+    }
+  }
+}

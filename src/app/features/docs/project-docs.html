@@ -1,0 +1,209 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando documentación…" />
+} @else if (error()) {
+  <div class="dp-modal__error">{{ error() }}</div>
+} @else if (project(); as p) {
+  <dp-page-header
+    [title]="'Documentación · ' + p.name"
+    [subtitle]="'Completa las secciones y genera tu README listo para entregar.'"
+  >
+    <a [routerLink]="['/app/projects', projectId(), 'overview']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver al proyecto</span>
+    </a>
+    <button
+      type="button"
+      class="dp-btn dp-btn--primary"
+      (click)="openReadme()"
+      [disabled]="generating()"
+      data-tour="generate-readme"
+    >
+      @if (generating()) { <span class="dp-spinner"></span> }
+      <i class="pi pi-file"></i>
+      <span>Generar README</span>
+    </button>
+  </dp-page-header>
+
+  @if (doc(); as d) {
+    <div class="dp-docs__progress" data-tour="docs-progress">
+      <div class="dp-docs__progress-bar">
+        <div class="dp-docs__progress-fill" [style.width.%]="d.completionPercent"></div>
+      </div>
+      <span class="dp-docs__progress-label">
+        <strong>{{ d.completionPercent }}%</strong> completado ·
+        {{ getCompletedCount(d) }} / {{ sectionKeys.length }} secciones marcadas
+      </span>
+    </div>
+  }
+
+  <div class="dp-docs" data-tour="docs-editor">
+    <!-- LEFT: section list -->
+    <aside class="dp-docs__sidebar" data-tour="docs-sections">
+      <ul>
+        @for (key of sectionKeys; track key) {
+          <li>
+            <button
+              type="button"
+              class="dp-docs__section-btn"
+              [class.dp-docs__section-btn--active]="activeSection() === key"
+              [class.dp-docs__section-btn--done]="sectionCompleted(key)"
+              (click)="selectSection(key)"
+            >
+              <span class="dp-docs__check">
+                @if (sectionCompleted(key)) {
+                  <i class="pi pi-check-circle"></i>
+                } @else {
+                  <i class="pi pi-circle"></i>
+                }
+              </span>
+              <span class="dp-docs__section-icon">
+                <i [class]="'pi ' + sectionMeta[key].icon"></i>
+              </span>
+              <span class="dp-docs__section-text">
+                <strong>{{ sectionMeta[key].label }}</strong>
+                <span class="dp-docs__section-hint">{{ sectionMeta[key].hint }}</span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    </aside>
+
+    <!-- RIGHT: editor for the active section -->
+    <section class="dp-docs__editor">
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <header class="dp-docs__editor-head">
+          <div>
+            <span class="dp-docs__editor-pill">
+              <i [class]="'pi ' + sectionMeta[activeSection()].icon"></i>
+              {{ sectionMeta[activeSection()].label }}
+            </span>
+            <p class="dp-text-muted dp-text-sm">{{ sectionMeta[activeSection()].hint }}</p>
+          </div>
+          <button
+            type="button"
+            class="dp-btn"
+            [class.dp-btn--ghost]="!form.controls.completed.value"
+            [class.dp-btn--success]="form.controls.completed.value"
+            (click)="toggleCompleted()"
+            [disabled]="saving()"
+          >
+            @if (form.controls.completed.value) {
+              <i class="pi pi-check-circle"></i><span>Completada</span>
+            } @else {
+              <i class="pi pi-circle"></i><span>Marcar completada</span>
+            }
+          </button>
+        </header>
+
+        <label class="dp-modal__field">
+          <span>Título de la sección</span>
+          <input type="text" formControlName="title" />
+        </label>
+
+        <label class="dp-modal__field dp-docs__content-field">
+          <span>Contenido (acepta Markdown)</span>
+          <textarea
+            formControlName="content"
+            rows="14"
+            data-tour="docs-section-content"
+            placeholder="Escribe aquí el contenido de la sección. Soporta Markdown — listas con `-`, código con triple backtick, links con [texto](url)."
+          ></textarea>
+        </label>
+
+        @if (saveError()) {
+          <div class="dp-modal__error">
+            <i class="pi pi-exclamation-circle"></i> {{ saveError() }}
+          </div>
+        }
+
+        <footer class="dp-docs__editor-foot">
+          @if (saveOk()) {
+            <span class="dp-docs__save-ok">
+              <i class="pi pi-check"></i> Guardado
+            </span>
+          } @else {
+            <span class="dp-text-muted dp-text-sm">
+              Los cambios se guardan al pulsar el botón.
+            </span>
+          }
+          <button
+            type="submit"
+            class="dp-btn dp-btn--primary"
+            [disabled]="form.invalid || saving()"
+          >
+            @if (saving()) { <span class="dp-spinner"></span> }
+            Guardar sección
+          </button>
+        </footer>
+      </form>
+
+      <dp-learn-more-card
+        [title]="('learn.readme.title' | t)"
+        [body]="('learn.readme.body' | t)"
+      />
+    </section>
+  </div>
+}
+
+<!-- README modal -->
+@if (readmeOpen() && readmeData(); as data) {
+  <div class="dp-modal__backdrop" (click)="closeReadme()">
+    <div class="dp-modal dp-modal--xl dp-readme" (click)="$event.stopPropagation()">
+      <header>
+        <h2>README generado</h2>
+        <button type="button" class="dp-modal__close" (click)="closeReadme()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      <div class="dp-readme__meta">
+        <span class="dp-readme__pill">
+          <i class="pi pi-percentage"></i> {{ data.completionPercent }}% completo
+        </span>
+        <span class="dp-text-muted dp-text-sm">
+          {{ data.markdown.length }} caracteres
+        </span>
+      </div>
+
+      <pre class="dp-readme__preview" data-tour="readme-preview">{{ data.markdown }}</pre>
+
+      @if (readmeError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i>
+          {{ readmeError() }}
+          @if (!canDownloadReadme()) {
+            <button type="button" class="dp-btn dp-btn--primary" (click)="goToPricing()">
+              Ver planes
+            </button>
+          }
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="copyReadme()">
+          @if (copySuccess()) {
+            <i class="pi pi-check"></i> Copiado
+          } @else {
+            <i class="pi pi-copy"></i> Copiar
+          }
+        </button>
+        <button
+          type="button"
+          class="dp-btn dp-btn--primary"
+          (click)="downloadReadme()"
+          [disabled]="downloading()"
+          data-tour="readme-download"
+        >
+          @if (downloading()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-download"></i>
+          @if (canDownloadReadme()) {
+            <span>Descargar .md</span>
+          } @else {
+            <span>Descargar (plan superior)</span>
+          }
+        </button>
+      </footer>
+    </div>
+  </div>
+}

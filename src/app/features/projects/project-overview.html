@@ -1,0 +1,254 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando proyecto…" />
+} @else if (error()) {
+  <div class="dp-modal__error">{{ error() }}</div>
+} @else if (data(); as d) {
+  <dp-page-header
+    [title]="d.project.name"
+    [subtitle]="d.project.description || 'Sin descripción'"
+  >
+    <dp-status-badge kind="project" [status]="d.project.status" [label]="d.project.status" />
+    <a [routerLink]="['/app/projects', projectId(), 'tasks']" class="dp-btn dp-btn--primary"
+       data-tour="view-tasks">
+      <i class="pi pi-th-large"></i>
+      <span>Ver tareas</span>
+    </a>
+    <a [routerLink]="['/app/projects', projectId(), 'docs']" class="dp-btn dp-btn--ghost"
+       data-tour="view-docs">
+      <i class="pi pi-book"></i>
+      <span>Documentación</span>
+    </a>
+    <a [routerLink]="['/app/projects', projectId(), 'github']" class="dp-btn dp-btn--ghost"
+       data-tour="view-github">
+      <i class="pi pi-github"></i>
+      <span>GitHub</span>
+    </a>
+    <button type="button" class="dp-btn dp-btn--ghost" (click)="openEdit()" data-tour="edit-project">
+      <i class="pi pi-pencil"></i>
+      <span>Editar</span>
+    </button>
+    @if (!isArchived()) {
+      <button
+        type="button"
+        class="dp-btn dp-btn--danger"
+        (click)="archive()"
+        [disabled]="archiving()"
+        data-tour="archive-project"
+      >
+        @if (archiving()) { <span class="dp-spinner"></span> }
+        <i class="pi pi-inbox"></i>
+        <span>Archivar</span>
+      </button>
+    }
+    <a [routerLink]="['/app/teams', d.project.team, 'projects']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver</span>
+    </a>
+  </dp-page-header>
+
+  @if (isArchived()) {
+    <div class="dp-overview__archived-banner">
+      <i class="pi pi-info-circle"></i>
+      Este proyecto está archivado. No cuenta para el cupo del plan.
+    </div>
+  }
+
+  <div class="dp-overview" data-tour="project-overview">
+    <div class="dp-overview__main">
+      <section class="dp-card" data-tour="project-metrics">
+        <h3 class="dp-team-detail__section-title">Métricas</h3>
+        <div class="dp-overview__metrics">
+          <div class="dp-metric">
+            <span class="dp-metric__label">Tareas totales</span>
+            <span class="dp-metric__value">{{ d.metrics.totalTasks }}</span>
+            @if (d.metrics.totalTasks === 0) {
+              <span class="dp-metric__hint">Crea tu primera tarea</span>
+            }
+          </div>
+          <div class="dp-metric">
+            <span class="dp-metric__label">En progreso</span>
+            <span class="dp-metric__value">{{ d.metrics.inProgressTasks }}</span>
+            <span class="dp-metric__hint">de {{ d.metrics.totalTasks }} totales</span>
+          </div>
+          <div class="dp-metric">
+            <span class="dp-metric__label">Completadas</span>
+            <span class="dp-metric__value">{{ d.metrics.completedTasks }}</span>
+            @if (d.metrics.totalTasks > 0) {
+              <span class="dp-metric__hint">
+                {{ ((d.metrics.completedTasks / d.metrics.totalTasks) * 100) | number:'1.0-0' }}% del total
+              </span>
+            }
+          </div>
+          <div class="dp-metric">
+            <span class="dp-metric__label">Bloqueadas</span>
+            <span class="dp-metric__value">{{ d.metrics.blockedTasks }}</span>
+            @if (d.metrics.blockedTasks > 0) {
+              <span class="dp-metric__hint">requieren atención</span>
+            }
+          </div>
+          <div class="dp-metric">
+            <span class="dp-metric__label">Vencidas</span>
+            <span class="dp-metric__value">{{ d.metrics.overdueTasks }}</span>
+            @if (d.metrics.overdueTasks > 0) {
+              <span class="dp-metric__hint" style="color: var(--dp-accent-red);">tareas atrasadas</span>
+            }
+          </div>
+          <div class="dp-metric">
+            <span class="dp-metric__label">Documentación</span>
+            <span class="dp-metric__value">{{ d.metrics.documentationPercent }}%</span>
+            <span class="dp-metric__hint">README en Fase 4</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="dp-card">
+        <h3 class="dp-team-detail__section-title">Stack y datos</h3>
+        <dl class="dp-team-detail__meta">
+          <div>
+            <dt>Estado</dt>
+            <dd>{{ d.project.status }}</dd>
+          </div>
+          <div>
+            <dt>Fecha límite</dt>
+            <dd>{{ formatDate(d.project.dueDate) }}</dd>
+          </div>
+          <div>
+            <dt>Repositorio</dt>
+            <dd class="dp-text-mono">
+              @if (d.project.repositoryUrl) {
+                <a [href]="d.project.repositoryUrl" target="_blank" rel="noopener">
+                  {{ d.project.repositoryUrl }}
+                </a>
+              } @else { — }
+            </dd>
+          </div>
+          <div>
+            <dt>Stack</dt>
+            <dd>
+              @if (d.project.stack && d.project.stack.length) {
+                {{ d.project.stack.join(', ') }}
+              } @else { — }
+            </dd>
+          </div>
+          <div>
+            <dt>Plan equipo</dt>
+            <dd>{{ d.plan.code }}</dd>
+          </div>
+          <div>
+            <dt>Creado</dt>
+            <dd>{{ formatDate(d.project.createdAt) }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="dp-card" data-tour="project-activity">
+        <h3 class="dp-team-detail__section-title">Actividad reciente</h3>
+        @if (d.recentActivity.length === 0) {
+          <dp-empty-state
+            title="Sin actividad todavía"
+            description="Las acciones sobre este proyecto aparecerán aquí."
+            icon="pi-history"
+          />
+        } @else {
+          <ul class="dp-overview__activity">
+            @for (a of d.recentActivity; track a._id) {
+              <li>
+                <span class="dp-overview__activity__dot"></span>
+                <div>
+                  <div class="dp-overview__activity__msg">{{ a.message }}</div>
+                  <div class="dp-overview__activity__time">
+                    @if (a.actor?.name) { {{ a.actor!.name }} · }
+                    {{ relativeTime(a.createdAt) }}
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+
+    <div class="dp-overview__side">
+      <dp-learn-more-card
+        [title]="('learn.project.title' | t)"
+        [body]="('learn.project.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.readme.title' | t)"
+        [body]="('learn.readme.body' | t)"
+      />
+    </div>
+  </div>
+}
+
+@if (editOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeEdit()">
+    <form
+      class="dp-modal dp-modal--lg"
+      (click)="$event.stopPropagation()"
+      [formGroup]="editForm"
+      (ngSubmit)="saveEdit()"
+      novalidate
+    >
+      <header>
+        <h2>Editar proyecto</h2>
+        <button type="button" class="dp-modal__close" (click)="closeEdit()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      <label class="dp-modal__field">
+        <span>Nombre <em>*</em></span>
+        <input type="text" formControlName="name" />
+      </label>
+
+      <label class="dp-modal__field">
+        <span>Descripción</span>
+        <textarea formControlName="description"></textarea>
+      </label>
+
+      <div class="dp-modal__row">
+        <label class="dp-modal__field">
+          <span>Estado</span>
+          <select formControlName="status">
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </label>
+        <label class="dp-modal__field">
+          <span>Fecha límite</span>
+          <input type="date" formControlName="dueDate" />
+        </label>
+      </div>
+
+      <label class="dp-modal__field">
+        <span>Stack (separado por comas)</span>
+        <input type="text" formControlName="stack" placeholder="Angular, Express, MongoDB" />
+      </label>
+
+      <label class="dp-modal__field">
+        <span>URL del repositorio</span>
+        <input type="url" formControlName="repositoryUrl" />
+      </label>
+
+      @if (saveError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ saveError() }}
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeEdit()">Cancelar</button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          [disabled]="editForm.invalid || saving()"
+        >
+          @if (saving()) { <span class="dp-spinner"></span> }
+          Guardar cambios
+        </button>
+      </footer>
+    </form>
+  </div>
+}

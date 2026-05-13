@@ -1,0 +1,91 @@
+@if (tutorial.isActive() && tutorial.currentStep(); as step) {
+  <div class="dp-tour" role="dialog" aria-modal="true" aria-label="Guía interactiva">
+    <!-- Spotlight: only when there's a real target located on screen -->
+    @if (spotlight(); as r) {
+      <div class="dp-tour__shade dp-tour__shade--top"
+           [style.height.px]="r.top"></div>
+      <div class="dp-tour__shade dp-tour__shade--left"
+           [style.top.px]="r.top"
+           [style.height.px]="r.height"
+           [style.width.px]="r.left"></div>
+      <div class="dp-tour__shade dp-tour__shade--right"
+           [style.top.px]="r.top"
+           [style.left.px]="r.left + r.width"
+           [style.height.px]="r.height"></div>
+      <div class="dp-tour__shade dp-tour__shade--bottom"
+           [style.top.px]="r.top + r.height"></div>
+
+      <div class="dp-tour__halo"
+           [style.top.px]="r.top"
+           [style.left.px]="r.left"
+           [style.width.px]="r.width"
+           [style.height.px]="r.height"></div>
+    } @else {
+      <!-- Centered or missing-target step: full-screen dimming -->
+      <div class="dp-tour__shade dp-tour__shade--full"></div>
+    }
+
+    @if (tooltip(); as pos) {
+      <div
+        class="dp-tour__tooltip"
+        [class.dp-tour__tooltip--centered]="!spotlight()"
+        [class.dp-tour__tooltip--missing]="missing()"
+        [class]="'dp-tour__tooltip--arrow-' + pos.arrow"
+        [style.top.px]="pos.top"
+        [style.left.px]="pos.left"
+      >
+        <header class="dp-tour__head">
+          <span class="dp-tour__pill">{{ stepLabel() }}</span>
+          <span class="dp-tour__name">{{ tutorial.currentTutorial()?.name }}</span>
+          <button type="button" class="dp-tour__x" aria-label="Cerrar guía" (click)="skip()">
+            <i class="pi pi-times"></i>
+          </button>
+        </header>
+
+        <h3 class="dp-tour__title">{{ step.title }}</h3>
+        <p class="dp-tour__body">{{ step.body }}</p>
+
+        @if (step.tierInfo) {
+          <div class="dp-tour__tier" role="note">
+            <i class="pi pi-tag"></i>
+            <span>{{ step.tierInfo }}</span>
+          </div>
+        }
+
+        @if (missing() && !step.cta) {
+          <p class="dp-tour__missing">
+            <i class="pi pi-info-circle"></i>
+            Este paso pertenece a otra pantalla. Pulsa el botón principal para continuar.
+          </p>
+        }
+
+        <footer class="dp-tour__foot">
+          <button
+            type="button"
+            class="dp-tour__btn dp-tour__btn--ghost"
+            [disabled]="tutorial.stepIndex() === 0"
+            (click)="previous()"
+          >
+            <i class="pi pi-angle-left"></i>
+            <span>Anterior</span>
+          </button>
+
+          <button
+            type="button"
+            class="dp-tour__btn dp-tour__btn--primary dp-tour__btn--grow"
+            (click)="proceed()"
+          >
+            <span>{{ primaryLabel() }}</span>
+            @if (step.cta) {
+              <i class="pi pi-arrow-right"></i>
+            } @else if (isLastStep()) {
+              <i class="pi pi-check"></i>
+            } @else {
+              <i class="pi pi-angle-right"></i>
+            }
+          </button>
+        </footer>
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,130 @@
+{
+  "app": {
+    "name": "DevPanel",
+    "tagline": "Centralize your development workflow"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "teams": "Teams",
+    "docs": "Docs",
+    "activity": "Activity",
+    "github": "GitHub",
+    "deploy": "Deploy",
+    "files": "Files",
+    "pricing": "Plans",
+    "logout": "Sign out",
+    "login": "Sign in",
+    "register": "Create account"
+  },
+  "landing": {
+    "hero": {
+      "title": "The control panel for your development projects.",
+      "subtitle": "Teams, projects, tasks, documentation and deploy in one place.",
+      "ctaPrimary": "Start free",
+      "ctaSecondary": "View plans"
+    },
+    "features": {
+      "title": "Built for developers who want order",
+      "f1": {
+        "title": "Organized projects",
+        "desc": "Tasks, docs, files and activity per project — not across 5 tools."
+      },
+      "f2": {
+        "title": "Teams with roles",
+        "desc": "Owner, admin, developer or viewer. Each one sees what they should."
+      },
+      "f3": {
+        "title": "Guided documentation",
+        "desc": "Section checklist and an automatically generated README."
+      },
+      "f4": {
+        "title": "Deploy Wizard",
+        "desc": "Clear steps to ship to Vercel without tripping."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Get started for free with DevPanel",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "An overview of your workspace",
+    "stats": {
+      "projects": "Projects",
+      "tasks": "Open tasks",
+      "team": "Members",
+      "storage": "Storage"
+    },
+    "apiStatus": {
+      "title": "API status",
+      "connected": "API connected",
+      "disconnected": "API down",
+      "checking": "Checking...",
+      "environment": "Environment",
+      "uptime": "Uptime",
+      "database": "Database",
+      "retry": "Retry"
+    },
+    "empty": {
+      "title": "No activity yet",
+      "desc": "Create your first project to start using DevPanel."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "comingSoon": "Coming soon",
+    "phase": "Phase"
+  },
+  "learn": {
+    "readme": {
+      "title": "What is a README?",
+      "body": "A README is the main documentation file of a project. It explains what the system does, how it is installed, how it runs and which technologies it uses."
+    },
+    "project": {
+      "title": "What is a project?",
+      "body": "A project groups together tasks, documentation, members, files and integrations related to an application or product under development."
+    },
+    "team": {
+      "title": "What is a team?",
+      "body": "A team represents a group of users that collaborate on one or more projects. Each member can have a different role."
+    },
+    "saas": {
+      "title": "What is SaaS?",
+      "body": "SaaS stands for Software as a Service. It's a model where users access an application over the internet and usually pay through plans, limits or features."
+    },
+    "deploy": {
+      "title": "What is deploy?",
+      "body": "Deploying is the process of publishing an application in an environment that's accessible to users, usually on the internet."
+    },
+    "envVar": {
+      "title": "What is an environment variable?",
+      "body": "An environment variable stores configuration that changes per environment, such as URLs, private keys or connection data. It must not be exposed publicly."
+    }
+  }
+}

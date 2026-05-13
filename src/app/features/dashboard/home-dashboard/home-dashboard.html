@@ -1,0 +1,153 @@
+<dp-page-header
+  [title]="'dashboard.title' | t"
+  [subtitle]="'dashboard.subtitle' | t"
+>
+  <button class="dp-dashboard__refresh" (click)="refresh()" [disabled]="loading()">
+    <i class="pi pi-refresh"></i>
+    <span>{{ 'dashboard.apiStatus.retry' | t }}</span>
+  </button>
+</dp-page-header>
+
+<div class="dp-dashboard">
+  <!-- Stats overview (Phase 1: static placeholders) -->
+  <section class="dp-dashboard__stats">
+    <dp-stats-card
+      [label]="'dashboard.stats.projects' | t"
+      value="0"
+      icon="pi-folder"
+      iconColor="#3B82F6"
+      hint="Crea tu primer proyecto en la Fase 2"
+    />
+    <dp-stats-card
+      [label]="'dashboard.stats.tasks' | t"
+      value="0"
+      icon="pi-check-square"
+      iconColor="#22C55E"
+      hint="Tablero Kanban en la Fase 3"
+    />
+    <dp-stats-card
+      [label]="'dashboard.stats.team' | t"
+      value="1"
+      icon="pi-users"
+      iconColor="#8B5CF6"
+      hint="Tú mismo · plan FREE"
+    />
+    <dp-stats-card
+      [label]="'dashboard.stats.storage' | t"
+      value="0 / 100 MB"
+      icon="pi-database"
+      iconColor="#F59E0B"
+      hint="Límite del plan FREE"
+    />
+  </section>
+
+  <!-- API status + Learn cards -->
+  <section class="dp-dashboard__row">
+    <article class="dp-dashboard__api dp-card" data-tour="api-status">
+      <header class="dp-dashboard__api-head">
+        <div>
+          <h3>{{ 'dashboard.apiStatus.title' | t }}</h3>
+          <p class="dp-text-muted dp-text-sm">
+            GET /health · localhost:4000
+          </p>
+        </div>
+
+        @if (loading()) {
+          <dp-loading-state [inline]="true" [label]="('dashboard.apiStatus.checking' | t)" />
+        } @else if (state()?.available) {
+          <dp-status-badge
+            kind="api"
+            status="CONNECTED"
+            [label]="('dashboard.apiStatus.connected' | t)"
+          />
+        } @else {
+          <dp-status-badge
+            kind="api"
+            status="DISCONNECTED"
+            [label]="('dashboard.apiStatus.disconnected' | t)"
+          />
+        }
+      </header>
+
+      @if (state(); as s) {
+        @if (s.available && s.data; as d) {
+          <dl class="dp-dashboard__api-meta">
+            <div>
+              <dt>{{ 'dashboard.apiStatus.environment' | t }}</dt>
+              <dd>{{ d.environment }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'dashboard.apiStatus.uptime' | t }}</dt>
+              <dd>{{ formatUptime(d.uptime) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'dashboard.apiStatus.database' | t }}</dt>
+              <dd [class.dp-dashboard__db-on]="d.database === 'connected'"
+                  [class.dp-dashboard__db-off]="d.database !== 'connected'">
+                {{ d.database }}
+              </dd>
+            </div>
+          </dl>
+        } @else if (!s.available) {
+          <div class="dp-dashboard__api-error">
+            <i class="pi pi-info-circle"></i>
+            <div>
+              <strong>No se pudo conectar con el backend.</strong>
+              <p>
+                Asegúrate de tener el API corriendo en
+                <code>http://localhost:4000</code>. Desde
+                <code>devpanel-api</code> ejecuta <code>npm run dev</code>.
+              </p>
+            </div>
+          </div>
+        }
+      }
+    </article>
+
+    <dp-learn-more-card
+      title="¿Qué es DevPanel?"
+      body="DevPanel es una plataforma SaaS para centralizar la gestión de proyectos de desarrollo: equipos, tareas, documentación, GitHub y deploy. Esta es la base técnica (Fase 1) sobre la que se construyen las siguientes fases."
+    />
+  </section>
+
+  <!-- Activity (empty by design in Phase 1) -->
+  <section class="dp-dashboard__activity">
+    <h3 class="dp-dashboard__section-title">Actividad reciente</h3>
+    <dp-empty-state
+      [title]="'dashboard.empty.title' | t"
+      [description]="'dashboard.empty.desc' | t"
+      icon="pi-history"
+    />
+  </section>
+
+  <!-- Learn more grid -->
+  <section class="dp-dashboard__learn">
+    <h3 class="dp-dashboard__section-title">Aprende más sobre…</h3>
+    <div class="dp-dashboard__learn-grid">
+      <dp-learn-more-card
+        [title]="('learn.readme.title' | t)"
+        [body]="('learn.readme.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.project.title' | t)"
+        [body]="('learn.project.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.team.title' | t)"
+        [body]="('learn.team.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.saas.title' | t)"
+        [body]="('learn.saas.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.deploy.title' | t)"
+        [body]="('learn.deploy.body' | t)"
+      />
+      <dp-learn-more-card
+        [title]="('learn.envVar.title' | t)"
+        [body]="('learn.envVar.body' | t)"
+      />
+    </div>
+  </section>
+</div>

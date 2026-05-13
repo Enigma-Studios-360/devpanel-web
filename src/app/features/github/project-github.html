@@ -1,0 +1,340 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando GitHub…" />
+} @else if (project(); as p) {
+  <dp-page-header
+    [title]="'GitHub · ' + p.name"
+    [subtitle]="repo() ? ('Vinculado a ' + repo()!.owner + '/' + repo()!.repo) : 'Conecta tu repositorio para ver commits, branches e issues'"
+  >
+    <a [routerLink]="['/app/projects', projectId(), 'overview']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver al proyecto</span>
+    </a>
+    @if (repo()) {
+      <a [href]="repo()!.url" target="_blank" rel="noopener" class="dp-btn dp-btn--ghost">
+        <i class="pi pi-external-link"></i>
+        <span>Ver en GitHub</span>
+      </a>
+      <button
+        type="button"
+        class="dp-btn dp-btn--danger"
+        (click)="unlink()"
+        [disabled]="unlinking()"
+        data-tour="github-unlink"
+      >
+        @if (unlinking()) { <span class="dp-spinner"></span> }
+        <i class="pi pi-times"></i>
+        <span>Desvincular</span>
+      </button>
+    }
+  </dp-page-header>
+
+  @if (!repo()) {
+    <!-- Linking flow -->
+    <section class="dp-gh-link" data-tour="github-link">
+      <div class="dp-gh-link__card">
+        <div class="dp-gh-link__head">
+          <i class="pi pi-github"></i>
+          <div>
+            <h3>Vincula tu repositorio</h3>
+            <p class="dp-text-muted dp-text-sm">
+              Pega la URL de GitHub o escribe <code>owner/repo</code>.
+              Ejemplo: <code>octokit/octokit.js</code> o
+              <code>https://github.com/expressjs/express</code>.
+            </p>
+          </div>
+        </div>
+
+        <form [formGroup]="linkForm" (ngSubmit)="link()" novalidate>
+          <label class="dp-modal__field" data-tour="github-link-input">
+            <span>Repositorio de GitHub</span>
+            <input
+              type="text"
+              formControlName="input"
+              placeholder="owner/repo o https://github.com/..."
+              autocomplete="off"
+            />
+          </label>
+
+          @if (linkError()) {
+            <div class="dp-modal__error">
+              <i class="pi pi-exclamation-circle"></i> {{ linkError() }}
+            </div>
+          }
+
+          <button
+            type="submit"
+            class="dp-btn dp-btn--primary"
+            [disabled]="linkForm.invalid || linking()"
+          >
+            @if (linking()) { <span class="dp-spinner"></span> }
+            <i class="pi pi-link"></i>
+            <span>Vincular repositorio</span>
+          </button>
+        </form>
+      </div>
+
+      <dp-learn-more-card
+        title="¿Por qué vincular GitHub?"
+        body="Conectar tu repo te permite ver commits, ramas e issues sin salir de DevPanel. Es solo lectura: no toca tu código. Para repos privados necesitas plan PRO o superior."
+      />
+    </section>
+  } @else if (repo(); as r) {
+    <!-- Repo info banner -->
+    <section class="dp-gh-info" data-tour="github-repo-info">
+      <div class="dp-gh-info__head">
+        <i class="pi pi-github"></i>
+        <div class="dp-gh-info__title">
+          <h3>
+            <a [href]="r.url" target="_blank" rel="noopener">{{ r.owner }}/{{ r.repo }}</a>
+            @if (r.isPrivate) {
+              <span class="dp-gh-info__pill dp-gh-info__pill--private">private</span>
+            } @else {
+              <span class="dp-gh-info__pill">public</span>
+            }
+          </h3>
+          @if (r.description) {
+            <p class="dp-text-muted dp-text-sm">{{ r.description }}</p>
+          }
+        </div>
+      </div>
+      <ul class="dp-gh-info__stats">
+        <li><i class="pi pi-star"></i> {{ r.stars }} stars</li>
+        <li><i class="pi pi-share-alt"></i> {{ r.forks }} forks</li>
+        <li><i class="pi pi-circle"></i> {{ r.openIssues }} open</li>
+        @if (r.language) {
+          <li><i class="pi pi-code"></i> {{ r.language }}</li>
+        }
+        <li><i class="pi pi-bookmark"></i> default: {{ r.defaultBranch }}</li>
+        @if (r.pushedAt) {
+          <li><i class="pi pi-clock"></i> push: {{ formatDate(r.pushedAt) }}</li>
+        }
+      </ul>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="dp-gh-tabs" role="tablist" data-tour="github-tabs">
+      <button
+        type="button"
+        role="tab"
+        class="dp-gh-tabs__btn"
+        [class.dp-gh-tabs__btn--active]="tab() === 'commits'"
+        (click)="selectTab('commits')"
+      >
+        <i class="pi pi-history"></i>
+        <span>Commits</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="dp-gh-tabs__btn"
+        [class.dp-gh-tabs__btn--active]="tab() === 'branches'"
+        (click)="selectTab('branches')"
+      >
+        <i class="pi pi-share-alt"></i>
+        <span>Branches</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="dp-gh-tabs__btn"
+        [class.dp-gh-tabs__btn--active]="tab() === 'issues'"
+        (click)="selectTab('issues')"
+      >
+        <i class="pi pi-exclamation-circle"></i>
+        <span>Issues</span>
+      </button>
+    </nav>
+
+    @if (tabLoading()) {
+      <dp-loading-state label="Sincronizando con GitHub…" />
+    } @else if (tabError()) {
+      <div class="dp-modal__error">
+        <i class="pi pi-exclamation-triangle"></i> {{ tabError() }}
+      </div>
+    } @else {
+      @switch (tab()) {
+        @case ('commits') {
+          @if (commits().length === 0) {
+            <dp-empty-state title="Sin commits" icon="pi-history" />
+          } @else {
+            <ul class="dp-gh-commits" data-tour="github-commits">
+              @for (c of commits(); track c.sha) {
+                <li>
+                  <span class="dp-gh-commits__sha">{{ c.shortSha }}</span>
+                  <div class="dp-gh-commits__body">
+                    <a [href]="c.url" target="_blank" rel="noopener" class="dp-gh-commits__msg">
+                      {{ c.message }}
+                    </a>
+                    <div class="dp-gh-commits__meta">
+                      @if (c.authorAvatar) {
+                        <img [src]="c.authorAvatar" alt="" class="dp-gh-avatar" />
+                      }
+                      <span>{{ c.authorName }}</span>
+                      @if (c.date) {
+                        <span class="dp-text-muted">· {{ formatDate(c.date) }}</span>
+                      }
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        }
+
+        @case ('branches') {
+          @if (branches().length === 0) {
+            <dp-empty-state title="Sin branches" icon="pi-share-alt" />
+          } @else {
+            <ul class="dp-gh-branches" data-tour="github-branches">
+              @for (b of branches(); track b.name) {
+                <li>
+                  <i class="pi pi-share-alt"></i>
+                  <strong>{{ b.name }}</strong>
+                  @if (b.protected) {
+                    <span class="dp-gh-info__pill dp-gh-info__pill--locked">
+                      <i class="pi pi-lock"></i> protected
+                    </span>
+                  }
+                  @if (b.name === r.defaultBranch) {
+                    <span class="dp-gh-info__pill">default</span>
+                  }
+                  <span class="dp-text-muted dp-text-sm dp-text-mono">
+                    {{ b.sha.slice(0, 7) }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        }
+
+        @case ('issues') {
+          <header class="dp-gh-issues__head" data-tour="github-issues-head">
+            <div class="dp-gh-issues__filter">
+              @for (s of ['open','closed','all']; track s) {
+                <button
+                  type="button"
+                  class="dp-gh-issues__filter-btn"
+                  [class.dp-gh-issues__filter-btn--active]="issueState() === s"
+                  (click)="setIssueState($any(s))"
+                >
+                  {{ s }}
+                </button>
+              }
+            </div>
+            <button
+              type="button"
+              class="dp-btn dp-btn--primary"
+              (click)="openIssueModal()"
+              data-tour="github-create-issue"
+            >
+              <i class="pi pi-plus"></i>
+              <span>Crear issue</span>
+            </button>
+          </header>
+
+          @if (issues().length === 0) {
+            <dp-empty-state
+              title="Sin issues"
+              [description]="'No hay issues con estado ' + issueState() + '.'"
+              icon="pi-exclamation-circle"
+            />
+          } @else {
+            <ul class="dp-gh-issues">
+              @for (i of issues(); track i.number) {
+                <li>
+                  <span
+                    class="dp-gh-issues__icon"
+                    [class.dp-gh-issues__icon--open]="i.state === 'open'"
+                    [class.dp-gh-issues__icon--closed]="i.state === 'closed'"
+                  >
+                    @if (i.isPullRequest) {
+                      <i class="pi pi-arrow-right-arrow-left"></i>
+                    } @else {
+                      <i class="pi pi-circle"></i>
+                    }
+                  </span>
+                  <div class="dp-gh-issues__body">
+                    <a [href]="i.url" target="_blank" rel="noopener" class="dp-gh-issues__title">
+                      {{ i.title }}
+                    </a>
+                    <div class="dp-gh-issues__meta">
+                      <span>#{{ i.number }}</span>
+                      <span>por {{ i.authorLogin }}</span>
+                      <span class="dp-text-muted">· {{ formatDate(i.createdAt) }}</span>
+                      @if (i.comments > 0) {
+                        <span><i class="pi pi-comment"></i> {{ i.comments }}</span>
+                      }
+                      @if (i.isPullRequest) {
+                        <span class="dp-gh-info__pill">PR</span>
+                      }
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    }
+  }
+}
+
+<!-- Create issue modal -->
+@if (issueModal()) {
+  <div class="dp-modal__backdrop" (click)="closeIssueModal()">
+    <form
+      class="dp-modal dp-modal--lg"
+      data-tour="github-issue-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="issueForm"
+      (ngSubmit)="submitIssue()"
+      novalidate
+    >
+      <header>
+        <h2>Crear issue en GitHub</h2>
+        <button type="button" class="dp-modal__close" (click)="closeIssueModal()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      <p class="dp-text-muted dp-text-sm">
+        El issue se creará en {{ repo()?.owner }}/{{ repo()?.repo }} usando el token configurado
+        en el backend. Soporta Markdown en el cuerpo.
+      </p>
+
+      <label class="dp-modal__field" data-tour="github-issue-title">
+        <span>Título <em>*</em></span>
+        <input type="text" formControlName="title" placeholder="Bug: el botón no responde" />
+      </label>
+
+      <label class="dp-modal__field" data-tour="github-issue-body">
+        <span>Descripción (Markdown)</span>
+        <textarea
+          formControlName="body"
+          rows="6"
+          placeholder="Pasos para reproducir, comportamiento esperado…"
+        ></textarea>
+      </label>
+
+      @if (issueError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ issueError() }}
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeIssueModal()">Cancelar</button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          data-tour="github-issue-submit"
+          [disabled]="issueForm.invalid || creatingIssue()"
+        >
+          @if (creatingIssue()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-send"></i>
+          Crear issue
+        </button>
+      </footer>
+    </form>
+  </div>
+}

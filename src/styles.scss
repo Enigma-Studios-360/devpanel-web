@@ -1,0 +1,77 @@
+/* ==========================================================================
+   DevPanel — Global Styles
+   ========================================================================== */
+
+@use 'primeicons/primeicons.css';
+@use './app/styles/tokens' as *;
+@use './app/styles/reset';
+@use './app/styles/utilities';
+
+/* Default theme: dark */
+:root {
+  color-scheme: dark;
+  --dp-bg:              #{$dp-bg};
+  --dp-surface:         #{$dp-surface};
+  --dp-surface-2:       #{$dp-surface-2};
+  --dp-border:          #{$dp-border};
+  --dp-text:            #{$dp-text};
+  --dp-text-muted:      #{$dp-text-muted};
+
+  --dp-accent-blue:     #{$dp-accent-blue};
+  --dp-accent-purple:   #{$dp-accent-purple};
+  --dp-accent-green:    #{$dp-accent-green};
+  --dp-accent-red:      #{$dp-accent-red};
+  --dp-accent-yellow:   #{$dp-accent-yellow};
+
+  --dp-radius-sm: 6px;
+  --dp-radius-md: 10px;
+  --dp-radius-lg: 14px;
+
+  --dp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --dp-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.35);
+
+  --dp-font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --dp-font-mono:
+    ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+/* Light variant — opt-in via [data-theme="light"] on <html> */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --dp-bg:         #F7F8FA;
+  --dp-surface:    #FFFFFF;
+  --dp-surface-2:  #F1F3F7;
+  --dp-border:     #E5E7EB;
+  --dp-text:       #0F172A;
+  --dp-text-muted: #4B5563;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--dp-bg);
+  color: var(--dp-text);
+  font-family: var(--dp-font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--dp-accent-blue);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: var(--dp-text);
+}

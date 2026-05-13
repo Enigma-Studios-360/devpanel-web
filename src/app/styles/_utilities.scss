@@ -1,0 +1,38 @@
+/* Tiny utility layer — kept minimal on purpose. Add only when shared. */
+
+.dp-stack       { display: flex; flex-direction: column; gap: 1rem; }
+.dp-stack-sm    { display: flex; flex-direction: column; gap: 0.5rem; }
+.dp-stack-lg    { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.dp-row         { display: flex; align-items: center; gap: 1rem; }
+.dp-row-sm      { display: flex; align-items: center; gap: 0.5rem; }
+.dp-row-between { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+.dp-grid        { display: grid; gap: 1rem; }
+
+.dp-text-muted  { color: var(--dp-text-muted); }
+.dp-text-mono   { font-family: var(--dp-font-mono); }
+.dp-text-sm     { font-size: 12px; }
+.dp-text-lg     { font-size: 16px; }
+.dp-text-xl     { font-size: 20px; font-weight: 600; }
+
+.dp-card {
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+  padding: 1.25rem 1.5rem;
+}
+
+.dp-card-flat {
+  background: var(--dp-surface-2);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.dp-divider {
+  height: 1px;
+  background: var(--dp-border);
+  border: 0;
+  margin: 1rem 0;
+}

@@ -1,0 +1,58 @@
+<div class="dp-landing">
+  <header class="dp-landing__nav">
+    <div class="dp-landing__brand">
+      <span class="dp-landing__logo"><i class="pi pi-bolt"></i></span>
+      <span class="dp-landing__brand-name">DevPanel</span>
+    </div>
+
+    <nav class="dp-landing__links">
+      <a routerLink="/pricing">{{ 'nav.pricing' | t }}</a>
+      <dp-language-switcher></dp-language-switcher>
+      <dp-theme-toggle></dp-theme-toggle>
+      <a routerLink="/auth/login" class="dp-landing__cta-secondary">
+        {{ 'nav.login' | t }}
+      </a>
+      <a routerLink="/auth/register" class="dp-landing__cta-primary">
+        {{ 'nav.register' | t }}
+      </a>
+    </nav>
+  </header>
+
+  <section class="dp-landing__hero">
+    <span class="dp-landing__pill">
+      <i class="pi pi-sparkles"></i>
+      Fase 1 · Base técnica funcional
+    </span>
+    <h1 class="dp-landing__title">{{ 'landing.hero.title' | t }}</h1>
+    <p class="dp-landing__subtitle">{{ 'landing.hero.subtitle' | t }}</p>
+    <div class="dp-landing__hero-actions">
+      <a routerLink="/auth/register" class="dp-landing__cta-primary dp-landing__cta-primary--lg">
+        {{ 'landing.hero.ctaPrimary' | t }}
+      </a>
+      <a routerLink="/app/dashboard" class="dp-landing__cta-secondary dp-landing__cta-secondary--lg">
+        Entrar al dashboard
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+
+  <section class="dp-landing__features">
+    <h2 class="dp-landing__section-title">{{ 'landing.features.title' | t }}</h2>
+    <div class="dp-landing__feature-grid">
+      @for (f of features; track f.titleKey) {
+        <article class="dp-landing__feature">
+          <span class="dp-landing__feature-icon" [style.--ic]="f.color">
+            <i [class]="'pi ' + f.icon"></i>
+          </span>
+          <h3>{{ f.titleKey | t }}</h3>
+          <p>{{ f.descKey | t }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <footer class="dp-landing__footer">
+    <span>© {{ year }} DevPanel · Proyecto integrador</span>
+    <span class="dp-text-muted">Express · TypeScript · MongoDB · Angular · PrimeNG</span>
+  </footer>
+</div>

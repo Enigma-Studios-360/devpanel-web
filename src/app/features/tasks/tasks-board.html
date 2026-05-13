@@ -1,0 +1,147 @@
+@if (project(); as p) {
+  <dp-page-header
+    [title]="'Tareas · ' + p.name"
+    [subtitle]="'Tablero Kanban del proyecto'"
+  >
+    <a [routerLink]="['/app/projects', projectId(), 'overview']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Overview</span>
+    </a>
+    <button
+      type="button"
+      class="dp-btn dp-btn--primary"
+      (click)="openCreate()"
+      data-tour="create-task"
+    >
+      <i class="pi pi-plus"></i>
+      <span>Crear tarea</span>
+    </button>
+  </dp-page-header>
+} @else if (loading()) {
+  <dp-loading-state label="Cargando tablero…" />
+}
+
+@if (!loading() && error()) {
+  <div class="dp-modal__error">{{ error() }}</div>
+}
+
+@if (!loading() && !error()) {
+  <div class="dp-kanban" data-tour="kanban-columns">
+    @for (col of columns; track col.status) {
+      <section class="dp-kanban__col" [style.--col]="col.color">
+        <header>
+          <span class="dp-kanban__col-icon"><i [class]="'pi ' + col.icon"></i></span>
+          <span class="dp-kanban__col-label">{{ col.label }}</span>
+          <span class="dp-kanban__col-count">{{ countFor(col.status) }}</span>
+        </header>
+
+        <div class="dp-kanban__list">
+          @for (task of tasksFor(col.status); track task._id) {
+            <article
+              class="dp-task-card"
+              [class.dp-task-card--overdue]="isOverdue(task)"
+              (click)="openTask(task)"
+              [attr.data-tour]="$first ? 'task-card' : null"
+            >
+              <header class="dp-task-card__top">
+                <span class="dp-task-card__title">{{ task.title }}</span>
+                <span [attr.data-tour]="($first && col.status === columns[0].status) ? 'task-priority' : null">
+                  <dp-priority-badge [priority]="task.priority" />
+                </span>
+              </header>
+              @if (task.description) {
+                <p class="dp-task-card__desc">{{ task.description }}</p>
+              }
+              <footer class="dp-task-card__meta">
+                @if (task.dueDate) {
+                  <span class="dp-task-card__due" [class.dp-task-card__due--overdue]="isOverdue(task)">
+                    <i class="pi pi-calendar"></i>
+                    {{ formatDate(task.dueDate) }}
+                  </span>
+                }
+                @if (task.assignees.length > 0) {
+                  <span class="dp-task-card__assignees" [title]="assigneeFullNames(task)">
+                    <i class="pi pi-users"></i>
+                    <span>{{ assigneeNames(task) }}</span>
+                  </span>
+                }
+              </footer>
+            </article>
+          } @empty {
+            <p class="dp-kanban__empty">Sin tareas</p>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}
+
+@if (modalOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeCreate()">
+    <form
+      class="dp-modal"
+      data-tour="create-task-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="createForm"
+      (ngSubmit)="submitCreate()"
+      novalidate
+    >
+      <header>
+        <h2>Crear tarea</h2>
+        <button type="button" class="dp-modal__close" (click)="closeCreate()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+
+      <label class="dp-modal__field" data-tour="create-task-title">
+        <span>Título <em>*</em></span>
+        <input type="text" formControlName="title" placeholder="Ej. Implementar login" autofocus />
+      </label>
+
+      <label class="dp-modal__field">
+        <span>Descripción</span>
+        <textarea formControlName="description" placeholder="Detalles, contexto, links…"></textarea>
+      </label>
+
+      <div class="dp-modal__row" data-tour="create-task-priority-field">
+        <label class="dp-modal__field">
+          <span>Prioridad</span>
+          <select formControlName="priority">
+            @for (p of priorities; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        </label>
+        <label class="dp-modal__field">
+          <span>Fecha límite</span>
+          <input type="date" formControlName="dueDate" />
+        </label>
+      </div>
+
+      @if (createError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ createError() }}
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeCreate()">Cancelar</button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          data-tour="create-task-submit"
+          [disabled]="createForm.invalid || creating()"
+        >
+          @if (creating()) { <span class="dp-spinner"></span> }
+          Crear tarea
+        </button>
+      </footer>
+    </form>
+  </div>
+}
+
+<dp-task-detail-drawer
+  [task]="selectedTask()"
+  (close)="closeTask()"
+  (taskUpdated)="onTaskUpdated($event)"
+/>

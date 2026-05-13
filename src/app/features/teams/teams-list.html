@@ -1,0 +1,105 @@
+<dp-page-header
+  title="Equipos"
+  subtitle="Crea equipos para colaborar con otros desarrolladores."
+>
+  <button
+    type="button"
+    class="dp-btn dp-btn--primary"
+    (click)="openCreate()"
+    data-tour="create-team"
+  >
+    <i class="pi pi-plus"></i>
+    <span>Crear equipo</span>
+  </button>
+</dp-page-header>
+
+@if (loading()) {
+  <dp-loading-state label="Cargando equipos…" />
+} @else {
+  @if (teams().length === 0) {
+    <dp-empty-state
+      title="Aún no tienes equipos"
+      description="Crea uno para comenzar a organizar tus proyectos."
+      icon="pi-users"
+      actionLabel="Crear equipo"
+      (action)="openCreate()"
+    />
+  } @else {
+    <div class="dp-teams-grid" data-tour="teams-list">
+      @for (t of teams(); track t.team._id) {
+        <article class="dp-team-card">
+          <header>
+            <div class="dp-team-card__avatar">{{ t.team.name.charAt(0).toUpperCase() }}</div>
+            <div class="dp-team-card__head">
+              <h3>{{ t.team.name }}</h3>
+              <span class="dp-text-muted dp-text-sm">{{ t.team.slug }}</span>
+            </div>
+            <span class="dp-team-card__plan" data-tour="team-plan">{{ t.team.plan }}</span>
+          </header>
+          <div class="dp-team-card__meta">
+            <span><i class="pi pi-user"></i> {{ t.role }}</span>
+            <span><i class="pi pi-folder"></i> {{ t.activeProjectsCount }} activos · {{ t.projectsCount }} totales</span>
+          </div>
+          <footer>
+            <a [routerLink]="['/app/teams', t.team._id]" class="dp-btn dp-btn--ghost">Abrir equipo</a>
+            <a [routerLink]="['/app/teams', t.team._id, 'projects']" class="dp-btn dp-btn--ghost">Proyectos</a>
+          </footer>
+        </article>
+      }
+    </div>
+
+    <div class="dp-teams-learn">
+      <dp-learn-more-card
+        [title]="('learn.team.title' | t)"
+        [body]="('learn.team.body' | t)"
+      />
+    </div>
+  }
+}
+
+@if (modalOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeCreate()">
+    <form
+      class="dp-modal"
+      data-tour="create-team-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+      <header>
+        <h2>Crear equipo</h2>
+        <button type="button" class="dp-modal__close" (click)="closeCreate()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+      <p class="dp-text-muted dp-text-sm">
+        Cada equipo arranca con plan FREE. Podrás simular un upgrade después.
+      </p>
+      <label class="dp-modal__field" data-tour="create-team-name">
+        <span>Nombre del equipo</span>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Mi equipo"
+          autocomplete="off"
+        />
+      </label>
+      @if (error()) {
+        <div class="dp-modal__error"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+      }
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeCreate()">Cancelar</button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          data-tour="create-team-submit"
+          [disabled]="form.invalid || creating()"
+        >
+          @if (creating()) {<span class="dp-spinner"></span>}
+          Crear
+        </button>
+      </footer>
+    </form>
+  </div>
+}
