@@ -23,7 +23,7 @@ import { TranslationService } from './core/i18n/translation.service';
 import { LanguageService } from './core/i18n/language.service';
 import { AuthService } from './core/auth/auth.service';
 
-const DevPanelTheme = definePreset(Aura, {
+const DevHubTheme = definePreset(Aura, {
   semantic: {
     primary: {
       50: '#EFF6FF',
@@ -49,7 +49,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     providePrimeNG({
       theme: {
-        preset: DevPanelTheme,
+        preset: DevHubTheme,
         options: {
           darkModeSelector: ':root',
           cssLayer: { name: 'primeng', order: 'app, primeng' },

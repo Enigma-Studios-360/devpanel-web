@@ -4,9 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
-import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { LearnMoreCardComponent } from '../../shared/components/learn-more-card/learn-more-card';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton';
 import { TeamsService, type TeamWithRole } from '../../core/services/teams.service';
 import { TutorialService } from '../../core/tutorial/tutorial.service';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -19,9 +19,9 @@ import { TPipe } from '../../core/i18n/t.pipe';
     ReactiveFormsModule,
     RouterLink,
     PageHeaderComponent,
-    LoadingStateComponent,
     EmptyStateComponent,
     LearnMoreCardComponent,
+    SkeletonComponent,
     TPipe,
   ],
   templateUrl: './teams-list.html',
@@ -84,6 +84,9 @@ export class TeamsListComponent {
       next: (team) => {
         this.creating.set(false);
         this.closeCreate();
+        // Notify any active onboarding tour that this milestone happened.
+        // No-op when no tour is parked on `waitFor: 'team-created'`.
+        this.tutorial.emitEvent('team-created');
         void this.router.navigate(['/app/teams', team._id]);
       },
       error: () => {

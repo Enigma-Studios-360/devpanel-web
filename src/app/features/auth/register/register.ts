@@ -43,7 +43,7 @@ export class RegisterComponent {
         this.submitting.set(false);
         const msg =
           err?.error?.error?.message ??
-          'No fue posible crear la cuenta. La autenticación se conectará en la Fase 2.';
+          'No fue posible crear la cuenta. Revisa tu conexión e inténtalo de nuevo.';
         this.errorMsg.set(msg);
       },
     });

@@ -1,6 +1,12 @@
-# DevPanel Web
+# DevHub Web (carpeta interna `devpanel-web`)
 
-Frontend de **DevPanel** — plataforma SaaS para centralizar la gestión de proyectos de desarrollo. Esta es la **Fase 1: Base técnica funcional**.
+> ⚠️ **README DESACTUALIZADO.** Describe la "Fase 1" inicial y NO refleja el
+> estado real: el frontend (Angular 21 + PrimeNG 21) ya tiene dashboard con
+> widgets, Kanban con drag & drop, docs + README, GitHub, Deploy Wizard,
+> pricing, asistente Clippy y tutorial guiado. La **fuente de verdad** es el
+> código y `../devpanel_readmes/00_PROMPT_CONTINUAR_PROYECTO.md` (+ `10_FASE_3_5`).
+
+Frontend de **DevHub**, plataforma SaaS para centralizar la gestión de proyectos de desarrollo.
 
 ## Stack
 

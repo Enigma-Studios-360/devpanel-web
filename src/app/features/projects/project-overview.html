@@ -23,11 +23,18 @@
       <i class="pi pi-github"></i>
       <span>GitHub</span>
     </a>
-    <button type="button" class="dp-btn dp-btn--ghost" (click)="openEdit()" data-tour="edit-project">
-      <i class="pi pi-pencil"></i>
-      <span>Editar</span>
-    </button>
-    @if (!isArchived()) {
+    <a [routerLink]="['/app/projects', projectId(), 'deploy']" class="dp-btn dp-btn--ghost"
+       data-tour="view-deploy">
+      <i class="pi pi-cloud-upload"></i>
+      <span>Deploy</span>
+    </a>
+    @if (permissions.canManageProject()) {
+      <button type="button" class="dp-btn dp-btn--ghost" (click)="openEdit()" data-tour="edit-project">
+        <i class="pi pi-pencil"></i>
+        <span>Editar</span>
+      </button>
+    }
+    @if (permissions.canManageProject() && !isArchived()) {
       <button
         type="button"
         class="dp-btn dp-btn--danger"
@@ -39,6 +46,11 @@
         <i class="pi pi-inbox"></i>
         <span>Archivar</span>
       </button>
+    }
+    @if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
     }
     <a [routerLink]="['/app/teams', d.project.team, 'projects']" class="dp-btn dp-btn--ghost">
       <i class="pi pi-arrow-left"></i>
@@ -96,7 +108,7 @@
           <div class="dp-metric">
             <span class="dp-metric__label">Documentación</span>
             <span class="dp-metric__value">{{ d.metrics.documentationPercent }}%</span>
-            <span class="dp-metric__hint">README en Fase 4</span>
+            <span class="dp-metric__hint">9 secciones del README</span>
           </div>
         </div>
       </section>

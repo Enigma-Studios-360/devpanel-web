@@ -4,7 +4,7 @@
       <i class="pi pi-bolt"></i>
     </span>
     <div class="dp-sidebar__brand-text">
-      <span class="dp-sidebar__brand-name">DevPanel</span>
+      <span class="dp-sidebar__brand-name">{{ 'app.name' | t }}</span>
       <span class="dp-sidebar__brand-tag">{{ 'app.tagline' | t }}</span>
     </div>
   </div>
@@ -22,7 +22,7 @@
               [attr.data-tour]="item.tour"
             >
               <i [class]="'pi ' + item.icon"></i>
-              <span>{{ item.labelKey | t }}</span>
+              <span>{{ item.labelKey! | t }}</span>
               @if (item.badge) {
                 <span class="dp-sidebar__badge">{{ item.badge }}</span>
               }
@@ -32,33 +32,32 @@
       </ul>
     </div>
 
-    <div class="dp-sidebar__group">
-      <span class="dp-sidebar__group-label">Integraciones</span>
-      <ul>
-        @for (item of integrationNav; track item.link) {
-          <li>
-            <a
-              [routerLink]="item.link"
-              routerLinkActive="dp-sidebar__link--active"
-              class="dp-sidebar__link"
-              [attr.data-tour]="item.tour"
-            >
-              <i [class]="'pi ' + item.icon"></i>
-              <span>{{ item.labelKey | t }}</span>
-              @if (item.badge) {
-                <span class="dp-sidebar__badge">{{ item.badge }}</span>
-              }
-            </a>
-          </li>
-        }
-      </ul>
-    </div>
+    @if (projectId()) {
+      <div class="dp-sidebar__group">
+        <span class="dp-sidebar__group-label">Proyecto actual</span>
+        <ul>
+          @for (item of projectNav(); track item.link) {
+            <li>
+              <a
+                [routerLink]="item.link"
+                routerLinkActive="dp-sidebar__link--active"
+                class="dp-sidebar__link"
+                [attr.data-tour]="item.tour"
+              >
+                <i [class]="'pi ' + item.icon"></i>
+                <span>{{ item.label }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </nav>
 
   <footer class="dp-sidebar__foot">
     <div class="dp-sidebar__phase">
-      <span class="dp-sidebar__phase-pill">Fase 2</span>
-      <span class="dp-sidebar__phase-text">SaaS base funcional</span>
+      <span class="dp-sidebar__phase-pill">v0.3</span>
+      <span class="dp-sidebar__phase-text">Equipos · Proyectos · Tareas · Docs · GitHub</span>
     </div>
   </footer>
 </aside>

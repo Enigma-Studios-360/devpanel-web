@@ -1,21 +1,22 @@
 import { Injectable } from '@angular/core';
+import { readWithMigration, safeSet, safeRemove } from '../storage/migrate';
 
-const STORAGE_KEY = 'devpanel.token';
+const STORAGE_KEY = 'devhub.token';
+const LEGACY_KEY = 'devpanel.token';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
   get(): string | null {
-    if (typeof localStorage === 'undefined') return null;
-    return localStorage.getItem(STORAGE_KEY);
+    return readWithMigration(STORAGE_KEY, LEGACY_KEY);
   }
 
   set(token: string): void {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(STORAGE_KEY, token);
+    safeSet(STORAGE_KEY, token);
   }
 
   clear(): void {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.removeItem(STORAGE_KEY);
+    safeRemove(STORAGE_KEY);
+    // Also remove the legacy key in case it lingered (defensive).
+    safeRemove(LEGACY_KEY);
   }
 }

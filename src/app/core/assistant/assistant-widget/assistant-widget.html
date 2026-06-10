@@ -1,0 +1,206 @@
+@if (assistant.visible()) {
+  <div class="dp-asst" [class.dp-asst--open]="assistant.open()">
+    <!-- Panel ------------------------------------------------------------- -->
+    @if (assistant.open()) {
+      <section
+        class="dp-asst__panel"
+        role="dialog"
+        aria-label="Asistente DevHub"
+        data-tour="assistant-panel"
+      >
+        <header class="dp-asst__head">
+          <span class="dp-asst__avatar dp-asst__avatar--head">
+            <i class="pi pi-bolt"></i>
+          </span>
+          <div class="dp-asst__head-text">
+            <strong>Asistente DevHub</strong>
+            <span class="dp-asst__hint">
+              @if (assistant.mode() === 'faq') {
+                Modo FAQ · respuestas del catálogo
+              } @else if (assistant.aiAvailable() === false) {
+                Modo IA · no configurada
+              } @else if (assistant.quota(); as q) {
+                Modo IA · {{ q.remaining }}/{{ q.quota }} esta semana
+              } @else {
+                Modo IA (DeepSeek)
+              }
+            </span>
+          </div>
+          <button
+            type="button"
+            class="dp-asst__icon-btn"
+            (click)="assistant.reset()"
+            title="Limpiar conversación"
+            aria-label="Limpiar conversación"
+          >
+            <i class="pi pi-refresh"></i>
+          </button>
+          <button
+            type="button"
+            class="dp-asst__icon-btn"
+            (click)="assistant.close()"
+            title="Cerrar"
+            aria-label="Cerrar"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </header>
+
+        <!-- Mode switch: IA (DeepSeek) ⇄ FAQ (catálogo local) ------------- -->
+        <div class="dp-asst__modebar">
+          <div class="dp-asst__modetoggle" role="group" aria-label="Modo del asistente">
+            @if (assistant.canUseIa()) {
+              <button
+                type="button"
+                [class.is-active]="assistant.mode() === 'ia'"
+                (click)="assistant.useIaMode()"
+              >
+                <i class="pi pi-sparkles"></i> IA
+              </button>
+            }
+            <button
+              type="button"
+              [class.is-active]="assistant.mode() === 'faq'"
+              (click)="assistant.useFaqMode()"
+            >
+              <i class="pi pi-list"></i> FAQ
+            </button>
+          </div>
+          @if (!assistant.canUseIa()) {
+            <span class="dp-asst__modehint">Inicia sesión para usar la IA</span>
+          }
+        </div>
+
+        <!-- Conversación -------------------------------------------------- -->
+        <div #scrollArea class="dp-asst__messages">
+          @if (assistant.messages().length === 0) {
+            <div class="dp-asst__empty">
+              <p>¿En qué te ayudo? Pregunta o elige una sugerencia.</p>
+            </div>
+          }
+
+          @for (m of assistant.messages(); track trackMessage($index, m)) {
+            <div
+              class="dp-asst__msg"
+              [class.dp-asst__msg--assistant]="m.role === 'assistant'"
+              [class.dp-asst__msg--user]="m.role === 'user'"
+            >
+              @if (m.role === 'assistant') {
+                <span
+                  class="dp-asst__avatar dp-asst__avatar--sm"
+                  [class.dp-asst__avatar--ai]="m.source === 'deepseek'"
+                  [class.dp-asst__avatar--error]="m.source === 'error'"
+                >
+                  <i class="pi" [class.pi-bolt]="m.source !== 'error'" [class.pi-exclamation-circle]="m.source === 'error'"></i>
+                </span>
+              }
+              <div
+                class="dp-asst__bubble"
+                [class.dp-asst__bubble--error]="m.source === 'error'"
+              >
+                @if (m.source === 'deepseek') {
+                  <span class="dp-asst__source-badge" title="Respuesta generada por DeepSeek">
+                    <i class="pi pi-sparkles"></i> IA
+                  </span>
+                }
+                <p>{{ m.text }}</p>
+                @if (m.quickReplies?.length) {
+                  <div class="dp-asst__chips">
+                    @for (r of m.quickReplies; track trackReply($index, r)) {
+                      <button
+                        type="button"
+                        class="dp-asst__chip"
+                        (click)="runQuickReply(r)"
+                      >
+                        @if (r.icon) {
+                          <i [class]="'pi ' + r.icon"></i>
+                        }
+                        <span>{{ r.label }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (assistant.state() === 'thinking') {
+            <div class="dp-asst__msg dp-asst__msg--assistant">
+              <span class="dp-asst__avatar dp-asst__avatar--sm">
+                <i class="pi pi-bolt"></i>
+              </span>
+              <div class="dp-asst__bubble dp-asst__bubble--typing">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Contextual suggestions (only when chat is empty) -------------- -->
+        @if (
+          assistant.messages().length === 0 &&
+          assistant.contextualSuggestions().length > 0
+        ) {
+          <div class="dp-asst__suggestions">
+            <span class="dp-asst__suggestions-label">
+              <i class="pi pi-compass"></i>
+              Esto suele ayudar aquí
+            </span>
+            <div class="dp-asst__chips">
+              @for (s of assistant.contextualSuggestions(); track trackReply($index, s)) {
+                <button
+                  type="button"
+                  class="dp-asst__chip dp-asst__chip--suggest"
+                  (click)="runQuickReply(s)"
+                >
+                  @if (s.icon) {
+                    <i [class]="'pi ' + s.icon"></i>
+                  }
+                  <span>{{ s.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Input -------------------------------------------------------- -->
+        <form class="dp-asst__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <input
+            type="text"
+            formControlName="text"
+            [placeholder]="assistant.mode() === 'faq' ? 'Busca en preguntas frecuentes…' : 'Escribe tu pregunta…'"
+            autocomplete="off"
+          />
+          <button
+            type="submit"
+            class="dp-asst__send"
+            [disabled]="form.invalid"
+            aria-label="Enviar"
+          >
+            <i class="pi pi-send"></i>
+          </button>
+        </form>
+      </section>
+    }
+
+    <!-- FAB --------------------------------------------------------------- -->
+    <button
+      type="button"
+      class="dp-asst__fab"
+      [class.dp-asst__fab--pulse]="assistant.state() === 'hello' && !assistant.open()"
+      (click)="assistant.toggle()"
+      [attr.aria-expanded]="assistant.open()"
+      aria-label="Abrir asistente"
+      data-tour="assistant-fab"
+    >
+      <span class="dp-asst__wave" aria-hidden="true"></span>
+      <span class="dp-asst__wave dp-asst__wave--2" aria-hidden="true"></span>
+      <span class="dp-asst__avatar dp-asst__avatar--lg">
+        <i class="pi pi-bolt"></i>
+      </span>
+      @if (assistant.unread() > 0 && !assistant.open()) {
+        <span class="dp-asst__badge">{{ assistant.unread() }}</span>
+      }
+    </button>
+  </div>
+}

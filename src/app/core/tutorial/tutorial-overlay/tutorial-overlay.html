@@ -27,6 +27,7 @@
 
     @if (tooltip(); as pos) {
       <div
+        #tooltipEl
         class="dp-tour__tooltip"
         [class.dp-tour__tooltip--centered]="!spotlight()"
         [class.dp-tour__tooltip--missing]="missing()"
@@ -45,6 +46,18 @@
         <h3 class="dp-tour__title">{{ step.title }}</h3>
         <p class="dp-tour__body">{{ step.body }}</p>
 
+        @if (isWaiting()) {
+          <div class="dp-tour__waiting" role="status">
+            <span class="dp-tour__waiting-dot"></span>
+            <span class="dp-tour__waiting-dot"></span>
+            <span class="dp-tour__waiting-dot"></span>
+            <span>{{ step.waitingHint || 'Esperando a que completes la acción…' }}</span>
+          </div>
+          <button type="button" class="dp-tour__skip-step" (click)="skipStep()">
+            Prefiero hacerlo luego — saltar este paso
+          </button>
+        }
+
         @if (step.tierInfo) {
           <div class="dp-tour__tier" role="note">
             <i class="pi pi-tag"></i>
@@ -52,11 +65,23 @@
           </div>
         }
 
-        @if (missing() && !step.cta) {
-          <p class="dp-tour__missing">
-            <i class="pi pi-info-circle"></i>
-            Este paso pertenece a otra pantalla. Pulsa el botón principal para continuar.
-          </p>
+        @if (missing()) {
+          @if (step.roleHint) {
+            <p class="dp-tour__missing">
+              <i class="pi pi-lock"></i>
+              {{ step.roleHint }}
+            </p>
+          } @else if (step.cta) {
+            <p class="dp-tour__missing">
+              <i class="pi pi-info-circle"></i>
+              Este paso vive en otra pantalla. Pulsa "{{ step.cta.label }}" para ir allí.
+            </p>
+          } @else {
+            <p class="dp-tour__missing">
+              <i class="pi pi-info-circle"></i>
+              No encontramos este elemento en la pantalla actual. Puedes saltarlo o cerrar la guía.
+            </p>
+          }
         }
 
         <footer class="dp-tour__foot">
@@ -73,10 +98,14 @@
           <button
             type="button"
             class="dp-tour__btn dp-tour__btn--primary dp-tour__btn--grow"
+            [class.dp-tour__btn--waiting]="isWaiting()"
+            [disabled]="isWaiting()"
             (click)="proceed()"
           >
             <span>{{ primaryLabel() }}</span>
-            @if (step.cta) {
+            @if (isWaiting()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else if (step.cta) {
               <i class="pi pi-arrow-right"></i>
             } @else if (isLastStep()) {
               <i class="pi pi-check"></i>

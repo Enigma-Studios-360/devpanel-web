@@ -18,12 +18,171 @@ import type { Tutorial } from './tutorial.types';
  */
 export const TUTORIALS: Tutorial[] = [
   // -------------------------------------------------------------------------
+  // 0. ONBOARDING FLOW — el tour MAESTRO que encadena todo
+  // -------------------------------------------------------------------------
+  //
+  // A diferencia de los tours sueltos (welcome-tour, teams-tour, ...) este
+  // flujo es continuo: te lleva de la mano desde "te damos la bienvenida"
+  // hasta "lanzaste tu primer deploy", pausando con `waitFor` mientras el
+  // usuario completa cada acción real (crear equipo, crear proyecto, crear
+  // tarea). Auto-arranca para usuarios nuevos.
+  {
+    id: 'onboarding-flow',
+    name: 'Te guío de inicio a fin',
+    summary: 'De la bienvenida a tu primer deploy',
+    icon: 'pi-compass',
+    steps: [
+      // ------ 0. Hello ------------------------------------------------------
+      {
+        id: 'ob-welcome',
+        route: '/app/dashboard',
+        target: 'sidebar-brand',
+        centered: true,
+        title: '👋 Bienvenido a DevHub',
+        body:
+          'Te voy a guiar paso a paso para que en menos de cinco minutos tengas tu ' +
+          'primer equipo, proyecto, tarea, documentación, GitHub vinculado y deploy ' +
+          'a Vercel. Cuando termines un paso, sigo solo con el siguiente.',
+        tierInfo:
+          'Puedes cerrar esta guía en cualquier momento con la X o con ESC. ' +
+          'Para retomarla, abre Clippy (esquina inferior derecha) y dile "reinicia el tutorial".',
+      },
+      // ------ 1. Take me to teams ------------------------------------------
+      {
+        id: 'ob-go-teams',
+        route: '/app/dashboard',
+        target: 'sidebar-teams',
+        title: 'Empezamos por crear tu equipo',
+        body:
+          'Te llevo a la pantalla de Equipos. Pulsa el botón de abajo y abrimos ' +
+          'el formulario juntos.',
+        placement: 'right',
+        cta: {
+          label: 'Vamos a equipos',
+          route: '/app/teams',
+        },
+      },
+      // ------ 2. Open create-team modal + WAIT FOR creation ----------------
+      {
+        id: 'ob-create-team',
+        route: '/app/teams',
+        target: 'create-team',
+        title: 'Crea tu primer equipo',
+        body:
+          'Te abro el formulario. Solo necesitas un nombre — el slug, el plan y la ' +
+          'suscripción se configuran automáticamente. Cuando pulses "Crear", yo te ' +
+          'llevo al siguiente paso.',
+        placement: 'bottom',
+        action: { key: 'open-modal:create-team' },
+        waitFor: 'team-created',
+        waitingHint: 'Esperando a que crees el equipo…',
+      },
+      // ------ 3. Celebrate + go to projects --------------------------------
+      {
+        id: 'ob-team-done',
+        target: 'team-plan',
+        centered: true,
+        title: '🎉 ¡Equipo creado!',
+        body:
+          'Perfecto, tu equipo está listo. Ahora vamos a crear el primer proyecto ' +
+          'dentro de él: los proyectos agrupan tareas, documentación, GitHub y ' +
+          'deploys.',
+      },
+      {
+        id: 'ob-go-projects',
+        target: 'team-projects-link',
+        title: 'Abre la lista de proyectos',
+        body:
+          'Pulsa el botón "Ver proyectos" resaltado y sigo contigo del otro lado.',
+        placement: 'bottom',
+        // No CTA: we don't know the team id statically. The button itself
+        // is a routerLink — clicking it triggers navigation and the
+        // `advanceOnNavigate` flag promotes that to a tour-advance.
+        advanceOnNavigate: true,
+      },
+      // ------ 4. Create project + WAIT -------------------------------------
+      {
+        id: 'ob-create-project',
+        target: 'create-project',
+        title: 'Crea tu primer proyecto',
+        body:
+          'Te abro el formulario de crear proyecto. El nombre es lo único obligatorio. ' +
+          'Cuando lo crees, sigo con tareas.',
+        placement: 'bottom',
+        action: { key: 'open-modal:create-project' },
+        waitFor: 'project-created',
+        waitingHint: 'Esperando a que crees el proyecto…',
+        requiresRole: ['OWNER', 'ADMIN'],
+        roleHint:
+          'Tu rol no permite crear proyectos en este equipo. Pide a un OWNER o ADMIN que lo haga.',
+      },
+      // ------ 5. Tasks introduction ----------------------------------------
+      // After creating the project, projects-list navigates the user STRAIGHT
+      // to the Kanban board while a tour is active (see projects-list.ts), so
+      // we no longer need a manual "open the board" step — we go right into
+      // creating the first task on the board the user is already looking at.
+      {
+        id: 'ob-project-done',
+        centered: true,
+        target: 'kanban-columns',
+        title: '🚀 ¡Proyecto listo!',
+        body:
+          'Te llevé directo a tu tablero Kanban: cinco columnas (por hacer, en ' +
+          'progreso, en revisión, bloqueadas y hechas). Ahora creemos tu primera tarea.',
+      },
+      {
+        id: 'ob-create-task',
+        target: 'create-task',
+        title: 'Crea tu primera tarea',
+        body:
+          'Te abro el formulario. Pon un título descriptivo (lo demás es opcional) y ' +
+          'cuando la crees, sigo con la documentación.',
+        placement: 'bottom',
+        action: { key: 'open-modal:create-task' },
+        waitFor: 'task-created',
+        waitingHint: 'Esperando a que crees la tarea…',
+        requiresRole: ['OWNER', 'ADMIN', 'DEVELOPER'],
+        roleHint:
+          'Tu rol VIEWER es solo lectura. Esta parte no aplica para ti.',
+      },
+      // ------ 6. Wrap-up: mention docs/github/deploy without spotlighting ---
+      //
+      // Why centered: after creating the task we're on /tasks, but the
+      // "Ver docs/github/deploy" anchors live on /overview. Rather than
+      // bounce the user back, we summarize the three remaining pieces
+      // in one centered card and let them explore.
+      {
+        id: 'ob-task-done',
+        centered: true,
+        target: 'kanban-columns',
+        title: '✅ ¡Primera tarea!',
+        body:
+          'Genial. Te falta conocer tres piezas más: Documentación (9 secciones + ' +
+          'README generado), GitHub (commits, branches, issues + creación de issues) y ' +
+          'Deploy Wizard a Vercel (de tu repo a producción en 4 pasos). Todas viven ' +
+          'en el overview de tu proyecto — encuéntralas como botones en la cabecera.',
+      },
+      // ------ 7. Outro -----------------------------------------------------
+      {
+        id: 'ob-outro',
+        centered: true,
+        target: 'assistant-fab',
+        title: '🎓 ¡Tour terminado!',
+        body:
+          'Ya conoces todo lo esencial. Si te pierdes en algún momento, abre Clippy ' +
+          'en la esquina inferior derecha — puede repetirte cualquier guía o ' +
+          'responder preguntas con IA. ¡Mucho éxito con tu proyecto!',
+      },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
   // 1. WELCOME — auto-arranca para usuarios nuevos
   // -------------------------------------------------------------------------
   {
     id: 'welcome-tour',
-    name: 'Bienvenida a DevPanel',
-    summary: 'Lo esencial en 5 pasos',
+    name: 'Bienvenida a DevHub',
+    summary: 'Lo esencial en 7 pasos',
     icon: 'pi-sparkles',
     steps: [
       {
@@ -31,37 +190,57 @@ export const TUTORIALS: Tutorial[] = [
         route: '/app/dashboard',
         target: 'sidebar-brand',
         centered: true,
-        title: '👋 Te damos la bienvenida',
+        title: '👋 Te damos la bienvenida a DevHub',
         body:
-          'DevPanel centraliza tus equipos, proyectos, tareas, documentación y deploy ' +
-          'en un solo lugar. En menos de un minuto te enseñamos lo esencial — al final, ' +
-          'crearás tu primer equipo paso a paso.',
+          'DevHub centraliza tus equipos, proyectos, tareas, documentación, GitHub y ' +
+          'deploy en un solo lugar. En menos de dos minutos te enseñamos lo esencial — ' +
+          'al final crearás tu primer equipo.',
+      },
+      {
+        id: 'whats-new',
+        route: '/app/dashboard',
+        target: 'whats-new',
+        title: 'Lo que estrenamos esta semana',
+        body:
+          'En tu dashboard verás un banner con las novedades: asistente con IA, ' +
+          'detección automática de stack y el nuevo Deploy Wizard. Pásale el ratón ' +
+          'a cada tarjeta para descubrirlas.',
+        placement: 'bottom',
       },
       {
         id: 'sidebar',
         target: 'sidebar-teams',
-        title: 'Navegación principal',
+        title: 'Tu navegación principal',
         body:
-          'A la izquierda tienes Equipos, Proyectos, Planes y los módulos de fases ' +
-          'futuras. Siempre está visible a un click.',
+          'A la izquierda tienes Equipos, Proyectos, Documentación, GitHub, Deploy ' +
+          'y Planes. Siempre está visible a un click.',
         placement: 'right',
       },
       {
-        id: 'api-status',
-        target: 'api-status',
-        title: 'Estado del backend',
+        id: 'role-badge',
+        target: 'current-role',
+        title: 'Tu rol activo',
         body:
-          'Esta tarjeta verifica que la API esté funcionando. Si la ves en rojo, ' +
-          'asegúrate de tener el backend corriendo.',
-        placement: 'top',
+          'Cuando entras a un equipo o proyecto, este chip muestra tu rol ' +
+          '(OWNER / ADMIN / DEVELOPER / VIEWER). Define qué puedes hacer en esa pantalla.',
+        placement: 'bottom',
+      },
+      {
+        id: 'assistant',
+        target: 'assistant-fab',
+        title: 'Tu asistente DevHub',
+        body:
+          'En la esquina inferior derecha tienes a Clippy: pregúntale lo que sea sobre ' +
+          'DevHub. Combina FAQ instantáneo con IA (DeepSeek) cuando la pregunta es nueva.',
+        placement: 'left',
       },
       {
         id: 'help-button',
         target: 'help-button',
-        title: 'Tu botón de ayuda',
+        title: 'Botón de ayuda',
         body:
-          'Pulsa este "?" siempre que quieras repasar una guía o ver los demás ' +
-          'tutoriales.',
+          'Pulsa el "?" arriba a la derecha siempre que quieras repasar una guía o ' +
+          'lanzar otro tour: tareas, documentación, GitHub, deploy…',
         placement: 'bottom',
       },
       {
@@ -69,13 +248,13 @@ export const TUTORIALS: Tutorial[] = [
         target: 'sidebar-teams',
         title: 'Listo, vamos a crear tu primer equipo',
         body:
-          'Te llevo a la pantalla de equipos y abrimos el formulario juntos. Solo ' +
-          'pulsa el botón de abajo.',
+          'Te llevo a la pantalla de equipos. Cuando hayas creado uno, podrás añadir ' +
+          'proyectos, vincular GitHub y lanzar tu primer deploy a Vercel.',
         tierInfo:
-          'Tu equipo arranca con plan FREE: 1 proyecto activo · 3 miembros · 100MB.',
+          'Tu equipo arranca con plan FREE: 1 proyecto activo · 3 miembros.',
         placement: 'right',
         cta: {
-          label: 'Crear mi primer equipo →',
+          label: 'Crear mi primer equipo',
           route: '/app/teams',
         },
       },
@@ -174,6 +353,9 @@ export const TUTORIALS: Tutorial[] = [
           'Pulsa el botón de abajo y te abro el formulario de crear proyecto.',
         placement: 'bottom',
         action: { key: 'open-modal:create-project' },
+        requiresRole: ['OWNER', 'ADMIN'],
+        roleHint:
+          'Tu rol no permite crear proyectos. Pide a un OWNER o ADMIN del equipo que lo cree.',
       },
       {
         id: 'create-project-name',
@@ -240,7 +422,8 @@ export const TUTORIALS: Tutorial[] = [
         title: 'Las 5 columnas del Kanban',
         body:
           'Por hacer · En progreso · En revisión · Bloqueadas · Hechas. ' +
-          'Cada columna muestra el conteo arriba a la derecha.',
+          'Arrastra cualquier tarjeta entre columnas para cambiarle el estado, ' +
+          'o pulsa el badge dentro del detalle.',
         placement: 'top',
       },
       {
@@ -250,6 +433,9 @@ export const TUTORIALS: Tutorial[] = [
         body: 'Pulsa el botón de abajo y te abro el formulario de crear tarea.',
         placement: 'bottom',
         action: { key: 'open-modal:create-task' },
+        requiresRole: ['OWNER', 'ADMIN', 'DEVELOPER'],
+        roleHint:
+          'Tu rol VIEWER es solo lectura. No puedes crear tareas, pero sí abrirlas y comentarlas.',
       },
       {
         id: 'create-task-title',
@@ -284,7 +470,8 @@ export const TUTORIALS: Tutorial[] = [
         title: 'Detalle de la tarea',
         body:
           'Pulsa cualquier card para abrir su detalle: ahí editas título, descripción, ' +
-          'prioridad, asignados, cambias estado y dejas comentarios.',
+          'prioridad, asignados, cambias estado y dejas comentarios. ' +
+          'Si aún no tienes ninguna tarea, crea una primero y vuelve aquí.',
         placement: 'right',
       },
     ],
@@ -307,7 +494,7 @@ export const TUTORIALS: Tutorial[] = [
         body:
           'Tu proyecto tiene 9 secciones predefinidas (visión general, stack, ' +
           'instalación, variables, comandos, base de datos, deploy, errores comunes, ' +
-          'contribuidores). Las completas a tu ritmo y DevPanel genera el README por ti.',
+          'contribuidores). Las completas a tu ritmo y DevHub genera el README por ti.',
         tierInfo:
           'Generar README: gratis en todos los planes. Descargar el .md: ' +
           'requiere STARTER o superior.',
@@ -347,6 +534,9 @@ export const TUTORIALS: Tutorial[] = [
           'Cuando tengas suficiente contenido, pulsa este botón. Se abre un modal ' +
           'con el README en Markdown listo para copiar o descargar.',
         placement: 'bottom',
+        requiresRole: ['OWNER', 'ADMIN', 'DEVELOPER'],
+        roleHint:
+          'Tu rol VIEWER es solo lectura. Puedes ver el README de otros, pero no generar uno nuevo.',
       },
     ],
   },
@@ -366,7 +556,7 @@ export const TUTORIALS: Tutorial[] = [
         centered: true,
         title: '¿Qué hace la integración con GitHub?',
         body:
-          'DevPanel se conecta a tu repositorio para mostrarte commits, branches ' +
+          'DevHub se conecta a tu repositorio para mostrarte commits, branches ' +
           'e issues sin salir de la app. Es solo lectura: tu código no se toca. ' +
           'También puedes crear issues desde aquí si el backend tiene un PAT configurado.',
         tierInfo:
@@ -379,9 +569,12 @@ export const TUTORIALS: Tutorial[] = [
         title: 'Vincula tu repositorio',
         body:
           'Pega la URL completa (ej. https://github.com/octokit/octokit.js) o ' +
-          'usa el formato corto "owner/repo". DevPanel verifica que existe ' +
+          'usa el formato corto "owner/repo". DevHub verifica que existe ' +
           'antes de guardarlo.',
         placement: 'right',
+        requiresRole: ['OWNER', 'ADMIN'],
+        roleHint:
+          'Solo OWNER y ADMIN pueden vincular el repositorio del proyecto.',
       },
       {
         id: 'github-repo-info',
@@ -413,11 +606,14 @@ export const TUTORIALS: Tutorial[] = [
       {
         id: 'github-issues-head',
         target: 'github-issues-head',
-        title: 'Issues y crear desde DevPanel',
+        title: 'Issues y crear desde DevHub',
         body:
           'Filtra por open/closed/all. El botón "Crear issue" abre un formulario ' +
           'que publica directamente en tu repo (requiere GITHUB_TOKEN en el backend).',
         placement: 'bottom',
+        requiresRole: ['OWNER', 'ADMIN', 'DEVELOPER'],
+        roleHint:
+          'Tu rol VIEWER es solo lectura. Puedes ver issues, pero no crearlos desde DevHub.',
       },
       {
         id: 'github-unlink',
@@ -425,14 +621,84 @@ export const TUTORIALS: Tutorial[] = [
         title: 'Desvincular',
         body:
           'Cuando termines un proyecto o quieras cambiar de repo, usa este botón. ' +
-          'El proyecto sigue existiendo en DevPanel, solo se elimina la conexión.',
+          'El proyecto sigue existiendo en DevHub, solo se elimina la conexión.',
         placement: 'bottom',
+        requiresRole: ['OWNER', 'ADMIN'],
+        roleHint:
+          'Solo OWNER y ADMIN pueden desvincular el repositorio del proyecto.',
       },
     ],
   },
 
   // -------------------------------------------------------------------------
-  // 7. PRICING — entender los planes y el upgrade simulado
+  // 7. DEPLOY — wizard de despliegue a Vercel
+  // -------------------------------------------------------------------------
+  {
+    id: 'deploy-tour',
+    name: 'Desplegar a Vercel',
+    summary: 'Cómo lanzar tu proyecto en 4 pasos',
+    icon: 'pi-cloud-upload',
+    steps: [
+      {
+        id: 'deploy-intro',
+        target: 'deploy-start',
+        centered: true,
+        title: 'Deploy Wizard',
+        body:
+          'DevHub usa la API de Vercel para crear el proyecto, configurar el build ' +
+          'y lanzar el deploy. La primera vez tienes que instalar la app de Vercel ' +
+          'en tu cuenta de GitHub (github.com/apps/vercel) y darle acceso al repo.',
+        tierInfo:
+          'El plan Hobby de Vercel es gratis (100GB banda, builds ilimitados). ' +
+          'Para repos privados igual necesitas plan PRO de DevHub.',
+      },
+      {
+        id: 'deploy-start',
+        target: 'deploy-start',
+        title: 'Lanza el wizard',
+        body:
+          'Pulsa "Desplegar a Vercel" y DevHub analiza tu repo, deduce el stack ' +
+          'y propone una configuración de build.',
+        placement: 'bottom',
+        requiresRole: ['OWNER', 'ADMIN'],
+        roleHint:
+          'Solo OWNER y ADMIN pueden disparar deploys (la operación afecta a la cuenta de Vercel).',
+      },
+      {
+        id: 'deploy-wizard',
+        target: 'deploy-wizard',
+        title: 'Cuatro pasos',
+        body:
+          'Stack → Build → Variables → Confirmar. Puedes ir y volver con los ' +
+          'botones del pie. Lo que rellenamos por ti son sugerencias — siempre ' +
+          'puedes sobrescribir.',
+        placement: 'top',
+      },
+      {
+        id: 'deploy-submit',
+        target: 'deploy-submit',
+        title: 'Lanza el deploy',
+        body:
+          'Después de "Lanzar deploy" DevHub crea el proyecto en Vercel (si no ' +
+          'existe), guarda tus env vars cifradas y dispara la construcción. El ' +
+          'estado se actualiza cada 3 segundos.',
+        placement: 'top',
+        requiresRole: ['OWNER', 'ADMIN'],
+      },
+      {
+        id: 'deploy-history',
+        target: 'deploy-history',
+        title: 'Historial completo',
+        body:
+          'Cada deploy queda registrado con su rama, autor, URL pública y enlace a ' +
+          'los logs en Vercel. Puedes volver aquí cuando quieras para auditarlos.',
+        placement: 'top',
+      },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  // 8. PRICING — entender los planes y el upgrade simulado
   // -------------------------------------------------------------------------
   {
     id: 'pricing-tour',
@@ -445,7 +711,7 @@ export const TUTORIALS: Tutorial[] = [
         route: '/app/pricing',
         target: 'pricing-plans',
         centered: true,
-        title: 'Planes de DevPanel',
+        title: 'Planes de DevHub',
         body:
           'Hay 5 planes (FREE, STARTER, PRO, TEAM, SCHOOL). Cada uno aumenta los ' +
           'límites de proyectos, miembros, almacenamiento e integraciones avanzadas.',

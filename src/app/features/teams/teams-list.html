@@ -14,7 +14,19 @@
 </dp-page-header>
 
 @if (loading()) {
-  <dp-loading-state label="Cargando equipos…" />
+  <div class="dp-teams-grid">
+    @for (_ of [1,2,3]; track $index) {
+      <article class="dp-team-card dp-team-card--skeleton">
+        <header style="display:flex; gap:0.65rem; align-items:center;">
+          <dp-skeleton variant="circle" size="42" />
+          <div style="flex:1;">
+            <dp-skeleton variant="text" lines="2" />
+          </div>
+        </header>
+        <dp-skeleton variant="card" height="48" />
+      </article>
+    }
+  </div>
 } @else {
   @if (teams().length === 0) {
     <dp-empty-state

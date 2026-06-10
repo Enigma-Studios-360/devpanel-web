@@ -15,8 +15,13 @@ import {
   type CommitItem,
   type BranchItem,
   type IssueItem,
+  type StackDetectionResult,
+  type GithubConnection,
 } from '../../core/services/github.service';
 import { ProjectsService } from '../../core/services/projects.service';
+import { PermissionsService } from '../../core/auth/permissions.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
+import { SubscriptionsService, type Subscription } from '../../core/services/subscription.service';
 import type { Project } from '../../shared/models/project.model';
 
 type Tab = 'commits' | 'branches' | 'issues';
@@ -40,7 +45,21 @@ export class ProjectGithubComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly githubApi = inject(GithubService);
   private readonly projectsApi = inject(ProjectsService);
+  private readonly subsApi = inject(SubscriptionsService);
   private readonly fb = inject(FormBuilder);
+  private readonly confirmSvc = inject(ConfirmService);
+  protected readonly permissions = inject(PermissionsService);
+
+  protected readonly subscription = signal<Subscription | null>(null);
+
+  /**
+   * Whether the project's team plan allows private repos. Frontend gate
+   * only — the backend always re-checks `subscription.limits.canUseGithubPrivateRepos`
+   * when the link is created with a private repo.
+   */
+  protected readonly canUsePrivateRepos = computed(
+    () => this.subscription()?.limits?.canUseGithubPrivateRepos ?? false,
+  );
 
   protected readonly projectId = computed(
     () => this.route.snapshot.paramMap.get('projectId') ?? '',
@@ -76,17 +95,65 @@ export class ProjectGithubComponent {
   // Unlink
   protected readonly unlinking = signal(false);
 
+  // Per-user GitHub OAuth connection
+  protected readonly ghConn = signal<GithubConnection | null>(null);
+  protected readonly connecting = signal(false);
+
+  // Stack detection
+  protected readonly stackDetection = signal<StackDetectionResult | null>(null);
+  protected readonly detectingStack = signal(false);
+  protected readonly detectStackError = signal<string | null>(null);
+
   constructor() {
     this.refresh();
+    this.refreshGithubConnection();
+  }
+
+  // --- Per-user GitHub OAuth ------------------------------------------------
+
+  refreshGithubConnection(): void {
+    this.githubApi.oauthStatus().subscribe({
+      next: (c) => this.ghConn.set(c),
+      error: () => this.ghConn.set(null),
+    });
+  }
+
+  /** Kick off the OAuth flow: get the authorize URL, then send the browser there. */
+  connectGithub(): void {
+    if (this.connecting()) return;
+    this.connecting.set(true);
+    this.githubApi.oauthStartUrl().subscribe({
+      next: (url) => {
+        window.location.href = url;
+      },
+      error: () => this.connecting.set(false),
+    });
+  }
+
+  disconnectGithub(): void {
+    this.githubApi.oauthDisconnect().subscribe({
+      next: () => this.refreshGithubConnection(),
+      error: () => this.refreshGithubConnection(),
+    });
   }
 
   refresh(): void {
     const id = this.projectId();
     if (!id) return;
     this.loading.set(true);
-    this.projectsApi.get(id).subscribe({
-      next: (project) => {
+    this.projectsApi.getWithRole(id).subscribe({
+      next: ({ project, userRole }) => {
         this.project.set(project);
+        this.permissions.setRole(userRole);
+        // Best-effort: fetch subscription so we can show the private-repo
+        // plan note. We don't block the page on this — if it fails the
+        // form still works and the backend enforces the gate.
+        if (project.team) {
+          this.subsApi.forTeam(project.team).subscribe({
+            next: (sub) => this.subscription.set(sub),
+            error: () => this.subscription.set(null),
+          });
+        }
         if (project.githubOwner && project.githubRepo) {
           this.loadRepoInfo();
         } else {
@@ -140,11 +207,18 @@ export class ProjectGithubComponent {
     });
   }
 
-  unlink(): void {
+  async unlink(): Promise<void> {
     if (this.unlinking()) return;
-    const ok = typeof confirm !== 'undefined'
-      ? confirm('¿Desvincular el repositorio? El proyecto seguirá existiendo, solo se quita la conexión a GitHub.')
-      : true;
+    const ok = await this.confirmSvc.ask({
+      title: 'Desvincular repositorio',
+      message:
+        'Se eliminará la conexión entre este proyecto y el repo de GitHub. ' +
+        'El proyecto y su contenido siguen intactos — solo se desconecta la integración.',
+      confirmLabel: 'Desvincular',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+      icon: 'pi-github',
+    });
     if (!ok) return;
     this.unlinking.set(true);
     this.githubApi.unlink(this.projectId()).subscribe({
@@ -229,6 +303,40 @@ export class ProjectGithubComponent {
       error: (err) => {
         this.creatingIssue.set(false);
         this.issueError.set(err?.error?.error?.message ?? 'No se pudo crear el issue.');
+      },
+    });
+  }
+
+  // --- Stack detection ----------------------------------------------------
+
+  /** Pure helper so the template can render a friendly category label. */
+  categoryLabel(category: string): string {
+    switch (category) {
+      case 'frontend':  return 'Frontend';
+      case 'backend':   return 'Backend';
+      case 'fullstack': return 'Fullstack';
+      case 'mobile':    return 'Móvil';
+      case 'language':  return 'Lenguaje';
+      case 'tooling':   return 'Tooling';
+      default:          return category;
+    }
+  }
+
+  /** Force a re-run of the rule-based stack detection. */
+  detectStack(): void {
+    if (this.detectingStack()) return;
+    this.detectingStack.set(true);
+    this.detectStackError.set(null);
+    this.githubApi.detectStack(this.projectId()).subscribe({
+      next: (result) => {
+        this.stackDetection.set(result);
+        this.detectingStack.set(false);
+      },
+      error: (err) => {
+        this.detectingStack.set(false);
+        this.detectStackError.set(
+          err?.error?.error?.message ?? 'No se pudo analizar el repositorio.',
+        );
       },
     });
   }

@@ -74,11 +74,12 @@ export const routes: Routes = [
 
       // Projects -------------------------------------------------------------
       {
-        // Friendly entry from the sidebar — sends the user to teams first
-        // because projects always live under a team in this app.
+        // Global projects page: every project across the user's teams.
         path: 'projects',
-        redirectTo: 'teams',
-        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/projects/all-projects').then(
+            (m) => m.AllProjectsComponent,
+          ),
       },
       {
         path: 'projects/:projectId/overview',
@@ -108,6 +109,13 @@ export const routes: Routes = [
             (m) => m.ProjectGithubComponent,
           ),
       },
+      {
+        path: 'projects/:projectId/deploy',
+        loadComponent: () =>
+          import('./features/deploy/project-deploy').then(
+            (m) => m.ProjectDeployComponent,
+          ),
+      },
 
       // Phase 3+ placeholders
       {
@@ -133,10 +141,10 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        // Global "Deploy" entry: per-project, so we send the user to pick a project first.
         path: 'deploy',
-        loadComponent: () =>
-          import('./features/coming-soon').then((m) => m.ComingSoonComponent),
-        data: { title: 'Deploy Wizard', subtitle: 'Guía paso a paso para Vercel.', phase: 'Fase 7' },
+        redirectTo: 'teams',
+        pathMatch: 'full',
       },
       {
         path: 'files',

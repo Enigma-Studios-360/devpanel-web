@@ -42,7 +42,7 @@ export class LoginComponent {
         this.submitting.set(false);
         const msg =
           err?.error?.error?.message ??
-          'No fue posible iniciar sesión. La autenticación se conectará en la Fase 2.';
+          'No fue posible iniciar sesión. Revisa tu conexión e inténtalo de nuevo.';
         this.errorMsg.set(msg);
       },
     });

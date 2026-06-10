@@ -14,68 +14,132 @@
         <i class="pi pi-external-link"></i>
         <span>Ver en GitHub</span>
       </a>
-      <button
-        type="button"
-        class="dp-btn dp-btn--danger"
-        (click)="unlink()"
-        [disabled]="unlinking()"
-        data-tour="github-unlink"
-      >
-        @if (unlinking()) { <span class="dp-spinner"></span> }
-        <i class="pi pi-times"></i>
-        <span>Desvincular</span>
-      </button>
+      @if (permissions.canManageGithub()) {
+        <button
+          type="button"
+          class="dp-btn dp-btn--danger"
+          (click)="unlink()"
+          [disabled]="unlinking()"
+          data-tour="github-unlink"
+        >
+          @if (unlinking()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-times"></i>
+          <span>Desvincular</span>
+        </button>
+      }
+    }
+    @if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
     }
   </dp-page-header>
+
+  @if (ghConn(); as gh) {
+    @if (gh.connected) {
+      <div class="dp-gh-conn dp-gh-conn--ok">
+        <i class="pi pi-github"></i>
+        <span>
+          Conectado a GitHub como <strong>{{ '@' + gh.login }}</strong> —
+          usas tu propia cuenta para repos privados y crear issues como tú.
+        </span>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="disconnectGithub()">
+          <i class="pi pi-sign-out"></i><span>Desconectar</span>
+        </button>
+      </div>
+    } @else if (gh.configured) {
+      <div class="dp-gh-conn">
+        <i class="pi pi-github"></i>
+        <span>Conecta tu cuenta de GitHub para acceder a repos privados y crear issues como tú.</span>
+        <button
+          type="button"
+          class="dp-btn dp-btn--primary"
+          (click)="connectGithub()"
+          [disabled]="connecting()"
+        >
+          @if (connecting()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-github"></i><span>Conectar GitHub</span>
+        </button>
+      </div>
+    }
+  }
 
   @if (!repo()) {
     <!-- Linking flow -->
     <section class="dp-gh-link" data-tour="github-link">
-      <div class="dp-gh-link__card">
-        <div class="dp-gh-link__head">
-          <i class="pi pi-github"></i>
-          <div>
-            <h3>Vincula tu repositorio</h3>
-            <p class="dp-text-muted dp-text-sm">
-              Pega la URL de GitHub o escribe <code>owner/repo</code>.
-              Ejemplo: <code>octokit/octokit.js</code> o
-              <code>https://github.com/expressjs/express</code>.
-            </p>
+      @if (permissions.canManageGithub()) {
+        <div class="dp-gh-link__card">
+          <div class="dp-gh-link__head">
+            <i class="pi pi-github"></i>
+            <div>
+              <h3>Vincula tu repositorio</h3>
+              <p class="dp-text-muted dp-text-sm">
+                Pega la URL de GitHub o escribe <code>owner/repo</code>.
+                Ejemplo: <code>octokit/octokit.js</code> o
+                <code>https://github.com/expressjs/express</code>.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <form [formGroup]="linkForm" (ngSubmit)="link()" novalidate>
-          <label class="dp-modal__field" data-tour="github-link-input">
-            <span>Repositorio de GitHub</span>
-            <input
-              type="text"
-              formControlName="input"
-              placeholder="owner/repo o https://github.com/..."
-              autocomplete="off"
-            />
-          </label>
-
-          @if (linkError()) {
-            <div class="dp-modal__error">
-              <i class="pi pi-exclamation-circle"></i> {{ linkError() }}
+          @if (subscription() && !canUsePrivateRepos()) {
+            <div class="dp-gh-link__plan-note">
+              <i class="pi pi-lock"></i>
+              <div>
+                <strong>Tu plan {{ subscription()!.plan }} solo permite repos públicos.</strong>
+                <span class="dp-text-muted dp-text-sm">
+                  Si intentas vincular un repo privado, recibirás un error de plan.
+                  Cambia a PRO o superior para habilitarlo.
+                </span>
+              </div>
             </div>
           }
 
-          <button
-            type="submit"
-            class="dp-btn dp-btn--primary"
-            [disabled]="linkForm.invalid || linking()"
-          >
-            @if (linking()) { <span class="dp-spinner"></span> }
-            <i class="pi pi-link"></i>
-            <span>Vincular repositorio</span>
-          </button>
-        </form>
-      </div>
+          <form [formGroup]="linkForm" (ngSubmit)="link()" novalidate>
+            <label class="dp-modal__field" data-tour="github-link-input">
+              <span>Repositorio de GitHub</span>
+              <input
+                type="text"
+                formControlName="input"
+                placeholder="owner/repo o https://github.com/..."
+                autocomplete="off"
+              />
+            </label>
+
+            @if (linkError()) {
+              <div class="dp-modal__error">
+                <i class="pi pi-exclamation-circle"></i> {{ linkError() }}
+              </div>
+            }
+
+            <button
+              type="submit"
+              class="dp-btn dp-btn--primary"
+              [disabled]="linkForm.invalid || linking()"
+            >
+              @if (linking()) { <span class="dp-spinner"></span> }
+              <i class="pi pi-link"></i>
+              <span>Vincular repositorio</span>
+            </button>
+          </form>
+        </div>
+      } @else {
+        <div class="dp-gh-link__card">
+          <div class="dp-gh-link__head">
+            <i class="pi pi-github"></i>
+            <div>
+              <h3>Repositorio sin vincular</h3>
+              <p class="dp-text-muted dp-text-sm">
+                <i class="pi pi-lock"></i>
+                Solo OWNER y ADMIN pueden vincular el repositorio de este proyecto.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
 
       <dp-learn-more-card
         title="¿Por qué vincular GitHub?"
-        body="Conectar tu repo te permite ver commits, ramas e issues sin salir de DevPanel. Es solo lectura: no toca tu código. Para repos privados necesitas plan PRO o superior."
+        body="Conectar tu repo te permite ver commits, ramas e issues sin salir de DevHub. Es solo lectura: no toca tu código. Para repos privados necesitas plan PRO o superior."
       />
     </section>
   } @else if (repo(); as r) {
@@ -109,6 +173,104 @@
           <li><i class="pi pi-clock"></i> push: {{ formatDate(r.pushedAt) }}</li>
         }
       </ul>
+    </section>
+
+    <!-- Stack detection ------------------------------------------------- -->
+    <section class="dp-gh-stack" data-tour="github-stack">
+      <header class="dp-gh-stack__head">
+        <div class="dp-gh-stack__title">
+          <span class="dp-gh-stack__icon"><i class="pi pi-microchip"></i></span>
+          <div>
+            <h3>Stack detectado</h3>
+            <p class="dp-text-muted dp-text-sm">
+              DevHub analiza el árbol del repo y los manifests (package.json,
+              requirements.txt, Gemfile…) para deducir las tecnologías que usas.
+              Es la base del Deploy Wizard.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="dp-btn dp-btn--primary"
+          (click)="detectStack()"
+          [disabled]="detectingStack()"
+        >
+          @if (detectingStack()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-search"></i>
+          <span>{{ stackDetection() ? 'Re-analizar' : 'Analizar repositorio' }}</span>
+        </button>
+      </header>
+
+      @if (detectStackError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ detectStackError() }}
+        </div>
+      }
+
+      @if (stackDetection(); as result) {
+        @if (result.empty) {
+          <dp-empty-state
+            title="No reconocimos el stack"
+            description="No encontramos manifests típicos (package.json, requirements.txt, etc.) en la raíz del repo. Puede ser un proyecto monorepo o usar tecnologías fuera de nuestro catálogo todavía."
+            icon="pi-question-circle"
+          />
+        } @else {
+          <ul class="dp-gh-stack__list">
+            @for (m of result.matches; track m.id; let first = $first) {
+              <li
+                class="dp-gh-stack__item"
+                [class.dp-gh-stack__item--primary]="first"
+              >
+                <span class="dp-gh-stack__match-icon">
+                  <i [class]="'pi ' + (m.icon || 'pi-box')"></i>
+                </span>
+                <div class="dp-gh-stack__match-body">
+                  <div class="dp-gh-stack__match-name">
+                    <strong>{{ m.name }}</strong>
+                    <span class="dp-gh-stack__category">{{ categoryLabel(m.category) }}</span>
+                    @if (first) {
+                      <span class="dp-gh-info__pill dp-gh-stack__primary-pill">match principal</span>
+                    }
+                  </div>
+                  @if (m.hint) {
+                    <p class="dp-text-muted dp-text-sm">{{ m.hint }}</p>
+                  }
+                  <div class="dp-gh-stack__confidence" [title]="(m.confidence * 100 | number:'1.0-0') + '% de confianza'">
+                    <div
+                      class="dp-gh-stack__confidence-bar"
+                      [style.width.%]="m.confidence * 100"
+                    ></div>
+                    <span>{{ m.confidence * 100 | number:'1.0-0' }}% confianza</span>
+                  </div>
+                  <details class="dp-gh-stack__evidence">
+                    <summary>{{ m.evidence.length }} señal(es) · ver evidencia</summary>
+                    <ul>
+                      @for (ev of m.evidence; track ev.description) {
+                        <li>
+                          <i class="pi pi-check"></i>
+                          {{ ev.description }}
+                        </li>
+                      }
+                    </ul>
+                  </details>
+                </div>
+              </li>
+            }
+          </ul>
+          <footer class="dp-gh-stack__foot">
+            <span class="dp-text-muted dp-text-sm">
+              Analizado el {{ formatDate(result.detectedAt) }} en la rama
+              <code>{{ result.branch }}</code>.
+            </span>
+          </footer>
+        }
+      } @else if (!detectingStack()) {
+        <p class="dp-text-muted dp-text-sm">
+          Pulsa "Analizar repositorio" para que DevHub identifique las
+          tecnologías de tu proyecto. Es solo lectura y toma un par de
+          segundos.
+        </p>
+      }
     </section>
 
     <!-- Tabs -->
@@ -221,15 +383,17 @@
                 </button>
               }
             </div>
-            <button
-              type="button"
-              class="dp-btn dp-btn--primary"
-              (click)="openIssueModal()"
-              data-tour="github-create-issue"
-            >
-              <i class="pi pi-plus"></i>
-              <span>Crear issue</span>
-            </button>
+            @if (permissions.canCreateGithubIssue()) {
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary"
+                (click)="openIssueModal()"
+                data-tour="github-create-issue"
+              >
+                <i class="pi pi-plus"></i>
+                <span>Crear issue</span>
+              </button>
+            }
           </header>
 
           @if (issues().length === 0) {

@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
+import { readWithMigration, safeSet } from '../storage/migrate';
 
 export type ThemeMode = 'dark' | 'light';
 
-const STORAGE_KEY = 'devpanel.theme';
+const STORAGE_KEY = 'devhub.theme';
+const LEGACY_KEY = 'devpanel.theme';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -19,9 +21,7 @@ export class ThemeService {
 
   set(mode: ThemeMode): void {
     this.modeSignal.set(mode);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, mode);
-    }
+    safeSet(STORAGE_KEY, mode);
     this.apply(mode);
   }
 
@@ -31,8 +31,7 @@ export class ThemeService {
   }
 
   private read(): ThemeMode {
-    if (typeof localStorage === 'undefined') return 'dark';
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = readWithMigration(STORAGE_KEY, LEGACY_KEY);
     return stored === 'light' ? 'light' : 'dark';
   }
 }

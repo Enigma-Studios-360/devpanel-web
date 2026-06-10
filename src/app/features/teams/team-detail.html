@@ -7,7 +7,8 @@
     [title]="t.name"
     [subtitle]="'Equipo · plan ' + t.plan"
   >
-    <a [routerLink]="['/app/teams', t._id, 'projects']" class="dp-btn dp-btn--primary">
+    <a [routerLink]="['/app/teams', t._id, 'projects']" class="dp-btn dp-btn--primary"
+       data-tour="team-projects-link">
       <i class="pi pi-folder-open"></i>
       <span>Ver proyectos</span>
     </a>

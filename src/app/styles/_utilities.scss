@@ -36,3 +36,40 @@
   border: 0;
   margin: 1rem 0;
 }
+
+/* Inline hint shown next to action bars when the current role is read-only. */
+.dp-role-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--dp-radius-md);
+  background: var(--dp-surface-2);
+  border: 1px dashed var(--dp-border);
+  color: var(--dp-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+
+  i { font-size: 12px; }
+}
+
+/* Role badge used in the topbar. */
+.dp-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--dp-surface-2);
+  color: var(--dp-text-muted);
+  border: 1px solid var(--dp-border);
+
+  &--owner    { color: #f5b85c; border-color: rgba(245, 184, 92, 0.35); }
+  &--admin    { color: #8b5cf6; border-color: rgba(139, 92, 246, 0.35); }
+  &--dev      { color: #3b82f6; border-color: rgba(59, 130, 246, 0.35); }
+  &--viewer   { color: #6b7280; }
+}

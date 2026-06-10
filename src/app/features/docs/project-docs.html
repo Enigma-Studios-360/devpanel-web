@@ -11,18 +11,46 @@
       <i class="pi pi-arrow-left"></i>
       <span>Volver al proyecto</span>
     </a>
-    <button
-      type="button"
-      class="dp-btn dp-btn--primary"
-      (click)="openReadme()"
-      [disabled]="generating()"
-      data-tour="generate-readme"
-    >
-      @if (generating()) { <span class="dp-spinner"></span> }
-      <i class="pi pi-file"></i>
-      <span>Generar README</span>
-    </button>
+    @if (permissions.canEditDocs()) {
+      <button
+        type="button"
+        class="dp-btn dp-btn--ai"
+        (click)="generateAi()"
+        [disabled]="aiGenerating()"
+        title="Genera las 9 secciones a partir de tu repositorio de GitHub usando IA"
+      >
+        @if (aiGenerating()) { <span class="dp-spinner"></span> } @else { <i class="pi pi-sparkles"></i> }
+        <span>{{ aiGenerating() ? 'Generando…' : 'Generar con IA' }}</span>
+      </button>
+      <button
+        type="button"
+        class="dp-btn dp-btn--primary"
+        (click)="openReadme()"
+        [disabled]="generating()"
+        data-tour="generate-readme"
+      >
+        @if (generating()) { <span class="dp-spinner"></span> }
+        <i class="pi pi-file"></i>
+        <span>Generar README</span>
+      </button>
+    } @else if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
+    }
   </dp-page-header>
+
+  @if (aiGenerating()) {
+    <div class="dp-docs__ai-banner">
+      <i class="pi pi-sparkles"></i>
+      Leyendo tu repositorio y redactando las 9 secciones con IA… esto tarda unos segundos.
+    </div>
+  }
+  @if (aiError()) {
+    <div class="dp-modal__error" style="margin-bottom: 1rem;">
+      <i class="pi pi-exclamation-circle"></i> {{ aiError() }}
+    </div>
+  }
 
   @if (doc(); as d) {
     <div class="dp-docs__progress" data-tour="docs-progress">
@@ -80,25 +108,31 @@
             </span>
             <p class="dp-text-muted dp-text-sm">{{ sectionMeta[activeSection()].hint }}</p>
           </div>
-          <button
-            type="button"
-            class="dp-btn"
-            [class.dp-btn--ghost]="!form.controls.completed.value"
-            [class.dp-btn--success]="form.controls.completed.value"
-            (click)="toggleCompleted()"
-            [disabled]="saving()"
-          >
-            @if (form.controls.completed.value) {
-              <i class="pi pi-check-circle"></i><span>Completada</span>
-            } @else {
-              <i class="pi pi-circle"></i><span>Marcar completada</span>
-            }
-          </button>
+          @if (permissions.canEditDocs()) {
+            <button
+              type="button"
+              class="dp-btn"
+              [class.dp-btn--ghost]="!form.controls.completed.value"
+              [class.dp-btn--success]="form.controls.completed.value"
+              (click)="toggleCompleted()"
+              [disabled]="saving()"
+            >
+              @if (form.controls.completed.value) {
+                <i class="pi pi-check-circle"></i><span>Completada</span>
+              } @else {
+                <i class="pi pi-circle"></i><span>Marcar completada</span>
+              }
+            </button>
+          } @else if (form.controls.completed.value) {
+            <span class="dp-docs__save-ok">
+              <i class="pi pi-check-circle"></i> Completada
+            </span>
+          }
         </header>
 
         <label class="dp-modal__field">
           <span>Título de la sección</span>
-          <input type="text" formControlName="title" />
+          <input type="text" formControlName="title" [readonly]="!permissions.canEditDocs()" />
         </label>
 
         <label class="dp-modal__field dp-docs__content-field">
@@ -107,6 +141,7 @@
             formControlName="content"
             rows="14"
             data-tour="docs-section-content"
+            [readonly]="!permissions.canEditDocs()"
             placeholder="Escribe aquí el contenido de la sección. Soporta Markdown — listas con `-`, código con triple backtick, links con [texto](url)."
           ></textarea>
         </label>
@@ -122,19 +157,25 @@
             <span class="dp-docs__save-ok">
               <i class="pi pi-check"></i> Guardado
             </span>
-          } @else {
+          } @else if (permissions.canEditDocs()) {
             <span class="dp-text-muted dp-text-sm">
               Los cambios se guardan al pulsar el botón.
             </span>
+          } @else if (permissions.isViewer()) {
+            <span class="dp-text-muted dp-text-sm">
+              <i class="pi pi-lock"></i> Tu rol es VIEWER: solo lectura.
+            </span>
           }
-          <button
-            type="submit"
-            class="dp-btn dp-btn--primary"
-            [disabled]="form.invalid || saving()"
-          >
-            @if (saving()) { <span class="dp-spinner"></span> }
-            Guardar sección
-          </button>
+          @if (permissions.canEditDocs()) {
+            <button
+              type="submit"
+              class="dp-btn dp-btn--primary"
+              [disabled]="form.invalid || saving()"
+            >
+              @if (saving()) { <span class="dp-spinner"></span> }
+              Guardar sección
+            </button>
+          }
         </footer>
       </form>
 

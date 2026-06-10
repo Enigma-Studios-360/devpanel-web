@@ -1,0 +1,74 @@
+<div class="dp-bell" [class.dp-bell--open]="open()" [attr.data-tour]="'notification-bell'">
+  <button
+    type="button"
+    class="dp-bell__trigger"
+    [class.dp-bell__trigger--has-unread]="hasUnread()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="'Notificaciones' + (hasUnread() ? ' — ' + unread() + ' sin leer' : '')"
+    title="Notificaciones"
+    (click)="toggle()"
+  >
+    <i class="pi pi-bell"></i>
+    @if (badgeLabel()) {
+      <span class="dp-bell__badge" aria-hidden="true">{{ badgeLabel() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="dp-bell__pop" role="dialog" aria-label="Notificaciones">
+      <header class="dp-bell__head">
+        <strong>Notificaciones</strong>
+        <button
+          type="button"
+          class="dp-bell__mark-all"
+          (click)="markAllRead()"
+          [disabled]="!hasUnread()"
+        >
+          <i class="pi pi-check"></i>
+          Marcar todas
+        </button>
+      </header>
+
+      @if (loading() && !hasItems()) {
+        <div class="dp-bell__loading">
+          <span class="dp-spinner"></span>
+          Cargando…
+        </div>
+      } @else if (!hasItems()) {
+        <div class="dp-bell__empty">
+          <i class="pi pi-inbox"></i>
+          <p>Sin notificaciones aún.</p>
+          <small>Cuando alguien te asigne una tarea o un deploy cambie de estado, lo verás aquí.</small>
+        </div>
+      } @else {
+        <ul class="dp-bell__list">
+          @for (n of notifications(); track trackId($index, n)) {
+            <li>
+              <button
+                type="button"
+                class="dp-bell__item"
+                [class.dp-bell__item--unread]="!n.readAt"
+                (click)="openItem(n)"
+              >
+                <span
+                  class="dp-bell__icon"
+                  [attr.data-tone]="toneFor(n.type)"
+                >
+                  <i [class]="'pi ' + iconFor(n.type)"></i>
+                </span>
+                <div class="dp-bell__body">
+                  <strong>{{ n.title }}</strong>
+                  <p>{{ n.message }}</p>
+                  <span class="dp-bell__meta">{{ relativeTime(n.createdAt) }}</span>
+                </div>
+                @if (!n.readAt) {
+                  <span class="dp-bell__unread-dot" aria-label="No leída"></span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

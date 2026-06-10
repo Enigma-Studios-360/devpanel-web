@@ -12,6 +12,8 @@ import {
   type ProjectDashboard,
   type UpdateProjectInput,
 } from '../../core/services/projects.service';
+import { PermissionsService } from '../../core/auth/permissions.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { formatDate } from '../../shared/utils/format-date';
 import type { ProjectStatus } from '../../shared/models/project.model';
@@ -37,6 +39,8 @@ export class ProjectOverviewComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly projectsApi = inject(ProjectsService);
   private readonly fb = inject(FormBuilder);
+  private readonly confirmSvc = inject(ConfirmService);
+  protected readonly permissions = inject(PermissionsService);
 
   protected readonly projectId = computed(
     () => this.route.snapshot.paramMap.get('projectId') ?? '',
@@ -75,6 +79,7 @@ export class ProjectOverviewComponent {
     this.projectsApi.dashboard(id).subscribe({
       next: (d) => {
         this.data.set(d);
+        this.permissions.setRole(d.userRole);
         this.loading.set(false);
       },
       error: () => {
@@ -152,11 +157,18 @@ export class ProjectOverviewComponent {
 
   // Archive --------------------------------------------------------------------
 
-  archive(): void {
+  async archive(): Promise<void> {
     if (this.archiving() || this.isArchived()) return;
-    const ok = typeof confirm !== 'undefined'
-      ? confirm('¿Seguro que quieres archivar este proyecto? Liberará un cupo del plan.')
-      : true;
+    const ok = await this.confirmSvc.ask({
+      title: 'Archivar proyecto',
+      message:
+        'Esto saca el proyecto del listado activo y libera un cupo del plan. ' +
+        'No se borran tareas, documentación ni actividad — siempre puedes desarchivarlo después.',
+      confirmLabel: 'Archivar',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+      icon: 'pi-inbox',
+    });
     if (!ok) return;
     this.archiving.set(true);
     this.projectsApi.archive(this.projectId()).subscribe({

@@ -78,6 +78,10 @@
   border-radius: var(--dp-radius-md);
 }
 
+.dp-kanban__move-error {
+  margin-bottom: 0.75rem;
+}
+
 .dp-task-card {
   background: var(--dp-surface-2);
   border: 1px solid var(--dp-border);
@@ -86,8 +90,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  cursor: pointer;
+  cursor: grab;
   transition: border-color 120ms ease, transform 120ms ease;
+
+  &:active { cursor: grabbing; }
 
   &:hover {
     border-color: color-mix(in srgb, var(--col) 50%, var(--dp-border));
@@ -155,4 +161,61 @@
       border-radius: 999px;
     }
   }
+
+  /* Lighter "ghost" left in place while dragging. cdkDragPlaceholder
+     templating means this element only renders during a drag — we use
+     it to keep layout from collapsing as the original card moves. */
+  &__placeholder {
+    height: 100%;
+    min-height: 80px;
+    border: 2px dashed color-mix(in srgb, var(--col) 50%, var(--dp-border));
+    background: color-mix(in srgb, var(--col) 6%, transparent);
+    border-radius: var(--dp-radius-md);
+  }
 }
+
+/* ============================================================================
+   CDK drag-drop integration
+   --------------------------------------------------------------------------
+   These class names come from `@angular/cdk/drag-drop`. We don't apply
+   them ourselves — CDK adds them at the right moment in the drag cycle.
+   ========================================================================= */
+
+/* The "snapshot" that follows the cursor mid-drag. */
+.cdk-drag-preview {
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-accent-blue, #3b82f6);
+  border-radius: var(--dp-radius-md);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(59, 130, 246, 0.4);
+  padding: 0.7rem 0.85rem;
+  transform: rotate(1.5deg) scale(1.02);
+  cursor: grabbing;
+  opacity: 0.96;
+}
+
+/* When the original card returns to its spot after a no-op drop. */
+.cdk-drag-animating {
+  transition: transform 240ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+/* Smooth shuffling of siblings while a card is hovering over a column. */
+.dp-kanban__list.cdk-drop-list-dragging .dp-task-card:not(.cdk-drag-placeholder) {
+  transition: transform 220ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+/* Highlight a column that's ready to receive a drop. */
+.cdk-drop-list-receiving,
+.cdk-drop-list-dragging {
+  background: color-mix(in srgb, var(--col) 6%, var(--dp-surface));
+  outline: 1px dashed color-mix(in srgb, var(--col) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: var(--dp-radius-md);
+}
+
+/* Subtle visual when DnD is disabled (VIEWER role). */
+.dp-task-card.cdk-drag-disabled {
+  cursor: pointer;
+}
+

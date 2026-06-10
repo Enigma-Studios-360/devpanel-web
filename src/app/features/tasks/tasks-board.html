@@ -7,15 +7,21 @@
       <i class="pi pi-arrow-left"></i>
       <span>Overview</span>
     </a>
-    <button
-      type="button"
-      class="dp-btn dp-btn--primary"
-      (click)="openCreate()"
-      data-tour="create-task"
-    >
-      <i class="pi pi-plus"></i>
-      <span>Crear tarea</span>
-    </button>
+    @if (permissions.canEditTasks()) {
+      <button
+        type="button"
+        class="dp-btn dp-btn--primary"
+        (click)="openCreate()"
+        data-tour="create-task"
+      >
+        <i class="pi pi-plus"></i>
+        <span>Crear tarea</span>
+      </button>
+    } @else if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
+    }
   </dp-page-header>
 } @else if (loading()) {
   <dp-loading-state label="Cargando tablero…" />
@@ -26,6 +32,12 @@
 }
 
 @if (!loading() && !error()) {
+  @if (moveError()) {
+    <div class="dp-modal__error dp-kanban__move-error">
+      <i class="pi pi-exclamation-circle"></i> {{ moveError() }}
+    </div>
+  }
+
   <div class="dp-kanban" data-tour="kanban-columns">
     @for (col of columns; track col.status) {
       <section class="dp-kanban__col" [style.--col]="col.color">
@@ -35,14 +47,33 @@
           <span class="dp-kanban__col-count">{{ countFor(col.status) }}</span>
         </header>
 
-        <div class="dp-kanban__list">
+        <!--
+          Each column is a cdkDropList. They're all connected via
+          `[cdkDropListConnectedTo]="allListIds"` so cards can move
+          between any pair. The `[id]` ties to listIdFor() so the
+          drop handler can map the container back to a TaskStatus.
+        -->
+        <div
+          class="dp-kanban__list"
+          cdkDropList
+          [id]="listIdFor(col.status)"
+          [cdkDropListData]="tasksFor(col.status)"
+          [cdkDropListConnectedTo]="allListIds"
+          [cdkDropListDisabled]="!permissions.canEditTasks()"
+          (cdkDropListDropped)="onDrop($event)"
+        >
           @for (task of tasksFor(col.status); track task._id) {
             <article
               class="dp-task-card"
+              cdkDrag
+              [cdkDragDisabled]="!permissions.canEditTasks()"
               [class.dp-task-card--overdue]="isOverdue(task)"
               (click)="openTask(task)"
               [attr.data-tour]="$first ? 'task-card' : null"
             >
+              <!-- Lighter "ghost" left behind while dragging -->
+              <div class="dp-task-card__placeholder" *cdkDragPlaceholder></div>
+
               <header class="dp-task-card__top">
                 <span class="dp-task-card__title">{{ task.title }}</span>
                 <span [attr.data-tour]="($first && col.status === columns[0].status) ? 'task-priority' : null">
@@ -68,7 +99,13 @@
               </footer>
             </article>
           } @empty {
-            <p class="dp-kanban__empty">Sin tareas</p>
+            <p class="dp-kanban__empty">
+              @if (permissions.canEditTasks()) {
+                Suelta tareas aquí
+              } @else {
+                Sin tareas
+              }
+            </p>
           }
         </div>
       </section>
@@ -144,4 +181,5 @@
   [task]="selectedTask()"
   (close)="closeTask()"
   (taskUpdated)="onTaskUpdated($event)"
+  (taskRemoved)="onTaskRemoved($event)"
 />

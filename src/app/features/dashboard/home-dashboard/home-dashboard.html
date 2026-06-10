@@ -1,153 +1,300 @@
 <dp-page-header
-  [title]="'dashboard.title' | t"
-  [subtitle]="'dashboard.subtitle' | t"
+  [title]="greeting() + (userFirstName() ? ', ' + userFirstName() : '') + ' 👋'"
+  subtitle="Aquí está el resumen de tu workspace en DevHub."
 >
-  <button class="dp-dashboard__refresh" (click)="refresh()" [disabled]="loading()">
+  <button
+    type="button"
+    class="dp-btn dp-btn--ghost"
+    (click)="refreshOverview(); refreshHealth()"
+    [disabled]="overviewLoading()"
+    title="Recargar"
+  >
     <i class="pi pi-refresh"></i>
-    <span>{{ 'dashboard.apiStatus.retry' | t }}</span>
+    <span>Recargar</span>
   </button>
 </dp-page-header>
 
 <div class="dp-dashboard">
-  <!-- Stats overview (Phase 1: static placeholders) -->
+  <!-- "What's new" banner ------------------------------------------------- -->
+  <dp-whats-new
+    releaseId="2026-05"
+    headline="Tres cosas que estrenamos esta semana"
+    [items]="whatsNewItems"
+  />
+
+  @if (overviewError()) {
+    <div class="dp-modal__error">
+      <i class="pi pi-exclamation-circle"></i> {{ overviewError() }}
+    </div>
+  }
+
+  <!-- Stats overview --------------------------------------------------------- -->
   <section class="dp-dashboard__stats">
-    <dp-stats-card
-      [label]="'dashboard.stats.projects' | t"
-      value="0"
-      icon="pi-folder"
-      iconColor="#3B82F6"
-      hint="Crea tu primer proyecto en la Fase 2"
-    />
-    <dp-stats-card
-      [label]="'dashboard.stats.tasks' | t"
-      value="0"
-      icon="pi-check-square"
-      iconColor="#22C55E"
-      hint="Tablero Kanban en la Fase 3"
-    />
-    <dp-stats-card
-      [label]="'dashboard.stats.team' | t"
-      value="1"
-      icon="pi-users"
-      iconColor="#8B5CF6"
-      hint="Tú mismo · plan FREE"
-    />
-    <dp-stats-card
-      [label]="'dashboard.stats.storage' | t"
-      value="0 / 100 MB"
-      icon="pi-database"
-      iconColor="#F59E0B"
-      hint="Límite del plan FREE"
-    />
+    @if (overviewLoading()) {
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="dp-stat-card dp-stat-card--loading">
+          <dp-skeleton variant="text" lines="2" />
+        </div>
+      }
+    } @else if (overview(); as o) {
+      <a [routerLink]="['/app/teams']" class="dp-stat-card" data-tour="stat-projects">
+        <span class="dp-stat-card__icon" style="--c: 59, 130, 246;">
+          <i class="pi pi-folder-open"></i>
+        </span>
+        <div>
+          <strong>{{ o.stats.activeProjects }}</strong>
+          <small>Proyectos activos</small>
+          @if (o.stats.totalProjects > o.stats.activeProjects) {
+            <span class="dp-stat-card__hint">
+              {{ o.stats.totalProjects - o.stats.activeProjects }} archivado(s)
+            </span>
+          }
+        </div>
+      </a>
+
+      <a [routerLink]="['/app/teams']" class="dp-stat-card">
+        <span class="dp-stat-card__icon" style="--c: 139, 92, 246;">
+          <i class="pi pi-users"></i>
+        </span>
+        <div>
+          <strong>{{ o.stats.totalTeams }}</strong>
+          <small>Equipos</small>
+        </div>
+      </a>
+
+      <div class="dp-stat-card">
+        <span class="dp-stat-card__icon" style="--c: 34, 197, 94;">
+          <i class="pi pi-check-square"></i>
+        </span>
+        <div>
+          <strong>{{ o.stats.openTasksAssignedToMe }}</strong>
+          <small>Tareas asignadas a ti</small>
+          @if (o.stats.overdueTasksAssignedToMe > 0) {
+            <span class="dp-stat-card__hint dp-stat-card__hint--danger">
+              <i class="pi pi-exclamation-circle"></i>
+              {{ o.stats.overdueTasksAssignedToMe }} vencida(s)
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="dp-stat-card">
+        <span class="dp-stat-card__icon" style="--c: 245, 184, 92;">
+          <i class="pi pi-bolt"></i>
+        </span>
+        <div>
+          @if (healthState()?.available) {
+            <strong>API</strong>
+            <small>Conectada</small>
+            <span class="dp-stat-card__hint">
+              uptime {{ formatUptime(healthState()?.data?.uptime) }}
+            </span>
+          } @else {
+            <strong>API</strong>
+            <small class="dp-stat-card__hint--danger">No disponible</small>
+          }
+        </div>
+      </div>
+    }
   </section>
 
-  <!-- API status + Learn cards -->
-  <section class="dp-dashboard__row">
-    <article class="dp-dashboard__api dp-card" data-tour="api-status">
-      <header class="dp-dashboard__api-head">
-        <div>
-          <h3>{{ 'dashboard.apiStatus.title' | t }}</h3>
-          <p class="dp-text-muted dp-text-sm">
-            GET /health · localhost:4000
-          </p>
+  <!-- Empty workspace state -------------------------------------------------- -->
+  @if (isEmptyWorkspace()) {
+    <section class="dp-dashboard__empty">
+      <div class="dp-dashboard__empty-icon"><i class="pi pi-rocket"></i></div>
+      <h2>Empieza por crear tu workspace</h2>
+      <p>
+        Crea un equipo desde cero, o deja que DevHub te genere un playground
+        (equipo + proyecto + 5 tareas de ejemplo) para que el tour guiado
+        tenga datos con los que jugar.
+      </p>
+      @if (seedError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ seedError() }}
         </div>
+      }
+      <div class="dp-dashboard__empty-actions">
+        <a [routerLink]="['/app/teams']" class="dp-btn dp-btn--ghost">
+          <i class="pi pi-users"></i>
+          <span>Crear equipo manualmente</span>
+        </a>
+        <button
+          type="button"
+          class="dp-btn dp-btn--primary"
+          (click)="seedDemoData()"
+          [disabled]="seeding()"
+          data-tour="seed-demo"
+        >
+          @if (seeding()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-sparkles"></i>
+          <span>Crear datos demo</span>
+        </button>
+      </div>
+    </section>
+  } @else {
+    <!-- Main grid: recent projects + my tasks -->
+    <div class="dp-dashboard__grid">
+      <!-- Recent projects ---------------------------------------------------- -->
+      <section class="dp-card dp-dashboard__panel" data-tour="dash-projects">
+        <header class="dp-dashboard__panel-head">
+          <h3>
+            <i class="pi pi-folder"></i>
+            Proyectos recientes
+          </h3>
+          <a [routerLink]="['/app/teams']" class="dp-dashboard__panel-link">
+            Ver todos <i class="pi pi-arrow-right"></i>
+          </a>
+        </header>
 
-        @if (loading()) {
-          <dp-loading-state [inline]="true" [label]="('dashboard.apiStatus.checking' | t)" />
-        } @else if (state()?.available) {
-          <dp-status-badge
-            kind="api"
-            status="CONNECTED"
-            [label]="('dashboard.apiStatus.connected' | t)"
-          />
-        } @else {
-          <dp-status-badge
-            kind="api"
-            status="DISCONNECTED"
-            [label]="('dashboard.apiStatus.disconnected' | t)"
-          />
+        @if (overviewLoading()) {
+          @for (_ of [1,2,3]; track $index) {
+            <div class="dp-dashboard__row-skeleton">
+              <dp-skeleton variant="circle" size="32" />
+              <dp-skeleton variant="text" lines="2" />
+            </div>
+          }
+        } @else if (overview()?.recentProjects?.length === 0) {
+          <p class="dp-text-muted dp-text-sm">
+            Aún no hay proyectos. Crea uno desde la página de tu equipo.
+          </p>
+        } @else if (overview(); as o) {
+          <ul class="dp-dashboard__projects">
+            @for (p of o.recentProjects; track trackProject($index, p)) {
+              <li>
+                <a
+                  [routerLink]="['/app/projects', p._id, 'overview']"
+                  class="dp-dashboard__project-row"
+                  [style.--accent]="p.color"
+                >
+                  <span class="dp-dashboard__project-dot"></span>
+                  <div class="dp-dashboard__project-meta">
+                    <strong>{{ p.name }}</strong>
+                    <span class="dp-text-muted dp-text-sm">
+                      {{ p.teamName ?? '—' }} · actualizado {{ relativeTime(p.updatedAt) }}
+                    </span>
+                  </div>
+                  <dp-status-badge kind="project" [status]="p.status" [label]="p.status" />
+                </a>
+              </li>
+            }
+          </ul>
         }
+      </section>
+
+      <!-- My open tasks ------------------------------------------------------ -->
+      <section class="dp-card dp-dashboard__panel" data-tour="dash-mytasks">
+        <header class="dp-dashboard__panel-head">
+          <h3>
+            <i class="pi pi-check-square"></i>
+            Mis tareas
+          </h3>
+          @if (overview()?.stats?.openTasksAssignedToMe; as total) {
+            <span class="dp-dashboard__panel-link">
+              {{ total }} abiertas
+            </span>
+          }
+        </header>
+
+        @if (overviewLoading()) {
+          @for (_ of [1,2,3]; track $index) {
+            <div class="dp-dashboard__row-skeleton">
+              <dp-skeleton variant="circle" size="22" />
+              <dp-skeleton variant="text" lines="2" />
+            </div>
+          }
+        } @else if (overview()?.myOpenTasks?.length === 0) {
+          <p class="dp-text-muted dp-text-sm">
+            <i class="pi pi-check-circle" style="color: #22c55e;"></i>
+            No tienes tareas abiertas asignadas a ti.
+          </p>
+        } @else if (overview(); as o) {
+          <ul class="dp-dashboard__tasks">
+            @for (t of o.myOpenTasks; track trackTask($index, t)) {
+              <li>
+                <a
+                  [routerLink]="['/app/projects', t.projectId, 'tasks']"
+                  class="dp-dashboard__task-row"
+                  [class.dp-dashboard__task-row--overdue]="t.overdue"
+                >
+                  <dp-priority-badge [priority]="$any(t.priority)" />
+                  <div class="dp-dashboard__task-meta">
+                    <strong>{{ t.title }}</strong>
+                    <span class="dp-text-muted dp-text-sm">
+                      {{ t.projectName ?? '—' }}
+                      @if (t.dueDate) {
+                        · <i class="pi pi-calendar"></i> {{ formatDate(t.dueDate) }}
+                      }
+                    </span>
+                  </div>
+                  @if (t.overdue) {
+                    <span class="dp-dashboard__overdue">
+                      <i class="pi pi-exclamation-circle"></i>
+                      Vencida
+                    </span>
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+
+    <!-- Recent activity ----------------------------------------------------- -->
+    <section class="dp-card dp-dashboard__panel" data-tour="dash-activity">
+      <header class="dp-dashboard__panel-head">
+        <h3>
+          <i class="pi pi-history"></i>
+          Actividad reciente
+        </h3>
+        <span class="dp-dashboard__panel-link">
+          últimos 10 cambios
+        </span>
       </header>
 
-      @if (state(); as s) {
-        @if (s.available && s.data; as d) {
-          <dl class="dp-dashboard__api-meta">
-            <div>
-              <dt>{{ 'dashboard.apiStatus.environment' | t }}</dt>
-              <dd>{{ d.environment }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'dashboard.apiStatus.uptime' | t }}</dt>
-              <dd>{{ formatUptime(d.uptime) }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'dashboard.apiStatus.database' | t }}</dt>
-              <dd [class.dp-dashboard__db-on]="d.database === 'connected'"
-                  [class.dp-dashboard__db-off]="d.database !== 'connected'">
-                {{ d.database }}
-              </dd>
-            </div>
-          </dl>
-        } @else if (!s.available) {
-          <div class="dp-dashboard__api-error">
-            <i class="pi pi-info-circle"></i>
-            <div>
-              <strong>No se pudo conectar con el backend.</strong>
-              <p>
-                Asegúrate de tener el API corriendo en
-                <code>http://localhost:4000</code>. Desde
-                <code>devpanel-api</code> ejecuta <code>npm run dev</code>.
-              </p>
-            </div>
+      @if (overviewLoading()) {
+        @for (_ of [1,2,3,4]; track $index) {
+          <div class="dp-dashboard__row-skeleton">
+            <dp-skeleton variant="circle" size="28" />
+            <dp-skeleton variant="text" lines="2" />
           </div>
         }
+      } @else if (overview()?.recentActivity?.length === 0) {
+        <dp-empty-state
+          title="Sin actividad todavía"
+          description="Cuando alguien cree tareas, cambie estados o vincule un repo, lo verás aquí."
+          icon="pi-history"
+          [compact]="true"
+        />
+      } @else if (overview(); as o) {
+        <ul class="dp-dashboard__activity">
+          @for (a of o.recentActivity; track trackActivity($index, a)) {
+            <li>
+              <span class="dp-dashboard__activity-dot"></span>
+              <div>
+                <p class="dp-dashboard__activity-msg">{{ a.message }}</p>
+                <span class="dp-text-muted dp-text-sm">
+                  @if (a.actor?.name) { {{ a.actor!.name }} · }
+                  {{ relativeTime(a.createdAt) }}
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
       }
-    </article>
+    </section>
+  }
 
-    <dp-learn-more-card
-      title="¿Qué es DevPanel?"
-      body="DevPanel es una plataforma SaaS para centralizar la gestión de proyectos de desarrollo: equipos, tareas, documentación, GitHub y deploy. Esta es la base técnica (Fase 1) sobre la que se construyen las siguientes fases."
-    />
-  </section>
-
-  <!-- Activity (empty by design in Phase 1) -->
-  <section class="dp-dashboard__activity">
-    <h3 class="dp-dashboard__section-title">Actividad reciente</h3>
-    <dp-empty-state
-      [title]="'dashboard.empty.title' | t"
-      [description]="'dashboard.empty.desc' | t"
-      icon="pi-history"
-    />
-  </section>
-
-  <!-- Learn more grid -->
+  <!-- Learn more grid (kept compact at the bottom) -->
   <section class="dp-dashboard__learn">
     <h3 class="dp-dashboard__section-title">Aprende más sobre…</h3>
     <div class="dp-dashboard__learn-grid">
-      <dp-learn-more-card
-        [title]="('learn.readme.title' | t)"
-        [body]="('learn.readme.body' | t)"
-      />
-      <dp-learn-more-card
-        [title]="('learn.project.title' | t)"
-        [body]="('learn.project.body' | t)"
-      />
-      <dp-learn-more-card
-        [title]="('learn.team.title' | t)"
-        [body]="('learn.team.body' | t)"
-      />
-      <dp-learn-more-card
-        [title]="('learn.saas.title' | t)"
-        [body]="('learn.saas.body' | t)"
-      />
-      <dp-learn-more-card
-        [title]="('learn.deploy.title' | t)"
-        [body]="('learn.deploy.body' | t)"
-      />
-      <dp-learn-more-card
-        [title]="('learn.envVar.title' | t)"
-        [body]="('learn.envVar.body' | t)"
-      />
+      <dp-learn-more-card [title]="('learn.readme.title' | t)" [body]="('learn.readme.body' | t)" />
+      <dp-learn-more-card [title]="('learn.project.title' | t)" [body]="('learn.project.body' | t)" />
+      <dp-learn-more-card [title]="('learn.team.title' | t)" [body]="('learn.team.body' | t)" />
+      <dp-learn-more-card [title]="('learn.saas.title' | t)" [body]="('learn.saas.body' | t)" />
+      <dp-learn-more-card [title]="('learn.deploy.title' | t)" [body]="('learn.deploy.body' | t)" />
+      <dp-learn-more-card [title]="('learn.envVar.title' | t)" [body]="('learn.envVar.body' | t)" />
     </div>
   </section>
 </div>

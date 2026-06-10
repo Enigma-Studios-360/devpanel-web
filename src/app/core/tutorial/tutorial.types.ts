@@ -1,3 +1,5 @@
+import type { TeamRole } from '../../shared/models/team.model';
+
 export type TutorialPlacement = 'top' | 'bottom' | 'left' | 'right';
 
 /**
@@ -35,6 +37,23 @@ export interface TutorialAction {
   key: TutorialActionKey;
 }
 
+/**
+ * Domain events the tutorial can wait for. When a step declares
+ * `waitFor: 'team-created'`, the overlay parks itself ("Esperando…")
+ * and only advances once a component calls
+ * `tutorialService.emitEvent('team-created')`.
+ *
+ * This lets a tour pause mid-step until the user actually completes the
+ * action being explained — no more "click next blindly" disconnect.
+ */
+export type TutorialEventKey =
+  | 'team-created'
+  | 'project-created'
+  | 'task-created'
+  | 'doc-saved'
+  | 'github-linked'
+  | 'deploy-triggered';
+
 export interface TutorialStep {
   /** Unique step id within a tour */
   id: string;
@@ -68,6 +87,44 @@ export interface TutorialStep {
    */
   action?: TutorialAction;
   placement?: TutorialPlacement;
+  /**
+   * Optional list of team roles allowed to see this step. When the current
+   * role is known (PermissionsService) and not included here, the step is
+   * auto-skipped. Used for steps that point at role-gated UI (e.g. the
+   * "Crear proyecto" button hidden from VIEWER/DEVELOPER).
+   *
+   * If undefined, the step is shown to every role.
+   */
+  requiresRole?: TeamRole[];
+  /**
+   * Short explanation surfaced in the "missing target" fallback when the
+   * step's element isn't in the DOM. Helps the user understand WHY they
+   * don't see the button (e.g. "Tu rol VIEWER no puede crear proyectos").
+   */
+  roleHint?: string;
+  /**
+   * Block tour progression until this event fires. Components emit
+   * events via `tutorialService.emitEvent('team-created')` after the
+   * user actually performs the action. While waiting:
+   *  - The primary button is disabled and labelled "Esperando…".
+   *  - The "stop on unrelated nav" guard is suspended (the action
+   *    typically triggers a navigation we *want*).
+   *  - "Saltar paso" stays available as an escape hatch.
+   */
+  waitFor?: TutorialEventKey;
+  /**
+   * Optional copy shown while the step is in the "waiting" state.
+   * Defaults to "Esperando a que completes la acción…".
+   */
+  waitingHint?: string;
+  /**
+   * When true, navigating away from the step's origin path advances the
+   * tour instead of stopping it. Use this on steps that spotlight a
+   * navigation link ("Ver proyectos", "Ver tareas") so the very act of
+   * clicking the link moves the tour forward — no separate Next click
+   * needed and no false "tour abandoned" trigger.
+   */
+  advanceOnNavigate?: boolean;
 }
 
 export interface Tutorial {

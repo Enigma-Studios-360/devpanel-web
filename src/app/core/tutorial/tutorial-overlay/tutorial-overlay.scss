@@ -1,16 +1,23 @@
 .dp-tour {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  /* Below app modals on purpose: the onboarding guides the user INTO a
+     modal (create team/project/task), so the modal must stay crisp and
+     clickable above the tour shades. See --dp-z-* scale in styles.scss. */
+  z-index: var(--dp-z-tour, 900);
   pointer-events: none;
 }
 
-/* 4-piece backdrop creates a "hole" around the highlighted element */
+/* 4-piece backdrop creates a "hole" around the highlighted element.
+   IMPORTANT: pointer-events MUST be none here. Otherwise the four
+   coloured rectangles intercept clicks on every button outside the
+   spotlight, breaking links like "Ver proyectos" / "Ver tareas" / etc.
+   during the tour. The tooltip itself opts back in via its own rule. */
 .dp-tour__shade {
   position: fixed;
   background: rgba(2, 6, 17, 0.62);
   backdrop-filter: blur(2px);
-  pointer-events: auto;
+  pointer-events: none;
   transition: all 200ms ease;
 
   &--top    { top: 0; left: 0; right: 0; }
@@ -47,6 +54,11 @@
   }
 }
 
+@keyframes dp-tour-pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .dp-tour__tooltip {
   position: fixed;
   width: 320px;
@@ -60,6 +72,7 @@
   flex-direction: column;
   gap: 0.6rem;
   transition: top 200ms ease, left 200ms ease;
+  animation: dp-tour-pop-in 200ms ease;
 
   &::before {
     content: '';
@@ -182,6 +195,65 @@
     font-size: 12px;
     margin-top: 2px;
   }
+}
+
+/* Surface a clear "I'm waiting on you" affordance whenever a step has
+   `waitFor`. Three blinking dots + a hint, themed in the assistant
+   gradient so it pairs visually with Clippy. */
+.dp-tour__waiting {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--dp-radius-md);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.10) 0%,
+    rgba(139, 92, 246, 0.10) 100%
+  );
+  border: 1px solid rgba(139, 92, 246, 0.30);
+  color: var(--dp-text);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.dp-tour__waiting-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dp-accent-blue, #3b82f6);
+  opacity: 0.55;
+  animation: dp-tour-wait-blink 1.2s infinite ease-in-out;
+
+  & + & { animation-delay: 0.15s; }
+  & + & + & { animation-delay: 0.30s; }
+}
+
+@keyframes dp-tour-wait-blink {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40%           { opacity: 1;   transform: translateY(-2px); }
+}
+
+.dp-tour__btn--waiting {
+  opacity: 0.78;
+  cursor: progress;
+}
+
+/* Escape hatch shown under the "Esperando…" hint so the user is never
+   stuck if the modeled action fails or they want to move on. */
+.dp-tour__skip-step {
+  align-self: flex-start;
+  margin-top: -0.2rem;
+  background: none;
+  border: 0;
+  padding: 0.1rem 0;
+  color: var(--dp-text-muted);
+  font-size: 11.5px;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 120ms ease;
+
+  &:hover { color: var(--dp-text); }
 }
 
 .dp-tour__missing {

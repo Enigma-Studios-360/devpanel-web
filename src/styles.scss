@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DevPanel — Global Styles
+   DevHub — Global Styles
    ========================================================================== */
 
 @use 'primeicons/primeicons.css';
@@ -29,6 +29,17 @@
 
   --dp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --dp-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.35);
+
+  /* Stacking scale — single source of truth for overlay layering.
+     Higher = closer to the user. App modals sit ABOVE the tutorial
+     overlay on purpose: the onboarding guides the user INTO a modal
+     (create team/project/task), so the modal must stay crisp and
+     clickable while the tour is active. */
+  --dp-z-dropdown:  200;  /* user menu, notification bell, help launcher */
+  --dp-z-drawer:    300;  /* task detail side drawer */
+  --dp-z-assistant: 400;  /* Clippy floating widget */
+  --dp-z-tour:      900;  /* tutorial spotlight overlay */
+  --dp-z-modal:    1000;  /* app modals + confirm dialog (above the tour) */
 
   --dp-font-sans:
     'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
@@ -74,4 +85,13 @@ a {
 ::selection {
   background: rgba(59, 130, 246, 0.35);
   color: var(--dp-text);
+}
+
+/* Accessible keyboard focus. Several components set `outline: 0` to drop the
+   mouse-focus ring; :focus-visible re-adds a clear ring for keyboard users
+   only. :where() keeps specificity at 0 so it never fights component styles. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--dp-accent-blue);
+  outline-offset: 2px;
+  border-radius: var(--dp-radius-sm);
 }

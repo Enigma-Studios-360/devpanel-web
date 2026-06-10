@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
+import { readWithMigration, safeSet } from '../storage/migrate';
 
 export type LanguageCode = 'es' | 'en';
 
-const STORAGE_KEY = 'devpanel.lang';
+const STORAGE_KEY = 'devhub.lang';
+const LEGACY_KEY = 'devpanel.lang';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
@@ -11,14 +13,11 @@ export class LanguageService {
 
   setLanguage(code: LanguageCode): void {
     this.currentSignal.set(code);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, code);
-    }
+    safeSet(STORAGE_KEY, code);
   }
 
   private read(): LanguageCode {
-    if (typeof localStorage === 'undefined') return 'es';
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = readWithMigration(STORAGE_KEY, LEGACY_KEY);
     return stored === 'en' || stored === 'es' ? stored : 'es';
   }
 }

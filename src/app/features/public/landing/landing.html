@@ -2,7 +2,7 @@
   <header class="dp-landing__nav">
     <div class="dp-landing__brand">
       <span class="dp-landing__logo"><i class="pi pi-bolt"></i></span>
-      <span class="dp-landing__brand-name">DevPanel</span>
+      <span class="dp-landing__brand-name">{{ 'app.name' | t }}</span>
     </div>
 
     <nav class="dp-landing__links">
@@ -18,24 +18,92 @@
     </nav>
   </header>
 
+  <!-- HERO ----------------------------------------------------------------- -->
   <section class="dp-landing__hero">
-    <span class="dp-landing__pill">
-      <i class="pi pi-sparkles"></i>
-      Fase 1 · Base técnica funcional
-    </span>
-    <h1 class="dp-landing__title">{{ 'landing.hero.title' | t }}</h1>
-    <p class="dp-landing__subtitle">{{ 'landing.hero.subtitle' | t }}</p>
-    <div class="dp-landing__hero-actions">
-      <a routerLink="/auth/register" class="dp-landing__cta-primary dp-landing__cta-primary--lg">
-        {{ 'landing.hero.ctaPrimary' | t }}
-      </a>
-      <a routerLink="/app/dashboard" class="dp-landing__cta-secondary dp-landing__cta-secondary--lg">
-        Entrar al dashboard
-        <i class="pi pi-arrow-right"></i>
-      </a>
+    <div class="dp-landing__hero-text">
+      <span class="dp-landing__pill">
+        <i class="pi pi-sparkles"></i>
+        De idea a deploy, sin perder el control
+      </span>
+      <h1 class="dp-landing__title">{{ 'landing.hero.title' | t }}</h1>
+      <p class="dp-landing__subtitle">{{ 'landing.hero.subtitle' | t }}</p>
+      <div class="dp-landing__hero-actions">
+        <a routerLink="/auth/register" class="dp-landing__cta-primary dp-landing__cta-primary--lg">
+          {{ 'landing.hero.ctaPrimary' | t }}
+          <i class="pi pi-arrow-right"></i>
+        </a>
+        <a routerLink="/auth/login" class="dp-landing__cta-secondary dp-landing__cta-secondary--lg">
+          Entrar al dashboard
+        </a>
+      </div>
+      <ul class="dp-landing__hero-tags">
+        <li><i class="pi pi-check"></i> Sin tarjeta de crédito</li>
+        <li><i class="pi pi-check"></i> Plan FREE para siempre</li>
+        <li><i class="pi pi-check"></i> Open por dentro</li>
+      </ul>
+    </div>
+
+    <!-- Faux dashboard mockup (CSS only) -->
+    <div class="dp-landing__mock" aria-hidden="true">
+      <div class="dp-landing__mock-window">
+        <div class="dp-landing__mock-chrome">
+          <span></span><span></span><span></span>
+          <small>devhub.dev/app/dashboard</small>
+        </div>
+        <div class="dp-landing__mock-body">
+          <div class="dp-landing__mock-side">
+            <div class="dp-landing__mock-side-item dp-landing__mock-side-item--active">
+              <i class="pi pi-th-large"></i> Dashboard
+            </div>
+            <div class="dp-landing__mock-side-item">
+              <i class="pi pi-users"></i> Equipos
+            </div>
+            <div class="dp-landing__mock-side-item">
+              <i class="pi pi-folder"></i> Proyectos
+            </div>
+            <div class="dp-landing__mock-side-item">
+              <i class="pi pi-cloud-upload"></i> Deploy
+            </div>
+          </div>
+          <div class="dp-landing__mock-main">
+            <div class="dp-landing__mock-stats">
+              <div><strong>5</strong><small>Proyectos</small></div>
+              <div><strong>12</strong><small>Tareas</small></div>
+              <div><strong>3</strong><small>Equipos</small></div>
+              <div><strong>OK</strong><small>API</small></div>
+            </div>
+            <div class="dp-landing__mock-row">
+              <span class="dp-landing__mock-dot"></span>
+              <span>Landing Page</span>
+              <span class="dp-landing__mock-tag">PRODUCTION</span>
+            </div>
+            <div class="dp-landing__mock-row">
+              <span class="dp-landing__mock-dot" style="background: #8b5cf6"></span>
+              <span>API Auth</span>
+              <span class="dp-landing__mock-tag">TESTING</span>
+            </div>
+            <div class="dp-landing__mock-row">
+              <span class="dp-landing__mock-dot" style="background: #22c55e"></span>
+              <span>App móvil</span>
+              <span class="dp-landing__mock-tag">PLANNING</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Floating "assistant" hint over the mockup -->
+      <div class="dp-landing__mock-asst">
+        <span class="dp-landing__mock-asst-avatar">
+          <i class="pi pi-bolt"></i>
+        </span>
+        <div>
+          <strong>Asistente DevHub</strong>
+          <small>¿Cómo despliego a Vercel? <i class="pi pi-sparkles"></i></small>
+        </div>
+      </div>
     </div>
   </section>
 
+  <!-- FEATURES PRIMARY ----------------------------------------------------- -->
   <section class="dp-landing__features">
     <h2 class="dp-landing__section-title">{{ 'landing.features.title' | t }}</h2>
     <div class="dp-landing__feature-grid">
@@ -51,8 +119,74 @@
     </div>
   </section>
 
+  <!-- FEATURES SECONDARY (recent investments) ------------------------------ -->
+  <section class="dp-landing__features dp-landing__features--secondary">
+    <h2 class="dp-landing__section-title">Y lo que estrenamos hace poco</h2>
+    <div class="dp-landing__feature-grid">
+      @for (f of extraFeatures; track f.titleKey) {
+        <article class="dp-landing__feature">
+          <span class="dp-landing__feature-icon" [style.--ic]="f.color">
+            <i [class]="'pi ' + f.icon"></i>
+          </span>
+          <h3>{{ f.titleKey | t }}</h3>
+          <p>{{ f.descKey | t }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS --------------------------------------------------------- -->
+  <section class="dp-landing__how">
+    <h2 class="dp-landing__section-title">Cómo funciona</h2>
+    <div class="dp-landing__how-grid">
+      @for (s of howItWorks; track s.number) {
+        <article class="dp-landing__how-step">
+          <header>
+            <span class="dp-landing__how-num">{{ s.number }}</span>
+            <span class="dp-landing__how-icon"><i [class]="'pi ' + s.icon"></i></span>
+          </header>
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.body }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- STACK ---------------------------------------------------------------- -->
+  <section class="dp-landing__stack">
+    <h2 class="dp-landing__section-title">Construido sobre</h2>
+    <ul class="dp-landing__stack-grid">
+      @for (s of stack; track s.name) {
+        <li>
+          <span><i [class]="'pi ' + s.icon"></i></span>
+          <div>
+            <strong>{{ s.name }}</strong>
+            <small>{{ s.role }}</small>
+          </div>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- FINAL CTA ------------------------------------------------------------ -->
+  <section class="dp-landing__cta">
+    <h2>De idea a deploy. Sin perder el control.</h2>
+    <p>
+      Crea tu cuenta en menos de un minuto. Cuando estés listo, tu primer
+      deploy a Vercel es de tres clicks.
+    </p>
+    <div class="dp-landing__cta-actions">
+      <a routerLink="/auth/register" class="dp-landing__cta-primary dp-landing__cta-primary--lg">
+        Empezar gratis <i class="pi pi-arrow-right"></i>
+      </a>
+      <a routerLink="/pricing" class="dp-landing__cta-secondary dp-landing__cta-secondary--lg">
+        Ver planes
+      </a>
+    </div>
+  </section>
+
   <footer class="dp-landing__footer">
-    <span>© {{ year }} DevPanel · Proyecto integrador</span>
-    <span class="dp-text-muted">Express · TypeScript · MongoDB · Angular · PrimeNG</span>
+    <span>© {{ year }} DevHub · Proyecto integrador</span>
+    <span class="dp-text-muted">Angular · Express · MongoDB · Vercel · DeepSeek</span>
   </footer>
 </div>

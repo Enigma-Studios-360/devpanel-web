@@ -6,15 +6,25 @@
     <i class="pi pi-arrow-left"></i>
     <span>Volver al equipo</span>
   </a>
-  <button
-    type="button"
-    class="dp-btn dp-btn--primary"
-    (click)="openCreate()"
-    data-tour="create-project"
-  >
-    <i class="pi pi-plus"></i>
-    <span>Crear proyecto</span>
-  </button>
+  @if (permissions.canManageProject()) {
+    <button
+      type="button"
+      class="dp-btn dp-btn--primary"
+      (click)="openCreate()"
+      data-tour="create-project"
+    >
+      <i class="pi pi-plus"></i>
+      <span>Crear proyecto</span>
+    </button>
+  } @else if (permissions.isViewer()) {
+    <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+      <i class="pi pi-eye"></i> Solo lectura
+    </span>
+  } @else if (permissions.isDeveloper()) {
+    <span class="dp-role-hint" title="Solo OWNER y ADMIN pueden crear proyectos.">
+      <i class="pi pi-info-circle"></i> Solo OWNER/ADMIN pueden crear proyectos
+    </span>
+  }
 </dp-page-header>
 
 @if (subscription(); as s) {
@@ -37,13 +47,21 @@
   <dp-loading-state label="Cargando proyectos…" />
 } @else {
   @if (projects().length === 0) {
-    <dp-empty-state
-      title="Aún no hay proyectos en este equipo"
-      description="Crea tu primer proyecto para empezar a organizar tareas, documentación y deploy."
-      icon="pi-folder-open"
-      actionLabel="Crear proyecto"
-      (action)="openCreate()"
-    />
+    @if (permissions.canManageProject()) {
+      <dp-empty-state
+        title="Aún no hay proyectos en este equipo"
+        description="Crea tu primer proyecto para empezar a organizar tareas, documentación y deploy."
+        icon="pi-folder-open"
+        actionLabel="Crear proyecto"
+        (action)="openCreate()"
+      />
+    } @else {
+      <dp-empty-state
+        title="Aún no hay proyectos en este equipo"
+        description="Pide a un OWNER o ADMIN del equipo que cree el primer proyecto."
+        icon="pi-folder-open"
+      />
+    }
   } @else {
     <div class="dp-projects-grid" data-tour="projects-list">
       @for (p of projects(); track p._id) {

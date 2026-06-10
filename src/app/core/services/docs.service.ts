@@ -83,6 +83,16 @@ export class DocsService {
       .pipe(map((r) => r.data));
   }
 
+  /** Fill all 9 sections from the linked GitHub repo using DeepSeek. */
+  generateWithAi(projectId: string): Observable<ProjectDoc> {
+    return this.http
+      .post<ApiSuccess<{ doc: ProjectDoc }>>(
+        `${this.api.baseUrl}/api/projects/${projectId}/docs/generate-ai`,
+        {},
+      )
+      .pipe(map((r) => r.data.doc));
+  }
+
   /**
    * Triggers a browser download. We bypass HttpClient because we want the
    * Blob response with `text/markdown` content-type to flow into a saved

@@ -10,6 +10,8 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge/statu
 import { LearnMoreCardComponent } from '../../shared/components/learn-more-card/learn-more-card';
 import { ProjectsService } from '../../core/services/projects.service';
 import { SubscriptionsService, type Subscription } from '../../core/services/subscription.service';
+import { TeamsService } from '../../core/services/teams.service';
+import { PermissionsService } from '../../core/auth/permissions.service';
 import { TutorialService } from '../../core/tutorial/tutorial.service';
 import { TPipe } from '../../core/i18n/t.pipe';
 import { formatDate } from '../../shared/utils/format-date';
@@ -37,9 +39,11 @@ export class ProjectsListComponent {
   private readonly router = inject(Router);
   private readonly projectsApi = inject(ProjectsService);
   private readonly subsApi = inject(SubscriptionsService);
+  private readonly teamsApi = inject(TeamsService);
   private readonly fb = inject(FormBuilder);
   private readonly tutorial = inject(TutorialService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly permissions = inject(PermissionsService);
 
   protected readonly teamId = computed(
     () => this.route.snapshot.paramMap.get('teamId') ?? '',
@@ -94,10 +98,12 @@ export class ProjectsListComponent {
     Promise.all([
       this.projectsApi.listByTeam(id).toPromise(),
       this.subsApi.forTeam(id).toPromise(),
+      this.teamsApi.get(id).toPromise(),
     ])
-      .then(([projects, sub]) => {
+      .then(([projects, sub, teamWithRole]) => {
         this.projects.set(projects ?? []);
         this.subscription.set(sub ?? null);
+        this.permissions.setRole(teamWithRole?.role ?? null);
         this.loading.set(false);
       })
       .catch(() => {
@@ -154,7 +160,14 @@ export class ProjectsListComponent {
         next: (project) => {
           this.creating.set(false);
           this.closeCreate();
-          void this.router.navigate(['/app/projects', project._id, 'overview']);
+          // Let the onboarding tour (if parked on waitFor) advance.
+          const inTour = this.tutorial.isActive();
+          this.tutorial.emitEvent('project-created');
+          // During the guided tour, drop the user straight on the Kanban board
+          // so the next step can open the "create task" modal there (instead of
+          // making them hunt for a "Ver tareas" button on the overview).
+          const dest = inTour ? 'tasks' : 'overview';
+          void this.router.navigate(['/app/projects', project._id, dest]);
         },
         error: (err) => {
           this.creating.set(false);

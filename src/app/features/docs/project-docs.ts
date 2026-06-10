@@ -18,6 +18,7 @@ import {
 } from '../../core/services/docs.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { SubscriptionsService, type Subscription } from '../../core/services/subscription.service';
+import { PermissionsService } from '../../core/auth/permissions.service';
 import type { Project } from '../../shared/models/project.model';
 
 @Component({
@@ -42,6 +43,7 @@ export class ProjectDocsComponent {
   private readonly projectsApi = inject(ProjectsService);
   private readonly subsApi = inject(SubscriptionsService);
   private readonly fb = inject(FormBuilder);
+  protected readonly permissions = inject(PermissionsService);
 
   protected readonly sectionKeys = DOC_SECTION_KEYS;
   protected readonly sectionMeta = DOC_SECTION_META;
@@ -81,6 +83,10 @@ export class ProjectDocsComponent {
     () => this.subscription()?.limits?.canDownloadReadme ?? false,
   );
 
+  // AI doc generation
+  protected readonly aiGenerating = signal(false);
+  protected readonly aiError = signal<string | null>(null);
+
   constructor() {
     this.refresh();
   }
@@ -91,11 +97,13 @@ export class ProjectDocsComponent {
     this.loading.set(true);
     Promise.all([
       this.docsApi.get(id).toPromise(),
-      this.projectsApi.get(id).toPromise(),
+      this.projectsApi.getWithRole(id).toPromise(),
     ])
-      .then(async ([doc, project]) => {
+      .then(async ([doc, projectAndRole]) => {
         this.doc.set(doc ?? null);
-        this.project.set(project ?? null);
+        const project = projectAndRole?.project ?? null;
+        this.project.set(project);
+        this.permissions.setRole(projectAndRole?.userRole ?? null);
         if (project?.team) {
           try {
             const sub = await this.subsApi.forTeam(project.team).toPromise();
@@ -191,6 +199,27 @@ export class ProjectDocsComponent {
   }
 
   closeReadme(): void { this.readmeOpen.set(false); }
+
+  /** Fill all 9 sections from the linked GitHub repo using DeepSeek. */
+  generateAi(): void {
+    const id = this.projectId();
+    if (!id || this.aiGenerating()) return;
+    this.aiError.set(null);
+    this.aiGenerating.set(true);
+    this.docsApi.generateWithAi(id).subscribe({
+      next: (doc) => {
+        this.doc.set(doc);
+        this.loadIntoForm(this.activeSection());
+        this.aiGenerating.set(false);
+      },
+      error: (err) => {
+        this.aiGenerating.set(false);
+        this.aiError.set(
+          err?.error?.error?.message ?? 'No se pudo generar la documentación con IA.',
+        );
+      },
+    });
+  }
 
   async copyReadme(): Promise<void> {
     const data = this.readmeData();

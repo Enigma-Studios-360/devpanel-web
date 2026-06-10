@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { API_CONFIG } from './api.config';
 import type { Project, ProjectStatus } from '../../shared/models/project.model';
 import type { PlanCode, PlanLimits } from '../../shared/models/plan.model';
+import type { TeamRole } from '../../shared/models/team.model';
 
 interface ApiSuccess<T> { success: true; data: T; meta?: Record<string, unknown>; }
 
@@ -47,12 +48,36 @@ export interface ProjectDashboard {
     actor?: { name: string; avatarUrl?: string };
   }>;
   plan: { code: PlanCode; limits: PlanLimits };
+  /** Role of the authenticated user on this project's team. */
+  userRole: TeamRole | null;
+}
+
+export interface UserProjectItem {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  status: ProjectStatus;
+  stack: string[];
+  color: string;
+  teamId: string;
+  teamName: string;
+  repositoryUrl: string | null;
+  githubOwner: string | null;
+  updatedAt: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
   private readonly http = inject(HttpClient);
   private readonly api = inject(API_CONFIG);
+
+  /** All projects across the user's teams, each with its team name. */
+  listAll(): Observable<UserProjectItem[]> {
+    return this.http
+      .get<ApiSuccess<UserProjectItem[]>>(`${this.api.baseUrl}/api/projects`)
+      .pipe(map((r) => r.data));
+  }
 
   listByTeam(teamId: string): Observable<Project[]> {
     return this.http
@@ -73,10 +98,21 @@ export class ProjectsService {
 
   get(projectId: string): Observable<Project> {
     return this.http
-      .get<ApiSuccess<{ project: Project }>>(
+      .get<ApiSuccess<{ project: Project; userRole: TeamRole | null }>>(
         `${this.api.baseUrl}/api/projects/${projectId}`,
       )
       .pipe(map((r) => r.data.project));
+  }
+
+  /** Same as `get`, but returns the user's role on the project's team. */
+  getWithRole(
+    projectId: string,
+  ): Observable<{ project: Project; userRole: TeamRole | null }> {
+    return this.http
+      .get<ApiSuccess<{ project: Project; userRole: TeamRole | null }>>(
+        `${this.api.baseUrl}/api/projects/${projectId}`,
+      )
+      .pipe(map((r) => r.data));
   }
 
   update(projectId: string, input: UpdateProjectInput): Observable<Project> {

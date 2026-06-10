@@ -189,7 +189,9 @@
 
 /* Modal */
 .dp-modal__backdrop {
-  position: fixed; inset: 0; z-index: 100;
+  /* Above the tutorial overlay (--dp-z-tour) so create-team/project/task
+     modals stay crisp and clickable while the onboarding tour is active. */
+  position: fixed; inset: 0; z-index: var(--dp-z-modal, 1000);
   background: rgba(2, 6, 17, 0.55);
   backdrop-filter: blur(4px);
   display: grid; place-items: center;

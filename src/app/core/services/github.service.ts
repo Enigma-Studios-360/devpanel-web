@@ -48,6 +48,37 @@ export interface IssueItem {
   isPullRequest: boolean;
 }
 
+export interface StackEvidence {
+  description: string;
+  file?: string;
+}
+
+export interface StackMatch {
+  id: string;
+  name: string;
+  category: string;
+  hint?: string;
+  icon?: string;
+  confidence: number;
+  evidence: StackEvidence[];
+}
+
+export interface StackDetectionResult {
+  matches: StackMatch[];
+  primary: StackMatch | null;
+  branch: string;
+  detectedAt: string;
+  empty: boolean;
+}
+
+export interface GithubConnection {
+  /** Whether the server has a GitHub OAuth App configured at all. */
+  configured: boolean;
+  /** Whether THIS user has connected their GitHub account. */
+  connected: boolean;
+  login: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GithubService {
   private readonly http = inject(HttpClient);
@@ -55,6 +86,30 @@ export class GithubService {
 
   private base(projectId: string): string {
     return `${this.api.baseUrl}/api/projects/${projectId}/github`;
+  }
+
+  // --- Per-user OAuth ("Connect GitHub") -----------------------------------
+
+  oauthStatus(): Observable<GithubConnection> {
+    return this.http
+      .get<ApiSuccess<GithubConnection>>(`${this.api.baseUrl}/api/github/oauth/status`)
+      .pipe(map((r) => r.data));
+  }
+
+  /** Returns the GitHub authorize URL; the caller navigates the browser to it. */
+  oauthStartUrl(): Observable<string> {
+    return this.http
+      .get<ApiSuccess<{ url: string }>>(`${this.api.baseUrl}/api/github/oauth/start`)
+      .pipe(map((r) => r.data.url));
+  }
+
+  oauthDisconnect(): Observable<void> {
+    return this.http
+      .post<ApiSuccess<{ disconnected: true }>>(
+        `${this.api.baseUrl}/api/github/oauth/disconnect`,
+        {},
+      )
+      .pipe(map(() => undefined));
   }
 
   link(projectId: string, input: string): Observable<RepoInfo> {
@@ -109,5 +164,18 @@ export class GithubService {
         body,
       })
       .pipe(map((r) => r.data.issue));
+  }
+
+  /**
+   * Run rule-based stack detection against the linked repository. Cheap on
+   * the backend (~2-5 GitHub API calls) but still I/O bound, so the UI
+   * should show a loading state while this is in flight.
+   */
+  detectStack(projectId: string): Observable<StackDetectionResult> {
+    return this.http
+      .get<ApiSuccess<StackDetectionResult>>(
+        `${this.base(projectId)}/detect-stack`,
+      )
+      .pipe(map((r) => r.data));
   }
 }

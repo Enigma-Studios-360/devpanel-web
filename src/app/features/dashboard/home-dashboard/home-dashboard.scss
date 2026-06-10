@@ -1,130 +1,13 @@
+/* Pull in the shared button/spinner/modal primitives (.dp-btn, .dp-spinner,
+   .dp-modal*). They live in teams.scss and, like projects/tasks/docs/github,
+   this view must import them or its "Recargar"/empty-state CTAs render
+   unstyled (Angular emulated encapsulation scopes them per component). */
+@use '../../teams/teams.scss';
+
 .dp-dashboard {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-
-  &__refresh {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.85rem;
-    border: 1px solid var(--dp-border);
-    background: var(--dp-surface);
-    color: var(--dp-text);
-    border-radius: var(--dp-radius-md);
-    font-size: 13px;
-    font-weight: 600;
-    transition: border-color 120ms ease;
-
-    &:hover:not(:disabled) {
-      border-color: color-mix(in srgb, var(--dp-text-muted) 35%, var(--dp-border));
-    }
-
-    &:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    i { font-size: 12px; }
-  }
-
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-
-  &__row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1rem;
-
-    @media (max-width: 960px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  &__api {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  &__api-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-
-    h3 {
-      color: var(--dp-text);
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-    }
-  }
-
-  &__api-meta {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    margin: 0;
-
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-    }
-
-    div {
-      background: var(--dp-surface-2);
-      border: 1px solid var(--dp-border);
-      border-radius: var(--dp-radius-md);
-      padding: 0.65rem 0.85rem;
-    }
-
-    dt {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--dp-text-muted);
-      margin-bottom: 0.2rem;
-    }
-
-    dd {
-      margin: 0;
-      font-size: 13.5px;
-      color: var(--dp-text);
-      font-family: var(--dp-font-mono);
-    }
-  }
-
-  &__db-on  { color: var(--dp-accent-green) !important; }
-  &__db-off { color: var(--dp-accent-red)   !important; }
-
-  &__api-error {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: var(--dp-radius-md);
-    color: var(--dp-text);
-    font-size: 13px;
-
-    i {
-      color: var(--dp-accent-red);
-      font-size: 14px;
-      margin-top: 2px;
-    }
-
-    strong { display: block; margin-bottom: 0.25rem; }
-    p { color: var(--dp-text-muted); line-height: 1.5; }
-    code {
-      background: var(--dp-surface-2);
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-family: var(--dp-font-mono);
-      font-size: 12px;
-    }
-  }
-
-  &__activity { display: flex; flex-direction: column; gap: 0.75rem; }
 
   &__section-title {
     font-size: 13px;
@@ -132,13 +15,338 @@
     letter-spacing: 0.06em;
     color: var(--dp-text-muted);
     font-weight: 700;
+    margin: 0;
   }
 
+  /* --- Stats strip ------------------------------------------------------- */
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  /* --- Two-column main grid (projects + tasks) --------------------------- */
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.1rem 1.25rem;
+  }
+
+  &__panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dp-text);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+
+      i { color: var(--dp-text-muted); font-size: 13px; }
+    }
+  }
+
+  &__panel-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--dp-text-muted);
+    font-size: 11.5px;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    transition: color 140ms ease;
+
+    &:hover {
+      color: var(--dp-accent-blue, #3b82f6);
+    }
+
+    i { font-size: 10px; }
+  }
+
+  /* --- Recent projects list --------------------------------------------- */
+  &__projects {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  &__project-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--dp-radius-md);
+    background: var(--dp-surface-2);
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 140ms ease, transform 140ms ease;
+
+    &:hover {
+      border-color: var(--dp-border);
+      transform: translateX(2px);
+    }
+
+    strong { color: var(--dp-text); font-size: 13px; }
+  }
+
+  &__project-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--accent, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  }
+
+  &__project-meta { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+
+  /* --- My tasks list ---------------------------------------------------- */
+  &__tasks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  &__task-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--dp-radius-md);
+    background: var(--dp-surface-2);
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 140ms ease, transform 140ms ease;
+
+    &:hover {
+      border-color: var(--dp-border);
+      transform: translateX(2px);
+    }
+
+    strong { color: var(--dp-text); font-size: 13px; }
+
+    &--overdue {
+      border-color: rgba(239, 68, 68, 0.32);
+    }
+  }
+
+  &__task-meta { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+
+  &__overdue {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--dp-accent-red, #ef4444);
+    padding: 0.15rem 0.45rem;
+    background: rgba(239, 68, 68, 0.12);
+    border-radius: 999px;
+
+    i { font-size: 9px; }
+  }
+
+  /* --- Activity feed ---------------------------------------------------- */
+  &__activity {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.7rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--dp-accent-blue, #3b82f6);
+    margin-top: 5px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  }
+
+  &__activity-msg {
+    margin: 0 0 0.15rem 0;
+    color: var(--dp-text);
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+
+  /* --- Loading skeletons -------------------------------------------------- */
+  &__row-skeleton {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.55rem 0.5rem;
+  }
+
+  /* --- Empty workspace --------------------------------------------------- */
+  &__empty {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background:
+      radial-gradient(circle at 30% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+      radial-gradient(circle at 70% 100%, rgba(139, 92, 246, 0.13) 0%, transparent 60%),
+      var(--dp-surface);
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+
+    h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--dp-text);
+    }
+
+    p {
+      margin: 0;
+      color: var(--dp-text-muted);
+      font-size: 13.5px;
+      line-height: 1.55;
+      max-width: 52ch;
+    }
+  }
+
+  &__empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    display: grid;
+    place-items: center;
+    color: #fff;
+
+    i { font-size: 22px; }
+  }
+
+  &__empty-actions {
+    display: inline-flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.25rem;
+  }
+
+  /* --- Learn-more grid -------------------------------------------------- */
   &__learn { display: flex; flex-direction: column; gap: 0.75rem; }
 
   &__learn-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1rem;
+  }
+}
+
+/* ============================================================================
+   Stat card — new compact widget used at the top of the dashboard. Lives
+   here (not in shared) because it's tightly coupled to the dashboard layout.
+   ========================================================================= */
+
+.dp-stat-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 140ms ease, transform 140ms ease;
+
+  &:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &--loading {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    padding: 1.1rem;
+  }
+
+  strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dp-text);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  small {
+    display: block;
+    color: var(--dp-text-muted);
+    font-size: 12px;
+  }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dp-radius-md);
+    display: grid;
+    place-items: center;
+    background: rgba(var(--c), 0.16);
+    color: rgb(var(--c));
+    flex-shrink: 0;
+
+    i { font-size: 16px; }
+  }
+
+  &__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.35rem;
+    color: var(--dp-text-muted);
+    font-size: 11px;
+
+    &--danger {
+      color: var(--dp-accent-red, #ef4444);
+
+      i { font-size: 10px; }
+    }
   }
 }

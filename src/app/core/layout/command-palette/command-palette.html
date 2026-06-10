@@ -1,0 +1,72 @@
+@if (palette.open()) {
+  <div class="dp-cmdk__backdrop" (click)="palette.close()">
+    <div
+      class="dp-cmdk"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Buscar en DevHub"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="dp-cmdk__search">
+        <i class="pi pi-search"></i>
+        <input
+          #searchInput
+          type="text"
+          [formControl]="queryControl"
+          placeholder="Buscar equipos, proyectos y tareas…"
+          autocomplete="off"
+          aria-label="Término de búsqueda"
+        />
+        <span class="dp-cmdk__esc">ESC</span>
+      </div>
+
+      <div class="dp-cmdk__body">
+        @if (loading()) {
+          <div class="dp-cmdk__hint">Buscando…</div>
+        } @else if (results(); as r) {
+          @if (hasResults()) {
+            @if (r.teams.length) {
+              <div class="dp-cmdk__group">
+                <span class="dp-cmdk__group-label">Equipos</span>
+                @for (t of r.teams; track t._id) {
+                  <button type="button" class="dp-cmdk__item" (click)="goTeam(t._id)">
+                    <i class="pi pi-users"></i>
+                    <span>{{ t.name }}</span>
+                  </button>
+                }
+              </div>
+            }
+            @if (r.projects.length) {
+              <div class="dp-cmdk__group">
+                <span class="dp-cmdk__group-label">Proyectos</span>
+                @for (p of r.projects; track p._id) {
+                  <button type="button" class="dp-cmdk__item" (click)="goProject(p._id)">
+                    <i class="pi pi-folder"></i>
+                    <span>{{ p.name }}</span>
+                    <span class="dp-cmdk__tag">{{ p.status }}</span>
+                  </button>
+                }
+              </div>
+            }
+            @if (r.tasks.length) {
+              <div class="dp-cmdk__group">
+                <span class="dp-cmdk__group-label">Tareas</span>
+                @for (t of r.tasks; track t._id) {
+                  <button type="button" class="dp-cmdk__item" (click)="goTask(t.projectId)">
+                    <i class="pi pi-check-square"></i>
+                    <span>{{ t.title }}</span>
+                    <span class="dp-cmdk__tag">{{ t.status }}</span>
+                  </button>
+                }
+              </div>
+            }
+          } @else {
+            <div class="dp-cmdk__hint">Sin resultados para "{{ r.query }}".</div>
+          }
+        } @else {
+          <div class="dp-cmdk__hint">Escribe al menos 2 letras para buscar.</div>
+        }
+      </div>
+    </div>
+  </div>
+}

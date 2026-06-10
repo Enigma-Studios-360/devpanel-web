@@ -1,0 +1,462 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando Deploy Wizard…" />
+} @else if (loadError()) {
+  <div class="dp-modal__error">{{ loadError() }}</div>
+} @else if (project(); as p) {
+  <dp-page-header
+    [title]="'Deploy · ' + p.name"
+    subtitle="Lleva tu proyecto a producción en Vercel con detección automática de stack."
+  >
+    <a [routerLink]="['/app/projects', projectId(), 'overview']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver al proyecto</span>
+    </a>
+    @if (permissions.canManageProject() && providerConfigured() !== false && !prepareResult()) {
+      <button
+        type="button"
+        class="dp-btn dp-btn--primary"
+        (click)="startWizard()"
+        [disabled]="preparing()"
+        data-tour="deploy-start"
+      >
+        @if (preparing()) { <span class="dp-spinner"></span> }
+        <i class="pi pi-bolt"></i>
+        <span>Desplegar a Vercel</span>
+      </button>
+    }
+    @if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Solo OWNER/ADMIN pueden disparar deploys.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
+    }
+  </dp-page-header>
+
+  <!-- Provider not configured ----------------------------------------------- -->
+  @if (providerConfigured() === false) {
+    <div class="dp-deploy__notice">
+      <div class="dp-deploy__notice-icon"><i class="pi pi-exclamation-triangle"></i></div>
+      <div>
+        <strong>Vercel no está configurado en este servidor.</strong>
+        <p class="dp-text-muted dp-text-sm">
+          Avisa al administrador para que añada
+          <code>VERCEL_TOKEN</code> al <code>.env</code> del backend. Mientras
+          tanto puedes ver el historial pero no disparar despliegues.
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Pre-requisite: GitHub repo not linked --------------------------------- -->
+  @if (!p.githubOwner || !p.githubRepo) {
+    <dp-empty-state
+      title="Vincula GitHub primero"
+      description="El Deploy Wizard usa el repositorio para que Vercel sepa qué construir. Conecta tu repo en la pestaña GitHub del proyecto y vuelve aquí."
+      icon="pi-github"
+      actionLabel="Ir a GitHub"
+      [routerLink]="['/app/projects', projectId(), 'github']"
+    />
+  } @else {
+    <!-- Wizard ------------------------------------------------------------- -->
+    @if (prepareResult(); as prep) {
+      <section class="dp-wizard" data-tour="deploy-wizard">
+        <!-- Stepper -->
+        <ol class="dp-stepper">
+          @for (s of steps; track s.key; let i = $index) {
+            <li
+              class="dp-stepper__step"
+              [class.dp-stepper__step--active]="currentStep() === s.key"
+              [class.dp-stepper__step--done]="i < currentStepIndex()"
+            >
+              <span class="dp-stepper__num">
+                @if (i < currentStepIndex()) {
+                  <i class="pi pi-check"></i>
+                } @else {
+                  {{ i + 1 }}
+                }
+              </span>
+              <span class="dp-stepper__label">
+                <i [class]="'pi ' + s.icon"></i>
+                {{ s.label }}
+              </span>
+            </li>
+          }
+        </ol>
+
+        <div class="dp-wizard__body">
+          <!-- Step 1: Stack ============================================== -->
+          @if (currentStep() === 'stack') {
+            <header class="dp-wizard__head">
+              <h2>Confirmar el stack detectado</h2>
+              <p>
+                Analizamos tu repo y este es nuestro mejor diagnóstico. Si te
+                cuadra, sigue al siguiente paso; si no, podrás ajustar
+                manualmente.
+              </p>
+            </header>
+
+            <div class="dp-wizard__stack">
+              @if (prep.detectedStackName) {
+                <div class="dp-wizard__stack-detected">
+                  <span class="dp-wizard__stack-icon"><i class="pi pi-microchip"></i></span>
+                  <div>
+                    <div class="dp-wizard__stack-name">{{ prep.detectedStackName }}</div>
+                    <div class="dp-text-muted dp-text-sm">
+                      Framework preset Vercel: <code>{{ prep.framework }}</code>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="dp-wizard__stack-detected dp-wizard__stack-detected--unknown">
+                  <span class="dp-wizard__stack-icon"><i class="pi pi-question-circle"></i></span>
+                  <div>
+                    <div class="dp-wizard__stack-name">No reconocimos un stack típico</div>
+                    <div class="dp-text-muted dp-text-sm">
+                      Puedes elegir "Otro" en el siguiente paso y configurar tu build a mano.
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <dl class="dp-wizard__summary">
+                <div>
+                  <dt>Repositorio</dt>
+                  <dd><code>{{ prep.repo.owner }}/{{ prep.repo.repo }}</code></dd>
+                </div>
+                <div>
+                  <dt>Rama</dt>
+                  <dd><code>{{ prep.branch }}</code></dd>
+                </div>
+                <div>
+                  <dt>Build sugerido</dt>
+                  <dd><code>{{ prep.buildCommand }}</code></dd>
+                </div>
+                <div>
+                  <dt>Output</dt>
+                  <dd><code>{{ prep.outputDirectory }}</code></dd>
+                </div>
+              </dl>
+            </div>
+
+            <footer class="dp-wizard__foot">
+              <button type="button" class="dp-btn dp-btn--ghost" (click)="prepareResult.set(null)">
+                <i class="pi pi-times"></i> Cancelar
+              </button>
+              <button type="button" class="dp-btn dp-btn--primary" (click)="next()">
+                Configurar build <i class="pi pi-arrow-right"></i>
+              </button>
+            </footer>
+          }
+
+          <!-- Step 2: Build ============================================== -->
+          @if (currentStep() === 'build') {
+            <header class="dp-wizard__head">
+              <h2>Configurar build</h2>
+              <p>
+                Estos comandos se ejecutarán en Vercel. Los rellenamos según tu
+                stack — solo cámbialos si tu proyecto usa algo no estándar.
+              </p>
+            </header>
+
+            <form class="dp-wizard__form" [formGroup]="buildForm" novalidate>
+              <label class="dp-modal__field">
+                <span>Nombre del proyecto en Vercel <em>*</em></span>
+                <input type="text" formControlName="projectName" placeholder="mi-proyecto" />
+                <small class="dp-text-muted dp-text-sm">
+                  Si ya existe en tu cuenta, lo reutilizamos.
+                </small>
+              </label>
+
+              <div class="dp-modal__row">
+                <label class="dp-modal__field">
+                  <span>Framework</span>
+                  <select formControlName="framework">
+                    @for (opt of frameworkOptions; track opt.value) {
+                      <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="dp-modal__field">
+                  <span>Rama a desplegar</span>
+                  <input type="text" formControlName="branch" placeholder="main" />
+                </label>
+              </div>
+
+              <label class="dp-modal__field">
+                <span>Build command</span>
+                <input type="text" formControlName="buildCommand" />
+              </label>
+
+              <div class="dp-modal__row">
+                <label class="dp-modal__field">
+                  <span>Output directory</span>
+                  <input type="text" formControlName="outputDirectory" />
+                </label>
+                <label class="dp-modal__field">
+                  <span>Install command</span>
+                  <input type="text" formControlName="installCommand" />
+                </label>
+              </div>
+
+              <label class="dp-modal__field">
+                <span>Root directory <small class="dp-text-muted">(opcional, ej. <code>apps/web</code>)</small></span>
+                <input type="text" formControlName="rootDirectory" />
+              </label>
+            </form>
+
+            <footer class="dp-wizard__foot">
+              <button type="button" class="dp-btn dp-btn--ghost" (click)="prev()">
+                <i class="pi pi-arrow-left"></i> Volver
+              </button>
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary"
+                (click)="next()"
+                [disabled]="buildForm.invalid"
+              >
+                Variables de entorno <i class="pi pi-arrow-right"></i>
+              </button>
+            </footer>
+          }
+
+          <!-- Step 3: Env vars =========================================== -->
+          @if (currentStep() === 'env') {
+            <header class="dp-wizard__head">
+              <h2>Variables de entorno</h2>
+              <p>
+                Se guardan cifradas en Vercel y se inyectan en cada deploy. Puedes
+                añadir las que necesites o saltar este paso.
+              </p>
+            </header>
+
+            <form class="dp-wizard__form dp-wizard__env-form" [formGroup]="envForm" novalidate>
+              @if (envRows.controls.length === 0) {
+                <p class="dp-text-muted dp-text-sm">
+                  No tienes variables todavía. Pulsa "Añadir variable" para crear una.
+                </p>
+              }
+              @for (row of envRows.controls; track row; let i = $index) {
+                <div class="dp-wizard__env-row" [formGroup]="row">
+                  <input
+                    type="text"
+                    formControlName="key"
+                    placeholder="NOMBRE_DE_VARIABLE"
+                    autocomplete="off"
+                  />
+                  <input
+                    type="text"
+                    formControlName="value"
+                    placeholder="valor"
+                    autocomplete="off"
+                  />
+                  <button
+                    type="button"
+                    class="dp-btn dp-btn--ghost"
+                    (click)="removeEnvRow(i)"
+                    aria-label="Quitar variable"
+                  >
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              }
+              <button
+                type="button"
+                class="dp-btn dp-btn--ghost"
+                (click)="addEnvRow()"
+              >
+                <i class="pi pi-plus"></i> Añadir variable
+              </button>
+            </form>
+
+            <footer class="dp-wizard__foot">
+              <button type="button" class="dp-btn dp-btn--ghost" (click)="prev()">
+                <i class="pi pi-arrow-left"></i> Volver
+              </button>
+              <button type="button" class="dp-btn dp-btn--primary" (click)="next()">
+                Revisar y desplegar <i class="pi pi-arrow-right"></i>
+              </button>
+            </footer>
+          }
+
+          <!-- Step 4: Review ============================================= -->
+          @if (currentStep() === 'review') {
+            <header class="dp-wizard__head">
+              <h2>Confirmar y desplegar</h2>
+              <p>
+                Esto creará el proyecto en Vercel si no existe y lanzará un deploy
+                desde la rama indicada. Puedes seguir el progreso aquí.
+              </p>
+            </header>
+
+            <div class="dp-wizard__review">
+              <dl class="dp-wizard__summary">
+                <div>
+                  <dt>Proyecto Vercel</dt>
+                  <dd><code>{{ buildForm.value.projectName }}</code></dd>
+                </div>
+                <div>
+                  <dt>Repo / rama</dt>
+                  <dd>
+                    <code>{{ prep.repo.owner }}/{{ prep.repo.repo }}</code> ·
+                    <code>{{ buildForm.value.branch }}</code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Framework</dt>
+                  <dd><code>{{ buildForm.value.framework }}</code></dd>
+                </div>
+                <div>
+                  <dt>Build</dt>
+                  <dd><code>{{ buildForm.value.buildCommand || '(preset)' }}</code></dd>
+                </div>
+                <div>
+                  <dt>Output</dt>
+                  <dd><code>{{ buildForm.value.outputDirectory || '(preset)' }}</code></dd>
+                </div>
+                <div>
+                  <dt>Variables</dt>
+                  <dd>{{ envRows.controls.length }} configurada(s)</dd>
+                </div>
+              </dl>
+            </div>
+
+            @if (triggerError()) {
+              <div class="dp-modal__error">
+                <i class="pi pi-exclamation-circle"></i> {{ triggerError() }}
+              </div>
+            }
+
+            <footer class="dp-wizard__foot">
+              <button type="button" class="dp-btn dp-btn--ghost" (click)="prev()" [disabled]="triggering()">
+                <i class="pi pi-arrow-left"></i> Volver
+              </button>
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary dp-btn--lg"
+                (click)="submit()"
+                [disabled]="triggering()"
+                data-tour="deploy-submit"
+              >
+                @if (triggering()) { <span class="dp-spinner"></span> }
+                <i class="pi pi-cloud-upload"></i>
+                <span>Lanzar deploy</span>
+              </button>
+            </footer>
+          }
+        </div>
+      </section>
+    } @else if (preparing()) {
+      <dp-loading-state label="Analizando el repo y preparando la configuración…" />
+    } @else if (prepareError()) {
+      <div class="dp-modal__error">
+        <i class="pi pi-exclamation-circle"></i> {{ prepareError() }}
+      </div>
+    }
+  }
+
+  <!-- Current / triggered deployment status --------------------------------- -->
+  @if (triggered(); as current) {
+    <section class="dp-deploy__current" data-tour="deploy-current">
+      <header class="dp-deploy__current-head">
+        <span
+          class="dp-deploy-badge"
+          [attr.data-variant]="statusVariant(current.status)"
+        >
+          @if (isInFlight(current)) { <span class="dp-spinner dp-spinner--sm"></span> }
+          {{ statusLabel(current.status) }}
+        </span>
+        <strong>Deploy en curso</strong>
+        @if (isInFlight(current)) {
+          <span class="dp-text-muted dp-text-sm">
+            Actualizamos el estado cada 3 segundos.
+          </span>
+        }
+      </header>
+
+      <div class="dp-deploy__current-body">
+        <dl>
+          <div>
+            <dt>Vercel</dt>
+            <dd><code>{{ current.vercelProjectName }}</code></dd>
+          </div>
+          @if (current.url) {
+            <div>
+              <dt>URL</dt>
+              <dd>
+                <a [href]="current.url" target="_blank" rel="noopener">
+                  {{ current.url }} <i class="pi pi-external-link"></i>
+                </a>
+              </dd>
+            </div>
+          }
+          @if (current.inspectorUrl) {
+            <div>
+              <dt>Logs</dt>
+              <dd>
+                <a [href]="current.inspectorUrl" target="_blank" rel="noopener">
+                  Ver en Vercel <i class="pi pi-external-link"></i>
+                </a>
+              </dd>
+            </div>
+          }
+          @if (current.errorMessage) {
+            <div>
+              <dt>Error</dt>
+              <dd class="dp-deploy__error-msg">{{ current.errorMessage }}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    </section>
+  }
+
+  <!-- History -------------------------------------------------------------- -->
+  @if (history(); as h) {
+    @if (h.history.length === 0) {
+      <dp-empty-state
+        title="Sin deploys aún"
+        description="Cuando lances tu primer deploy aparecerá aquí su historial completo."
+        icon="pi-history"
+      />
+    } @else {
+      <section class="dp-deploy__history" data-tour="deploy-history">
+        <h3>Historial</h3>
+        <ul>
+          @for (d of h.history; track d._id) {
+            <li class="dp-deploy__history-row">
+              <span
+                class="dp-deploy-badge"
+                [attr.data-variant]="statusVariant(d.status)"
+              >
+                {{ statusLabel(d.status) }}
+              </span>
+              <div class="dp-deploy__history-meta">
+                <strong>{{ d.vercelProjectName }}</strong>
+                <span class="dp-text-muted dp-text-sm">
+                  por {{ triggeredByName(d) }} · rama <code>{{ d.gitBranch }}</code>
+                  · {{ formatDate(d.createdAt) }}
+                </span>
+              </div>
+              <div class="dp-deploy__history-actions">
+                @if (d.url) {
+                  <a [href]="d.url" target="_blank" rel="noopener" class="dp-btn dp-btn--ghost dp-btn--sm">
+                    <i class="pi pi-external-link"></i> Abrir
+                  </a>
+                }
+                @if (d.inspectorUrl) {
+                  <a [href]="d.inspectorUrl" target="_blank" rel="noopener" class="dp-btn dp-btn--ghost dp-btn--sm">
+                    <i class="pi pi-list"></i> Logs
+                  </a>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+
+  <dp-learn-more-card
+    [title]="'Sobre el Deploy Wizard'"
+    [body]="'DevHub usa la API oficial de Vercel para crear el proyecto, configurar el build y disparar el deploy. La primera vez tienes que instalar la app de Vercel en tu cuenta de GitHub (github.com/apps/vercel) para que tenga acceso al repo. Una vez hecho eso, los deploys siguientes son un click.'"
+  />
+}

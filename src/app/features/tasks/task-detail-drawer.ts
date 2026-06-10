@@ -12,6 +12,8 @@ import {
 } from '@angular/core';
 
 import { TasksService } from '../../core/services/tasks.service';
+import { PermissionsService } from '../../core/auth/permissions.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
 import { PriorityBadgeComponent } from '../../shared/components/priority-badge/priority-badge';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state';
@@ -45,9 +47,15 @@ export class TaskDetailDrawerComponent {
   @Input() task: Task | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() taskUpdated = new EventEmitter<Task>();
+  @Output() taskRemoved = new EventEmitter<string>();
 
   private readonly tasksApi = inject(TasksService);
   private readonly fb = inject(FormBuilder);
+  private readonly confirmSvc = inject(ConfirmService);
+  protected readonly permissions = inject(PermissionsService);
+
+  protected readonly archiving = signal(false);
+  protected readonly deleting = signal(false);
 
   protected readonly statuses: TaskStatus[] = TASK_STATUS_VALUES;
   protected readonly priorities: TaskPriority[] = TASK_PRIORITY_VALUES;
@@ -232,6 +240,69 @@ export class TaskDetailDrawerComponent {
         this.sendingComment.set(false);
         this.opError.set(
           err?.error?.error?.message ?? 'No se pudo enviar el comentario.',
+        );
+      },
+    });
+  }
+
+  // --- Archive / Delete -----------------------------------------------------
+
+  async archive(): Promise<void> {
+    if (!this.task || this.archiving()) return;
+    const ok = await this.confirmSvc.ask({
+      title: 'Archivar tarea',
+      message:
+        'La tarea se ocultará del tablero pero no se eliminará. ' +
+        'Podrás restaurarla más tarde desde el listado de archivadas.',
+      confirmLabel: 'Archivar',
+      cancelLabel: 'Cancelar',
+      icon: 'pi-inbox',
+    });
+    if (!ok || !this.task) return;
+    this.archiving.set(true);
+    this.opError.set(null);
+    const id = this.task._id;
+    this.tasksApi.archive(id).subscribe({
+      next: () => {
+        this.archiving.set(false);
+        this.taskRemoved.emit(id);
+        this.close.emit();
+      },
+      error: (err) => {
+        this.archiving.set(false);
+        this.opError.set(
+          err?.error?.error?.message ?? 'No se pudo archivar la tarea.',
+        );
+      },
+    });
+  }
+
+  async remove(): Promise<void> {
+    if (!this.task || this.deleting()) return;
+    const ok = await this.confirmSvc.ask({
+      title: 'Eliminar tarea',
+      message:
+        'Esta acción es permanente. Se borrarán también todos sus comentarios. ' +
+        'Si solo quieres ocultarla del tablero, mejor archívala.',
+      confirmLabel: 'Eliminar definitivamente',
+      cancelLabel: 'Cancelar',
+      variant: 'danger',
+      icon: 'pi-trash',
+    });
+    if (!ok || !this.task) return;
+    this.deleting.set(true);
+    this.opError.set(null);
+    const id = this.task._id;
+    this.tasksApi.remove(id).subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.taskRemoved.emit(id);
+        this.close.emit();
+      },
+      error: (err) => {
+        this.deleting.set(false);
+        this.opError.set(
+          err?.error?.error?.message ?? 'No se pudo eliminar la tarea.',
         );
       },
     });

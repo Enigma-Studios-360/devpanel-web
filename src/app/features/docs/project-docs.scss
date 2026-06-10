@@ -1,6 +1,35 @@
 @use '../teams/teams.scss';
 @use '../projects/projects.scss';
 
+/* AI generate button — distinctive gradient. */
+.dp-btn--ai {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  color: #fff;
+  border: 0;
+  &:hover:not(:disabled) { filter: brightness(1.08); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+/* "Generating with AI…" banner. */
+.dp-docs__ai-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--dp-radius-md);
+  font-size: 13px;
+  color: var(--dp-text);
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.12) 0%,
+    rgba(236, 72, 153, 0.12) 100%
+  );
+  border: 1px solid rgba(139, 92, 246, 0.35);
+
+  i { color: #c084fc; }
+}
+
 /* Success variant for buttons (used when section is marked complete) */
 .dp-btn--success {
   background: rgba(34, 197, 94, 0.12);

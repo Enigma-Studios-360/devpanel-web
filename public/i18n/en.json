@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "DevPanel",
+    "name": "DevHub",
     "tagline": "Centralize your development workflow"
   },
   "nav": {
@@ -42,6 +42,22 @@
       "f4": {
         "title": "Deploy Wizard",
         "desc": "Clear steps to ship to Vercel without tripping."
+      },
+      "f5": {
+        "title": "AI assistant",
+        "desc": "Ask Clippy anything. Instant FAQ + DeepSeek when you need more."
+      },
+      "f6": {
+        "title": "Stack detection",
+        "desc": "DevHub reads your repo and figures out the stack. The base of the Deploy Wizard."
+      },
+      "f7": {
+        "title": "Built-in GitHub",
+        "desc": "Commits, branches and issues without leaving DevHub. Create issues from the app."
+      },
+      "f8": {
+        "title": "Roles that hold",
+        "desc": "OWNER · ADMIN · DEVELOPER · VIEWER. Enforced server-side, not only in the UI."
       }
     }
   },
@@ -57,7 +73,7 @@
     },
     "register": {
       "title": "Create your account",
-      "subtitle": "Get started for free with DevPanel",
+      "subtitle": "Get started for free with DevHub",
       "name": "Name",
       "email": "Email",
       "password": "Password",
@@ -87,7 +103,7 @@
     },
     "empty": {
       "title": "No activity yet",
-      "desc": "Create your first project to start using DevPanel."
+      "desc": "Create your first project to start using DevHub."
     }
   },
   "common": {

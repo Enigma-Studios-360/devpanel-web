@@ -86,4 +86,33 @@ export class TasksService {
       )
       .pipe(map((r) => r.data.comment));
   }
+
+  /** Soft-archive a task. Hides it from the board but keeps the data. */
+  archive(taskId: string): Observable<Task> {
+    return this.http
+      .post<ApiSuccess<{ task: Task }>>(
+        `${this.api.baseUrl}/api/tasks/${taskId}/archive`,
+        {},
+      )
+      .pipe(map((r) => r.data.task));
+  }
+
+  /** Bring a previously archived task back to the board. */
+  restore(taskId: string): Observable<Task> {
+    return this.http
+      .post<ApiSuccess<{ task: Task }>>(
+        `${this.api.baseUrl}/api/tasks/${taskId}/restore`,
+        {},
+      )
+      .pipe(map((r) => r.data.task));
+  }
+
+  /** Hard-delete a task and its comments. OWNER/ADMIN only on the server. */
+  remove(taskId: string): Observable<{ deleted: true; _id: string }> {
+    return this.http
+      .delete<ApiSuccess<{ deleted: true; _id: string }>>(
+        `${this.api.baseUrl}/api/tasks/${taskId}`,
+      )
+      .pipe(map((r) => r.data));
+  }
 }

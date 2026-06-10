@@ -1,0 +1,46 @@
+@if (visible()) {
+  <section class="dp-whatsnew" data-tour="whats-new">
+    <header class="dp-whatsnew__head">
+      <span class="dp-whatsnew__pill">
+        <i class="pi pi-sparkles"></i>
+        Novedades
+      </span>
+      <h2 class="dp-whatsnew__title">{{ headline }}</h2>
+      <button
+        type="button"
+        class="dp-whatsnew__close"
+        (click)="dismiss()"
+        aria-label="No mostrar de nuevo"
+        title="No mostrar de nuevo"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    @if (items.length > 0) {
+      <div class="dp-whatsnew__grid">
+        @for (item of items; track item.id) {
+          <button
+            type="button"
+            class="dp-whatsnew__card"
+            [class.dp-whatsnew__card--ai]="item.tone === 'ai'"
+            [class.dp-whatsnew__card--clickable]="item.route"
+            [disabled]="!item.route"
+            (click)="open(item)"
+          >
+            <span class="dp-whatsnew__icon">
+              <i [class]="'pi ' + item.icon"></i>
+            </span>
+            <span class="dp-whatsnew__text">
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.description }}</small>
+            </span>
+            @if (item.route) {
+              <i class="pi pi-arrow-right dp-whatsnew__arrow"></i>
+            }
+          </button>
+        }
+      </div>
+    }
+  </section>
+}

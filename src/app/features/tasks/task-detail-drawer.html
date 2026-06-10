@@ -25,30 +25,34 @@
       </div>
       <div class="dp-drawer__badges">
         <span data-tour="status-menu" class="dp-drawer__status">
-          <button
-            type="button"
-            class="dp-drawer__status-trigger"
-            (click)="toggleStatusMenu()"
-            [attr.aria-expanded]="statusMenuOpen()"
-          >
+          @if (permissions.canEditTasks()) {
+            <button
+              type="button"
+              class="dp-drawer__status-trigger"
+              (click)="toggleStatusMenu()"
+              [attr.aria-expanded]="statusMenuOpen()"
+            >
+              <dp-status-badge kind="task" [status]="t.status" [label]="t.status" />
+              <i class="pi pi-angle-down"></i>
+            </button>
+            @if (statusMenuOpen()) {
+              <ul class="dp-drawer__status-menu" role="menu">
+                @for (s of statuses; track s) {
+                  <li>
+                    <button
+                      type="button"
+                      class="dp-drawer__status-option"
+                      [class.dp-drawer__status-option--current]="s === t.status"
+                      (click)="changeStatus(s)"
+                    >
+                      {{ s }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          } @else {
             <dp-status-badge kind="task" [status]="t.status" [label]="t.status" />
-            <i class="pi pi-angle-down"></i>
-          </button>
-          @if (statusMenuOpen()) {
-            <ul class="dp-drawer__status-menu" role="menu">
-              @for (s of statuses; track s) {
-                <li>
-                  <button
-                    type="button"
-                    class="dp-drawer__status-option"
-                    [class.dp-drawer__status-option--current]="s === t.status"
-                    (click)="changeStatus(s)"
-                  >
-                    {{ s }}
-                  </button>
-                </li>
-              }
-            </ul>
           }
         </span>
         <dp-priority-badge [priority]="t.priority" />
@@ -93,11 +97,39 @@
           </div>
         </div>
 
-        <div class="dp-drawer__actions">
-          <button type="button" class="dp-btn dp-btn--ghost" (click)="startEditing()">
-            <i class="pi pi-pencil"></i> Editar tarea
-          </button>
-        </div>
+        @if (permissions.canEditTasks()) {
+          <div class="dp-drawer__actions">
+            <button type="button" class="dp-btn dp-btn--ghost" (click)="startEditing()">
+              <i class="pi pi-pencil"></i> Editar tarea
+            </button>
+            <button
+              type="button"
+              class="dp-btn dp-btn--ghost"
+              (click)="archive()"
+              [disabled]="archiving() || deleting()"
+              title="Ocultar del tablero (se puede restaurar)"
+            >
+              @if (archiving()) { <span class="dp-spinner"></span> }
+              <i class="pi pi-inbox"></i> Archivar
+            </button>
+            @if (permissions.canManageProject()) {
+              <button
+                type="button"
+                class="dp-btn dp-btn--danger dp-btn--ghost-danger"
+                (click)="remove()"
+                [disabled]="archiving() || deleting()"
+                title="Eliminar permanentemente (OWNER/ADMIN)"
+              >
+                @if (deleting()) { <span class="dp-spinner"></span> }
+                <i class="pi pi-trash"></i> Eliminar
+              </button>
+            }
+          </div>
+        } @else if (permissions.isViewer()) {
+          <p class="dp-text-muted dp-text-sm">
+            <i class="pi pi-eye"></i> Tu rol es VIEWER: solo lectura.
+          </p>
+        }
       } @else {
         <form
           class="dp-drawer__edit-form"
@@ -169,22 +201,28 @@
           </ul>
         }
 
-        <form class="dp-drawer__comment-form" [formGroup]="commentForm" (ngSubmit)="sendComment()" novalidate>
-          <textarea
-            formControlName="message"
-            placeholder="Escribe un comentario…"
-            rows="2"
-          ></textarea>
-          <button
-            type="submit"
-            class="dp-btn dp-btn--primary"
-            [disabled]="commentForm.invalid || sendingComment()"
-          >
-            @if (sendingComment()) { <span class="dp-spinner"></span> }
-            <i class="pi pi-send"></i>
-            Enviar
-          </button>
-        </form>
+        @if (permissions.canEditTasks()) {
+          <form class="dp-drawer__comment-form" [formGroup]="commentForm" (ngSubmit)="sendComment()" novalidate>
+            <textarea
+              formControlName="message"
+              placeholder="Escribe un comentario…"
+              rows="2"
+            ></textarea>
+            <button
+              type="submit"
+              class="dp-btn dp-btn--primary"
+              [disabled]="commentForm.invalid || sendingComment()"
+            >
+              @if (sendingComment()) { <span class="dp-spinner"></span> }
+              <i class="pi pi-send"></i>
+              Enviar
+            </button>
+          </form>
+        } @else if (permissions.isViewer()) {
+          <p class="dp-text-muted dp-text-sm" style="margin-top: 0.5rem;">
+            <i class="pi pi-lock"></i> Los VIEWER no pueden comentar.
+          </p>
+        }
       </div>
     </section>
   </aside>

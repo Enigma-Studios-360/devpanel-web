@@ -1,0 +1,52 @@
+:host {
+  display: contents;
+}
+
+.dp-skel {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--dp-surface-2) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    var(--dp-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: dp-skel-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--dp-radius-md);
+
+  &--text {
+    height: 11px;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  &--circle {
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  &--block {
+    width: 100%;
+    border-radius: var(--dp-radius-md);
+  }
+}
+
+@keyframes dp-skel-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Slight tint variation for light theme so the shimmer is still visible. */
+:root[data-theme='light'] {
+  .dp-skel {
+    background: linear-gradient(
+      90deg,
+      var(--dp-surface-2) 0%,
+      rgba(0, 0, 0, 0.04) 50%,
+      var(--dp-surface-2) 100%
+    );
+    background-size: 200% 100%;
+  }
+}

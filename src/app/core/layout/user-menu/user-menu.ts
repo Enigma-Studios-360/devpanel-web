@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../auth/auth-state.service';
 import { AuthService } from '../../auth/auth.service';
@@ -105,6 +105,20 @@ export class UserMenuComponent {
 
   close(): void {
     this.open.set(false);
+  }
+
+  /** Close when clicking anywhere outside the menu (matches notification-bell). */
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: MouseEvent): void {
+    if (!this.open()) return;
+    const target = e.target as HTMLElement | null;
+    if (!target?.closest('.dp-user-menu')) this.close();
+  }
+
+  /** Close on Escape for keyboard users. */
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    if (this.open()) this.close();
   }
 
   logout(): void {
