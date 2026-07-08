@@ -23,6 +23,10 @@ import {
   type DashboardMyTask,
   type DashboardActivityEntry,
 } from '../../../core/services/dashboard.service';
+import {
+  ArcadeService,
+  type ArcadeProgress,
+} from '../../../core/services/arcade.service';
 import { AuthStateService } from '../../../core/auth/auth-state.service';
 import { TutorialService } from '../../../core/tutorial/tutorial.service';
 import { Router } from '@angular/router';
@@ -50,6 +54,7 @@ import { formatDate, formatUptime } from '../../../shared/utils/format-date';
 export class HomeDashboardComponent {
   private readonly health = inject(ApiHealthService);
   private readonly dashboardApi = inject(DashboardService);
+  private readonly arcadeApi = inject(ArcadeService);
   private readonly auth = inject(AuthStateService);
   private readonly tutorial = inject(TutorialService);
   private readonly router = inject(Router);
@@ -66,6 +71,11 @@ export class HomeDashboardComponent {
   // Demo data seeding (only shown when the workspace is empty)
   protected readonly seeding = signal<boolean>(false);
   protected readonly seedError = signal<string | null>(null);
+
+  // Arcade (DevCrafting) — progress reported by the game to the backend
+  protected readonly arcade = signal<ArcadeProgress | null>(null);
+  protected readonly arcadeTop = signal<ArcadeProgress[]>([]);
+  protected readonly arcadeLoading = signal<boolean>(true);
 
   // --- Derived --------------------------------------------------------------
 
@@ -111,6 +121,7 @@ export class HomeDashboardComponent {
   constructor() {
     this.refreshHealth();
     this.refreshOverview();
+    this.refreshArcade();
     this.bootstrapTour();
   }
 
@@ -139,6 +150,29 @@ export class HomeDashboardComponent {
         this.overviewLoading.set(false);
       },
     });
+  }
+
+  refreshArcade(): void {
+    this.arcadeLoading.set(true);
+    Promise.all([
+      this.arcadeApi.progress().toPromise(),
+      this.arcadeApi.leaderboard().toPromise(),
+    ])
+      .then(([progress, top]) => {
+        this.arcade.set(progress ?? null);
+        this.arcadeTop.set(top ?? []);
+        this.arcadeLoading.set(false);
+      })
+      .catch(() => {
+        // Arcade is optional flair on the dashboard; fail silently.
+        this.arcadeLoading.set(false);
+      });
+  }
+
+  arcadePlayerName(entry: ArcadeProgress): string {
+    const u = entry.user;
+    if (u && typeof u === 'object') return u.name;
+    return 'Jugador';
   }
 
   /**

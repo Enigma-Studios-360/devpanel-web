@@ -285,6 +285,65 @@
     </section>
   }
 
+  <!-- Arcade · DevCrafting ------------------------------------------------- -->
+  <section class="dp-card dp-dashboard__panel dp-arcade" data-tour="dash-arcade">
+    <header class="dp-dashboard__panel-head">
+      <h3>
+        <i class="pi pi-play-circle"></i>
+        Arcade · DevCrafting
+      </h3>
+      <span class="dp-dashboard__panel-link">tu progreso vive en el backend</span>
+    </header>
+
+    @if (arcadeLoading()) {
+      <div class="dp-dashboard__row-skeleton">
+        <dp-skeleton variant="circle" size="32" />
+        <dp-skeleton variant="text" lines="2" />
+      </div>
+    } @else if (arcade(); as a) {
+      <div class="dp-arcade__stats">
+        <div class="dp-arcade__stat">
+          <strong>Día {{ a.day }}</strong>
+          <small>campaña</small>
+        </div>
+        <div class="dp-arcade__stat">
+          <strong>⭐ {{ a.totalStars }}</strong>
+          <small>estrellas</small>
+        </div>
+        <div class="dp-arcade__stat">
+          <strong>${{ a.money }}</strong>
+          <small>sueldo</small>
+        </div>
+        <div class="dp-arcade__stat">
+          <strong>{{ a.ticketsResolved }}</strong>
+          <small>tickets resueltos</small>
+        </div>
+        <div class="dp-arcade__stat">
+          <strong>{{ a.rank }}</strong>
+          <small>rango · jugado {{ relativeTime(a.lastPlayedAt) }}</small>
+        </div>
+      </div>
+      @if (arcadeTop().length > 1) {
+        <ul class="dp-arcade__top">
+          @for (e of arcadeTop(); track e._id) {
+            <li>
+              <span class="dp-arcade__top-pos">#{{ $index + 1 }}</span>
+              <span class="dp-arcade__top-name">{{ arcadePlayerName(e) }}</span>
+              <span class="dp-arcade__top-stars">⭐ {{ e.totalStars }} · día {{ e.day }}</span>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p class="dp-text-muted dp-text-sm">
+        <i class="pi pi-play-circle"></i>
+        Aún no has jugado. DevCrafting es nuestro simulador de tickets de TI:
+        resuelve bugs, poncha cables y diseña bases de datos — tu progreso se
+        guarda aquí, en tu cuenta de DevHub.
+      </p>
+    }
+  </section>
+
   <!-- Learn more grid (kept compact at the bottom) -->
   <section class="dp-dashboard__learn">
     <h3 class="dp-dashboard__section-title">Aprende más sobre…</h3>

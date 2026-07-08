@@ -350,3 +350,49 @@
     }
   }
 }
+
+/* Arcade (DevCrafting) panel ------------------------------------------------ */
+.dp-arcade {
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem 0.9rem;
+    background: var(--dp-surface-2);
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius-md);
+
+    strong { font-size: 15px; color: var(--dp-text); }
+    small { font-size: 11px; color: var(--dp-text-muted); }
+  }
+
+  &__top {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 13px;
+      padding: 0.35rem 0.5rem;
+      border-radius: var(--dp-radius-sm, 6px);
+
+      &:hover { background: var(--dp-surface-2); }
+    }
+  }
+
+  &__top-pos { color: var(--dp-text-muted); width: 2rem; }
+  &__top-name { color: var(--dp-text); flex: 1; }
+  &__top-stars { color: var(--dp-text-muted); font-size: 12px; }
+}
