@@ -116,6 +116,13 @@ export const routes: Routes = [
             (m) => m.ProjectDeployComponent,
           ),
       },
+      {
+        path: 'projects/:projectId/files',
+        loadComponent: () =>
+          import('./features/files/project-files').then(
+            (m) => m.ProjectFilesComponent,
+          ),
+      },
 
       // Phase 3+ placeholders
       {
@@ -147,10 +154,10 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        // Global "Files" entry: per-project, so we send the user to pick a project first.
         path: 'files',
-        loadComponent: () =>
-          import('./features/coming-soon').then((m) => m.ComingSoonComponent),
-        data: { title: 'Archivos', subtitle: 'Sube y organiza archivos por proyecto.', phase: 'Fase 3' },
+        redirectTo: 'teams',
+        pathMatch: 'full',
       },
     ],
   },

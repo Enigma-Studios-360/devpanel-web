@@ -1,0 +1,154 @@
+@if (loading()) {
+  <dp-loading-state label="Cargando archivos…" />
+} @else if (error()) {
+  <div class="dp-modal__error">{{ error() }}</div>
+} @else if (project(); as p) {
+  <dp-page-header
+    [title]="'Archivos · ' + p.name"
+    [subtitle]="'Comparte entregables, evidencias y recursos del proyecto.'"
+  >
+    <a [routerLink]="['/app/projects', projectId(), 'overview']" class="dp-btn dp-btn--ghost">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver al proyecto</span>
+    </a>
+    @if (permissions.canUploadFiles()) {
+      <label class="dp-btn dp-btn--primary dp-files__upload-btn" data-tour="upload-file">
+        @if (uploading()) { <span class="dp-spinner"></span> } @else { <i class="pi pi-upload"></i> }
+        <span>{{ uploading() ? 'Subiendo…' : 'Subir archivo' }}</span>
+        <input type="file" (change)="onFileInput($event)" [disabled]="uploading()" hidden />
+      </label>
+    } @else if (permissions.isViewer()) {
+      <span class="dp-role-hint" title="Tu rol es VIEWER. Solo lectura.">
+        <i class="pi pi-eye"></i> Solo lectura
+      </span>
+    }
+  </dp-page-header>
+
+  @if (usage(); as u) {
+    <div class="dp-files__usage" data-tour="files-usage">
+      <div class="dp-files__usage-bar">
+        <div
+          class="dp-files__usage-fill"
+          [class.dp-files__usage-fill--warn]="usagePercent() >= 80"
+          [style.width.%]="usagePercent()"
+        ></div>
+      </div>
+      <span class="dp-files__usage-label">
+        <strong>{{ formatUsage(u) }}</strong> usados por el equipo · plan {{ u.plan }}
+      </span>
+    </div>
+  }
+
+  @if (uploadError()) {
+    <div class="dp-modal__error" style="margin-bottom: 1rem;">
+      <i class="pi pi-exclamation-circle"></i> {{ uploadError() }}
+    </div>
+  }
+
+  <div
+    class="dp-files"
+    [class.dp-files--dragover]="dragOver()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    data-tour="files-list"
+  >
+    @if (files().length === 0) {
+      <div class="dp-files__empty">
+        <i class="pi pi-inbox"></i>
+        <h3>Aún no hay archivos</h3>
+        @if (permissions.canUploadFiles()) {
+          <p>Arrastra un archivo aquí o usa el botón <strong>Subir archivo</strong>. Máximo 10 MB por archivo.</p>
+        } @else {
+          <p>Cuando el equipo suba archivos, aparecerán aquí.</p>
+        }
+      </div>
+    } @else {
+      <table class="dp-files__table">
+        <thead>
+          <tr>
+            <th>Archivo</th>
+            <th>Tamaño</th>
+            <th>Subido por</th>
+            <th>Fecha</th>
+            <th class="dp-files__actions-col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of files(); track f._id) {
+            <tr>
+              <td class="dp-files__name">
+                <i [class]="'pi ' + fileIcon(f.mimeType)"></i>
+                <span [title]="f.originalName">{{ f.originalName }}</span>
+              </td>
+              <td>{{ formatSize(f.size) }}</td>
+              <td>{{ uploaderName(f) }}</td>
+              <td>{{ f.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="dp-files__actions">
+                <button
+                  type="button"
+                  class="dp-btn dp-btn--ghost dp-btn--sm"
+                  (click)="download(f)"
+                  [disabled]="downloadingId() === f._id"
+                  title="Descargar"
+                >
+                  @if (downloadingId() === f._id) { <span class="dp-spinner"></span> }
+                  @else { <i class="pi pi-download"></i> }
+                </button>
+                @if (permissions.canDeleteFiles()) {
+                  <button
+                    type="button"
+                    class="dp-btn dp-btn--danger dp-btn--sm"
+                    (click)="askDelete(f)"
+                    title="Eliminar"
+                  >
+                    <i class="pi pi-trash"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <dp-learn-more-card
+    [title]="('learn.files.title' | t)"
+    [body]="('learn.files.body' | t)"
+  />
+}
+
+<!-- Confirm delete modal -->
+@if (deleteTarget(); as target) {
+  <div class="dp-modal__backdrop" (click)="cancelDelete()">
+    <div class="dp-modal" (click)="$event.stopPropagation()">
+      <header>
+        <h2>Eliminar archivo</h2>
+        <button type="button" class="dp-modal__close" (click)="cancelDelete()" aria-label="Cerrar">
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+      <p>
+        ¿Seguro que quieres eliminar
+        <strong>{{ target.originalName }}</strong> ({{ formatSize(target.size) }})?
+        Esta acción no se puede deshacer.
+      </p>
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="cancelDelete()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="dp-btn dp-btn--danger"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+          @if (deleting()) { <span class="dp-spinner"></span> }
+          <i class="pi pi-trash"></i>
+          <span>Eliminar</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+}

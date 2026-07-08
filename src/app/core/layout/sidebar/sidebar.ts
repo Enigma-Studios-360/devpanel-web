@@ -59,6 +59,7 @@ export class SidebarComponent {
       { label: 'Documentación', icon: 'pi-book',         link: `${base}/docs`,   tour: 'sidebar-docs' },
       { label: 'GitHub',        icon: 'pi-github',       link: `${base}/github`, tour: 'sidebar-github' },
       { label: 'Deploy',        icon: 'pi-cloud-upload', link: `${base}/deploy`, tour: 'sidebar-deploy' },
+      { label: 'Archivos',      icon: 'pi-paperclip',    link: `${base}/files`,  tour: 'sidebar-files' },
     ];
   });
 

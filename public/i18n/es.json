@@ -122,6 +122,10 @@
       "title": "¿Qué es un README?",
       "body": "Un README es el archivo principal de documentación de un proyecto. Explica qué hace el sistema, cómo se instala, cómo se ejecuta y qué tecnologías utiliza."
     },
+    "files": {
+      "title": "¿Para qué sirven los archivos?",
+      "body": "Aquí el equipo comparte entregables, evidencias, diagramas o cualquier recurso del proyecto. El almacenamiento se mide a nivel de equipo y depende del plan contratado; cada archivo puede pesar hasta 10 MB."
+    },
     "project": {
       "title": "¿Qué es un proyecto?",
       "body": "Un proyecto agrupa tareas, documentación, integrantes, archivos e integraciones relacionadas con una aplicación o producto en desarrollo."

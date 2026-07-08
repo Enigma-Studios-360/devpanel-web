@@ -125,4 +125,16 @@ export class PermissionsService {
     const r = this.roleSignal();
     return r === 'OWNER' || r === 'ADMIN';
   });
+
+  /** Upload files to a project. */
+  readonly canUploadFiles = computed(() => {
+    const r = this.roleSignal();
+    return r === 'OWNER' || r === 'ADMIN' || r === 'DEVELOPER';
+  });
+
+  /** Delete project files (destructive: frees team storage). */
+  readonly canDeleteFiles = computed(() => {
+    const r = this.roleSignal();
+    return r === 'OWNER' || r === 'ADMIN';
+  });
 }

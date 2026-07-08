@@ -28,6 +28,11 @@
       <i class="pi pi-cloud-upload"></i>
       <span>Deploy</span>
     </a>
+    <a [routerLink]="['/app/projects', projectId(), 'files']" class="dp-btn dp-btn--ghost"
+       data-tour="view-files">
+      <i class="pi pi-paperclip"></i>
+      <span>Archivos</span>
+    </a>
     @if (permissions.canManageProject()) {
       <button type="button" class="dp-btn dp-btn--ghost" (click)="openEdit()" data-tour="edit-project">
         <i class="pi pi-pencil"></i>
