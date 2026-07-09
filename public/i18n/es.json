@@ -14,6 +14,7 @@
     "deploy": "Deploy",
     "files": "Archivos",
     "pricing": "Planes",
+    "arcade": "Arcade",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "register": "Crear cuenta"
@@ -125,6 +126,10 @@
     "files": {
       "title": "¿Para qué sirven los archivos?",
       "body": "Aquí el equipo comparte entregables, evidencias, diagramas o cualquier recurso del proyecto. El almacenamiento se mide a nivel de equipo y depende del plan contratado; cada archivo puede pesar hasta 10 MB."
+    },
+    "arcade": {
+      "title": "¿Cómo se conecta el juego?",
+      "body": "DevCrafting está hecho en Unity y compilado a WebGL; se despliega como sitio estático con el propio Deploy Wizard de DevHub. La versión de escritorio inicia sesión contra la misma API con JWT y sincroniza tu progreso al cerrar cada día."
     },
     "project": {
       "title": "¿Qué es un proyecto?",

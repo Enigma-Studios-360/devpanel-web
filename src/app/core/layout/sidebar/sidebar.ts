@@ -33,6 +33,7 @@ export class SidebarComponent {
     { labelKey: 'nav.teams',     icon: 'pi-users',    link: '/app/teams',     tour: 'sidebar-teams' },
     { labelKey: 'nav.projects',  icon: 'pi-folder',   link: '/app/projects',  tour: 'sidebar-projects' },
     { labelKey: 'nav.pricing',   icon: 'pi-tag',      link: '/app/pricing',   tour: 'sidebar-pricing' },
+    { labelKey: 'nav.arcade',    icon: 'pi-play-circle', link: '/app/arcade', tour: 'sidebar-arcade' },
   ];
 
   /** Current project id, derived from the URL — drives the contextual group. */

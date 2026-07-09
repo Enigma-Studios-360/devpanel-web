@@ -52,6 +52,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/pricing/pricing').then((m) => m.PricingComponent),
       },
+      {
+        path: 'arcade',
+        loadComponent: () =>
+          import('./features/arcade/arcade-page').then((m) => m.ArcadePageComponent),
+      },
 
       // Teams ----------------------------------------------------------------
       {

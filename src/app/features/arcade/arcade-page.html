@@ -1,0 +1,68 @@
+<dp-page-header
+  title="Arcade · DevCrafting"
+  subtitle="Nuestro simulador de tickets de TI — desplegado con el propio Deploy Wizard de DevHub."
+>
+  <a [href]="gameUrl" target="_blank" rel="noopener" class="dp-btn dp-btn--ghost">
+    <i class="pi pi-external-link"></i>
+    <span>Abrir en pestaña completa</span>
+  </a>
+</dp-page-header>
+
+<div class="dp-arcadepg">
+  <section class="dp-arcadepg__stage">
+    @if (loadGame()) {
+      <iframe
+        class="dp-arcadepg__frame"
+        [src]="gameSrc"
+        title="DevCrafting"
+        allow="autoplay; fullscreen"
+        loading="lazy"
+      ></iframe>
+    } @else {
+      <button type="button" class="dp-arcadepg__cover" (click)="loadGame.set(true)">
+        <span class="dp-arcadepg__cover-icon"><i class="pi pi-play-circle"></i></span>
+        <strong>Jugar DevCrafting aquí mismo</strong>
+        <span class="dp-text-muted">
+          Resuelve tickets reales de código, redes y bases de datos — estilo "Papa's".
+        </span>
+        <span class="dp-arcadepg__cover-hint">WebGL · corre en tu navegador · ~1 min de carga</span>
+      </button>
+    }
+  </section>
+
+  <aside class="dp-arcadepg__side">
+    @if (progress(); as p) {
+      <div class="dp-card dp-arcadepg__panel">
+        <h3><i class="pi pi-user"></i> Tu progreso</h3>
+        <ul class="dp-arcadepg__stats">
+          <li><strong>Día {{ p.day }}</strong><span>campaña</span></li>
+          <li><strong>⭐ {{ p.totalStars }}</strong><span>estrellas</span></li>
+          <li><strong>${{ p.money }}</strong><span>sueldo</span></li>
+          <li><strong>{{ p.rank }}</strong><span>rango</span></li>
+        </ul>
+        <p class="dp-text-muted dp-text-sm">
+          Sincronizado desde el juego de escritorio — tu avance vive en el backend.
+        </p>
+      </div>
+    }
+
+    @if (top().length > 0) {
+      <div class="dp-card dp-arcadepg__panel">
+        <h3><i class="pi pi-trophy"></i> Leaderboard</h3>
+        <ol class="dp-arcadepg__top">
+          @for (e of top(); track e._id) {
+            <li>
+              <span class="dp-arcadepg__top-name">{{ playerName(e) }}</span>
+              <span class="dp-arcadepg__top-score">⭐ {{ e.totalStars }} · día {{ e.day }}</span>
+            </li>
+          }
+        </ol>
+      </div>
+    }
+
+    <dp-learn-more-card
+      [title]="('learn.arcade.title' | t)"
+      [body]="('learn.arcade.body' | t)"
+    />
+  </aside>
+</div>
