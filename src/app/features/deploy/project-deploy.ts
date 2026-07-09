@@ -196,15 +196,12 @@ export class ProjectDeployComponent implements OnDestroy {
         this.history.set(history ?? null);
         this.loading.set(false);
 
-        // If the latest deploy is still in flight, surface it to the
-        // wizard's "triggered" slot so polling resumes after a page refresh.
+        // Surface the latest deploy to the "current" slot so the user sees
+        // its status, public URL and QR when they land on the page — not
+        // only right after triggering. If it's still in flight, the polling
+        // effect resumes automatically.
         const current = history?.current;
-        if (
-          current &&
-          current.status !== 'READY' &&
-          current.status !== 'ERROR' &&
-          current.status !== 'CANCELED'
-        ) {
+        if (current) {
           this.triggered.set(current);
         }
       })

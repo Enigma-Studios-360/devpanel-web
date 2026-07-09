@@ -364,7 +364,7 @@
           @if (isInFlight(current)) { <span class="dp-spinner dp-spinner--sm"></span> }
           {{ statusLabel(current.status) }}
         </span>
-        <strong>Deploy en curso</strong>
+        <strong>{{ isInFlight(current) ? 'Deploy en curso' : 'Último deploy' }}</strong>
         @if (isInFlight(current)) {
           <span class="dp-text-muted dp-text-sm">
             Actualizamos el estado cada 3 segundos.
