@@ -380,7 +380,7 @@
           </div>
           @if (current.url) {
             <div>
-              <dt>URL</dt>
+              <dt>Este build</dt>
               <dd>
                 <a [href]="current.url" target="_blank" rel="noopener">
                   {{ current.url }} <i class="pi pi-external-link"></i>
@@ -406,6 +406,47 @@
           }
         </dl>
       </div>
+
+      <!-- Public URL + QR: the shareable result, shown once the deploy is live -->
+      @if (current.status === 'READY' && (current.publicUrl || current.url)) {
+        <div class="dp-deploy__public" data-tour="deploy-public-url">
+          <div class="dp-deploy__public-info">
+            <span class="dp-deploy__public-kicker">
+              <i class="pi pi-globe"></i> URL PÚBLICA — compártela con quien quieras
+            </span>
+            <a
+              class="dp-deploy__public-link"
+              [href]="current.publicUrl || current.url"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ current.publicUrl || current.url }}
+            </a>
+            <div class="dp-deploy__public-actions">
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary"
+                (click)="copyPublicUrl(current.publicUrl || current.url || '')"
+              >
+                @if (urlCopied()) {
+                  <i class="pi pi-check"></i> Copiada
+                } @else {
+                  <i class="pi pi-copy"></i> Copiar URL
+                }
+              </button>
+              <span class="dp-text-muted dp-text-sm">
+                Sin logins ni códigos raros: siempre apunta al último deploy.
+              </span>
+            </div>
+          </div>
+          @if (qrDataUrl(); as qr) {
+            <figure class="dp-deploy__qr">
+              <img [src]="qr" alt="Código QR de la URL pública" width="150" height="150" />
+              <figcaption>Escanéame</figcaption>
+            </figure>
+          }
+        </div>
+      }
     </section>
   }
 

@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import * as QRCode from 'qrcode';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state';
@@ -98,6 +99,10 @@ export class ProjectDeployComponent implements OnDestroy {
   protected readonly triggerError = signal<string | null>(null);
   protected readonly triggered = signal<DeploymentRecord | null>(null);
 
+  /** QR of the public URL, rendered when the deploy reaches READY. */
+  protected readonly qrDataUrl = signal<string | null>(null);
+  protected readonly urlCopied = signal(false);
+
   /** Status polling token so we can cancel on destroy / navigation. */
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -143,6 +148,24 @@ export class ProjectDeployComponent implements OnDestroy {
       const dep = this.triggered();
       if (dep && dep.status !== 'READY' && dep.status !== 'ERROR' && dep.status !== 'CANCELED') {
         this.scheduleStatusPoll(dep._id);
+      }
+    });
+
+    // When the deploy settles in READY, draw the QR of the public URL so
+    // the team can share it (or project it) straight from the wizard.
+    effect(() => {
+      const dep = this.triggered();
+      const target = dep?.publicUrl ?? dep?.url;
+      if (dep?.status === 'READY' && target) {
+        QRCode.toDataURL(target, {
+          width: 260,
+          margin: 1,
+          color: { dark: '#0B1020', light: '#FFFFFF' },
+        })
+          .then((data) => this.qrDataUrl.set(data))
+          .catch(() => this.qrDataUrl.set(null));
+      } else {
+        this.qrDataUrl.set(null);
       }
     });
   }
@@ -355,6 +378,16 @@ export class ProjectDeployComponent implements OnDestroy {
 
   // ---- View helpers --------------------------------------------------------
 
+  async copyPublicUrl(url: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(url);
+      this.urlCopied.set(true);
+      setTimeout(() => this.urlCopied.set(false), 2000);
+    } catch {
+      // clipboard unavailable (http/permissions) — no-op, the link is visible
+    }
+  }
+
   triggeredByName(d: DeploymentRecord): string {
     const v = d.triggeredBy;
     if (!v) return '—';
@@ -394,6 +427,12 @@ export class ProjectDeployComponent implements OnDestroy {
   private errorMessageFrom(err: HttpErrorResponse): string {
     const code = (err?.error as { error?: { code?: string } } | undefined)?.error?.code;
     const msg = (err?.error as { error?: { message?: string } } | undefined)?.error?.message;
+    if (code === 'DEPLOY_VERCEL_GITHUB_UNLINKED') {
+      return (
+        msg ??
+        'Tu cuenta de Vercel no está conectada a GitHub. Conéctala en Account Settings → Authentication y reintenta.'
+      );
+    }
     if (code === 'DEPLOY_GITHUB_APP_MISSING') {
       return (
         msg ??

@@ -59,6 +59,8 @@ export interface DeploymentRecord {
   vercelProjectId?: string;
   vercelProjectName?: string;
   url?: string;
+  /** Stable production URL (`https://<name>.vercel.app`) — what end users get. */
+  publicUrl?: string;
   inspectorUrl?: string;
   status: DeployStatus;
   errorMessage?: string;
