@@ -166,6 +166,21 @@
             </div>
           }
 
+          <!-- Sube tu proyecto: ZIP → repo GitHub del usuario -->
+          <div class="dp-gh-import-block">
+            <div class="dp-gh-import-block__label">
+              <i class="pi pi-upload"></i> ¿No tienes tu proyecto en GitHub todavía?
+              <span class="dp-text-muted">Súbelo aquí y lo creamos por ti.</span>
+            </div>
+            <dp-project-import
+              [projectId]="projectId()"
+              [githubConnected]="ghConn()?.connected ?? false"
+              (viewRepo)="onProjectImported()"
+            />
+          </div>
+
+          <div class="dp-gh-picker__divider"><span>o vincula un repo que ya existe</span></div>
+
           <form [formGroup]="linkForm" (ngSubmit)="link()" novalidate>
             <label class="dp-modal__field" data-tour="github-link-input">
               <span>Repositorio de GitHub</span>

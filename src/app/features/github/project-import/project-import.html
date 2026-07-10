@@ -1,0 +1,164 @@
+<div class="dp-import">
+  <!-- IDLE: dropzone -->
+  @if (phase() === 'idle' || phase() === 'analyzing') {
+    @if (!githubConnected()) {
+      <div class="dp-import__gate">
+        <i class="pi pi-github"></i>
+        <p>Conecta tu cuenta de GitHub (arriba) para poder subir tu proyecto — el repositorio se crea a tu nombre.</p>
+      </div>
+    } @else {
+      <div
+        class="dp-import__drop"
+        [class.dp-import__drop--over]="dragOver()"
+        [class.dp-import__drop--busy]="phase() === 'analyzing'"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+      >
+        @if (phase() === 'analyzing') {
+          <span class="dp-spinner dp-spinner--lg"></span>
+          <strong>Analizando tu proyecto…</strong>
+          <span class="dp-text-muted">Revisando qué subir y qué proteger.</span>
+        } @else {
+          <span class="dp-import__drop-icon"><i class="pi pi-upload"></i></span>
+          <strong>Arrastra aquí el ZIP de tu proyecto</strong>
+          <span class="dp-text-muted">
+            Comprime tu carpeta (clic derecho → "Comprimir") y suéltala aquí.
+            Nosotros excluimos lo peligroso o innecesario.
+          </span>
+          <label class="dp-btn dp-btn--primary dp-import__pick">
+            <i class="pi pi-folder-open"></i> Elegir archivo .zip
+            <input type="file" accept=".zip" (change)="onFileInput($event)" hidden />
+          </label>
+          <span class="dp-import__hint">Hasta 250 MB · React, Angular, Vite, estáticos y más</span>
+        }
+      </div>
+    }
+    @if (error()) {
+      <div class="dp-modal__error"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+    }
+  }
+
+  <!-- REVIEW: reporte educativo + nombre del repo -->
+  @if (phase() === 'review' || phase() === 'confirming') {
+    @if (analysis(); as a) {
+      <div class="dp-import__report">
+        <header class="dp-import__report-head">
+          <span class="dp-import__shield"><i class="pi pi-verified"></i></span>
+          <div>
+            <h4>Protegimos tu proyecto</h4>
+            <p class="dp-text-muted dp-text-sm">
+              De <strong>{{ a.totalEntries }}</strong> archivos en tu ZIP, subiremos
+              <strong>{{ a.keptCount }}</strong> ({{ formatBytes(a.keptBytes) }}) y
+              excluimos el resto. Esto es lo que NO se sube y por qué:
+            </p>
+          </div>
+        </header>
+
+        <ul class="dp-import__excl">
+          @for (row of excludedCategories(); track row.category) {
+            <li [attr.data-tone]="meta[row.category].tone">
+              <i [class]="'pi ' + meta[row.category].icon"></i>
+              <div>
+                <strong>
+                  {{ meta[row.category].label }}
+                  <span class="dp-import__count">{{ row.count }} archivo(s)</span>
+                </strong>
+                <span class="dp-text-muted dp-text-sm">{{ meta[row.category].why }}</span>
+                @if (row.category === 'SECRETO' && secretSamples().length) {
+                  <span class="dp-import__secret-list">
+                    @for (s of secretSamples(); track s) {
+                      <code>{{ s }}</code>
+                    }
+                  </span>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+
+        <div class="dp-import__form">
+          <label class="dp-modal__field">
+            <span>Nombre del repositorio en GitHub</span>
+            <input
+              type="text"
+              [value]="repoName()"
+              (input)="onRepoNameInput($event)"
+              placeholder="mi-proyecto"
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="dp-import__toggle">
+            <input
+              type="checkbox"
+              [checked]="isPrivate()"
+              (change)="isPrivate.set($any($event.target).checked)"
+            />
+            <span>
+              <i class="pi" [class.pi-lock]="isPrivate()" [class.pi-globe]="!isPrivate()"></i>
+              Repositorio {{ isPrivate() ? 'privado' : 'público' }}
+              <small class="dp-text-muted">
+                {{ isPrivate()
+                  ? 'Solo tú lo ves. Para desplegarlo con nuestro plan actual tendría que hacerse público.'
+                  : 'Cualquiera con el link puede verlo.' }}
+              </small>
+            </span>
+          </label>
+
+          @if (error()) {
+            <div class="dp-modal__error"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+          }
+
+          <div class="dp-import__actions">
+            <button type="button" class="dp-btn dp-btn--ghost" (click)="reset()" [disabled]="phase() === 'confirming'">
+              Cancelar
+            </button>
+            <button type="button" class="dp-btn dp-btn--primary" (click)="confirm()" [disabled]="phase() === 'confirming'">
+              @if (phase() === 'confirming') { <span class="dp-spinner"></span> }
+              <i class="pi pi-github"></i>
+              <span>Crear repo y subir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- DONE: resultado + veredicto de deploy -->
+  @if (phase() === 'done') {
+    @if (result(); as r) {
+      <div class="dp-import__done">
+        <span class="dp-import__check"><i class="pi pi-check"></i></span>
+        <h4>¡Tu proyecto está en GitHub!</h4>
+        <p>
+          Subimos <strong>{{ r.pushedFiles }}</strong> archivos a
+          <a [href]="r.repoUrl" target="_blank" rel="noopener"><code>{{ r.repoFullName }}</code> <i class="pi pi-external-link"></i></a>
+        </p>
+
+        <div
+          class="dp-import__verdict"
+          [class.dp-import__verdict--ok]="r.deployable"
+          [class.dp-import__verdict--wait]="!r.deployable"
+        >
+          <i class="pi" [class.pi-rocket]="r.deployable" [class.pi-clock]="!r.deployable"></i>
+          <span>{{ r.verdict }}</span>
+        </div>
+
+        <div class="dp-import__done-actions">
+          @if (r.deployable) {
+            <a
+              [routerLink]="['/app/projects', projectId(), 'deploy']"
+              class="dp-btn dp-btn--primary"
+            >
+              <i class="pi pi-rocket"></i> Ir al Deploy Wizard
+            </a>
+          }
+          <button type="button" class="dp-btn dp-btn--ghost" (click)="viewRepo.emit()">
+            <i class="pi pi-github"></i> Ver mi repositorio
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -23,6 +23,7 @@ import { ProjectsService } from '../../core/services/projects.service';
 import { PermissionsService } from '../../core/auth/permissions.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { SubscriptionsService, type Subscription } from '../../core/services/subscription.service';
+import { ProjectImportComponent } from './project-import/project-import';
 import type { Project } from '../../shared/models/project.model';
 
 type Tab = 'commits' | 'branches' | 'issues';
@@ -38,6 +39,7 @@ type Tab = 'commits' | 'branches' | 'issues';
     LoadingStateComponent,
     EmptyStateComponent,
     LearnMoreCardComponent,
+    ProjectImportComponent,
   ],
   templateUrl: './project-github.html',
   styleUrl: './project-github.scss',
@@ -178,6 +180,11 @@ export class ProjectGithubComponent {
 
   onRepoFilterInput(event: Event): void {
     this.repoFilter.set((event.target as HTMLInputElement).value);
+  }
+
+  /** Tras importar un ZIP, el repo quedó creado y vinculado: recarga la vista. */
+  onProjectImported(): void {
+    this.refresh();
   }
 
   /** Kick off the OAuth flow: get the authorize URL, then send the browser there. */
