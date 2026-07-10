@@ -94,6 +94,78 @@
             </div>
           }
 
+          <!-- Repo picker: one-click linking when the user connected GitHub -->
+          @if (ghConn()?.connected) {
+            <div class="dp-gh-picker" data-tour="github-repo-picker">
+              <div class="dp-gh-picker__head">
+                <span class="dp-gh-picker__title">
+                  <i class="pi pi-list"></i> Tus repositorios
+                  @if (myRepos(); as repos) {
+                    <span class="dp-text-muted">({{ repos.length }})</span>
+                  }
+                </span>
+                <input
+                  class="dp-gh-picker__search"
+                  type="search"
+                  placeholder="Buscar repo…"
+                  [value]="repoFilter()"
+                  (input)="onRepoFilterInput($event)"
+                />
+              </div>
+
+              @if (reposLoading()) {
+                <div class="dp-gh-picker__loading">
+                  <span class="dp-spinner"></span> Cargando tus repositorios…
+                </div>
+              } @else if (filteredRepos().length === 0) {
+                <p class="dp-text-muted dp-text-sm dp-gh-picker__empty">
+                  @if (repoFilter()) {
+                    Ningún repo coincide con "{{ repoFilter() }}".
+                  } @else {
+                    No encontramos repositorios en tu cuenta.
+                  }
+                </p>
+              } @else {
+                <ul class="dp-gh-picker__list">
+                  @for (r of filteredRepos(); track r.fullName) {
+                    <li>
+                      <div class="dp-gh-picker__meta">
+                        <span class="dp-gh-picker__name">
+                          {{ r.fullName }}
+                          @if (r.private) {
+                            <span class="dp-gh-picker__badge"><i class="pi pi-lock"></i> privado</span>
+                          }
+                        </span>
+                        <span class="dp-text-muted dp-text-sm dp-gh-picker__desc">
+                          @if (r.language) { {{ r.language }} · }
+                          {{ r.description || 'Sin descripción' }}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        class="dp-btn dp-btn--primary dp-btn--sm"
+                        (click)="linkFromList(r)"
+                        [disabled]="linkingRepo() !== null"
+                      >
+                        @if (linkingRepo() === r.fullName) { <span class="dp-spinner"></span> }
+                        @else { <i class="pi pi-link"></i> }
+                        <span>Vincular</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (linkError()) {
+                <div class="dp-modal__error">
+                  <i class="pi pi-exclamation-circle"></i> {{ linkError() }}
+                </div>
+              }
+
+              <div class="dp-gh-picker__divider"><span>o pega la URL manualmente</span></div>
+            </div>
+          }
+
           <form [formGroup]="linkForm" (ngSubmit)="link()" novalidate>
             <label class="dp-modal__field" data-tour="github-link-input">
               <span>Repositorio de GitHub</span>
@@ -105,7 +177,7 @@
               />
             </label>
 
-            @if (linkError()) {
+            @if (linkError() && !ghConn()?.connected) {
               <div class="dp-modal__error">
                 <i class="pi pi-exclamation-circle"></i> {{ linkError() }}
               </div>

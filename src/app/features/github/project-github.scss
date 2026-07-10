@@ -574,3 +574,125 @@
 
   i { font-size: 10.5px; }
 }
+
+/* Repo picker (one-click linking) ------------------------------------------ */
+.dp-gh-picker {
+  margin-bottom: 1.1rem;
+}
+
+.dp-gh-picker__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+
+.dp-gh-picker__title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dp-text-muted);
+
+  i { margin-right: 0.3rem; }
+}
+
+.dp-gh-picker__search {
+  flex: 0 1 240px;
+  padding: 0.45rem 0.8rem;
+  background: var(--dp-surface-2);
+  border: 1px solid var(--dp-border);
+  border-radius: 999px;
+  color: var(--dp-text);
+  font: inherit;
+  font-size: 13px;
+
+  &:focus { outline: none; border-color: #3b82f6; }
+}
+
+.dp-gh-picker__loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.2rem;
+  color: var(--dp-text-muted);
+  font-size: 13px;
+}
+
+.dp-gh-picker__empty { padding: 0.6rem 0.2rem; }
+
+.dp-gh-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-md);
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--dp-border);
+
+    &:last-child { border-bottom: 0; }
+    &:hover { background: var(--dp-surface-2); }
+  }
+}
+
+.dp-gh-picker__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.dp-gh-picker__name {
+  font-weight: 600;
+  color: var(--dp-text);
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dp-gh-picker__badge {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+
+  i { font-size: 9px; }
+}
+
+.dp-gh-picker__desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 460px;
+}
+
+.dp-gh-picker__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1rem 0 0.4rem;
+  color: var(--dp-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--dp-border);
+  }
+}
+

@@ -79,6 +79,17 @@ export interface GithubConnection {
   login: string | null;
 }
 
+/** One of the user's own repos (repo-picker). */
+export interface MyRepo {
+  fullName: string;
+  owner: string;
+  name: string;
+  private: boolean;
+  language: string | null;
+  description: string | null;
+  updatedAt: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GithubService {
   private readonly http = inject(HttpClient);
@@ -94,6 +105,13 @@ export class GithubService {
     return this.http
       .get<ApiSuccess<GithubConnection>>(`${this.api.baseUrl}/api/github/oauth/status`)
       .pipe(map((r) => r.data));
+  }
+
+  /** Repos of the user's connected GitHub account (repo-picker). */
+  myRepos(): Observable<MyRepo[]> {
+    return this.http
+      .get<ApiSuccess<{ repos: MyRepo[] }>>(`${this.api.baseUrl}/api/github/repos`)
+      .pipe(map((r) => r.data.repos));
   }
 
   /** Returns the GitHub authorize URL; the caller navigates the browser to it. */

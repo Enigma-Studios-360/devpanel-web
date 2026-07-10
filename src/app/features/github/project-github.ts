@@ -17,6 +17,7 @@ import {
   type IssueItem,
   type StackDetectionResult,
   type GithubConnection,
+  type MyRepo,
 } from '../../core/services/github.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { PermissionsService } from '../../core/auth/permissions.service';
@@ -99,6 +100,25 @@ export class ProjectGithubComponent {
   protected readonly ghConn = signal<GithubConnection | null>(null);
   protected readonly connecting = signal(false);
 
+  // Repo picker (repos of the connected GitHub account)
+  protected readonly myRepos = signal<MyRepo[] | null>(null);
+  protected readonly reposLoading = signal(false);
+  protected readonly repoFilter = signal('');
+  /** fullName of the repo currently being linked from the list. */
+  protected readonly linkingRepo = signal<string | null>(null);
+
+  protected readonly filteredRepos = computed(() => {
+    const all = this.myRepos() ?? [];
+    const q = this.repoFilter().trim().toLowerCase();
+    if (!q) return all;
+    return all.filter(
+      (r) =>
+        r.fullName.toLowerCase().includes(q) ||
+        (r.description ?? '').toLowerCase().includes(q) ||
+        (r.language ?? '').toLowerCase().includes(q),
+    );
+  });
+
   // Stack detection
   protected readonly stackDetection = signal<StackDetectionResult | null>(null);
   protected readonly detectingStack = signal(false);
@@ -113,9 +133,51 @@ export class ProjectGithubComponent {
 
   refreshGithubConnection(): void {
     this.githubApi.oauthStatus().subscribe({
-      next: (c) => this.ghConn.set(c),
+      next: (c) => {
+        this.ghConn.set(c);
+        if (c.connected) this.loadMyRepos();
+      },
       error: () => this.ghConn.set(null),
     });
+  }
+
+  /** Repos of the connected account, for the one-click picker. */
+  loadMyRepos(): void {
+    if (this.reposLoading()) return;
+    this.reposLoading.set(true);
+    this.githubApi.myRepos().subscribe({
+      next: (repos) => {
+        this.myRepos.set(repos);
+        this.reposLoading.set(false);
+      },
+      error: () => {
+        this.myRepos.set(null);
+        this.reposLoading.set(false);
+      },
+    });
+  }
+
+  /** One-click link straight from the picker list. */
+  linkFromList(r: MyRepo): void {
+    if (this.linkingRepo()) return;
+    this.linkingRepo.set(r.fullName);
+    this.linkError.set(null);
+    this.githubApi.link(this.projectId(), r.fullName).subscribe({
+      next: (repo) => {
+        this.repo.set(repo);
+        this.linkingRepo.set(null);
+        this.loadCurrentTab();
+        this.refresh();
+      },
+      error: (err) => {
+        this.linkingRepo.set(null);
+        this.linkError.set(err?.error?.error?.message ?? 'No se pudo vincular el repositorio.');
+      },
+    });
+  }
+
+  onRepoFilterInput(event: Event): void {
+    this.repoFilter.set((event.target as HTMLInputElement).value);
   }
 
   /** Kick off the OAuth flow: get the authorize URL, then send the browser there. */
