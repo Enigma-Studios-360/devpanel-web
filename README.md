@@ -8,11 +8,14 @@ internet"*. En español primero (i18n ES/EN).
 
 ## Lo que hace hoy
 
-13 features navegables, con tema claro/oscuro, i18n ES/EN y tutorial guiado:
+12 features construidas (+1 placeholder), con tema claro/oscuro, i18n ES/EN y tutorial guiado:
 
 - **Dashboard** con métricas del equipo y estado de la API
-- **Proyectos / Tareas kanban** (drag & drop) / **Docs** / **Archivos** / **Actividad**
+- **Proyectos / Tareas kanban** (drag & drop por proyecto) / **Docs** / **Archivos**
 - **Equipos** con roles e invitaciones
+- *Actividad — por construir:* la ruta `/app/activity` es un placeholder (Fase 3);
+  hoy la actividad reciente se muestra como widget en el Dashboard y en el
+  overview de cada proyecto
 - **GitHub** — conecta TU cuenta (OAuth), elige repos con botones, o **sube tu
   proyecto en ZIP**: reporte educativo de seguridad ("Protegimos tu proyecto")
   y repo creado en tu cuenta sin saber Git
@@ -69,9 +72,9 @@ src/app/
 ├── core/          # auth, guards, interceptors, layout (shell/sidebar/topbar),
 │                  # i18n (pipe | t), theme, servicios de API por módulo
 ├── shared/        # componentes reutilizables, modelos, utils
-├── features/      # 13 features: public/landing, auth, dashboard, teams,
-│                  # projects, tasks, docs, activity, files, github, deploy,
-│                  # arcade, pricing
+├── features/      # 12 features: public/landing, auth, dashboard, teams,
+│                  # projects, tasks, docs, files, github, deploy, arcade,
+│                  # pricing (+ activity: vacía, placeholder Fase 3)
 └── styles/        # tokens SCSS, reset, utilities
 ```
 

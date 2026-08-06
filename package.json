@@ -8,6 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  "author": "equipo enigma",
+  "license": "AGPL-3.0-only",
   "private": true,
   "packageManager": "npm@11.9.0",
   "dependencies": {
