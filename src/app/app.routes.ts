@@ -15,6 +15,16 @@ export const routes: Routes = [
       import('./features/pricing/pricing').then((m) => m.PricingComponent),
   },
   {
+    path: 'privacidad',
+    loadComponent: () =>
+      import('./features/public/legal/legal-pages').then((m) => m.PrivacyPageComponent),
+  },
+  {
+    path: 'terminos',
+    loadComponent: () =>
+      import('./features/public/legal/legal-pages').then((m) => m.TermsPageComponent),
+  },
+  {
     path: 'auth',
     canActivate: [guestGuard],
     children: [
