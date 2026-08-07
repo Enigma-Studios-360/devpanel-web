@@ -4,6 +4,7 @@
     "tagline": "Centralize your development workflow"
   },
   "nav": {
+    "today": "Today",
     "dashboard": "Dashboard",
     "projects": "Projects",
     "tasks": "Tasks",
@@ -106,6 +107,91 @@
     "empty": {
       "title": "No activity yet",
       "desc": "Create your first project to start using DevHub."
+    }
+  },
+  "shell": {
+    "more": "More",
+    "menu": "Menu",
+    "project": "Project",
+    "overview": "Overview"
+  },
+  "statusbar": {
+    "apiOk": "API OK",
+    "apiDown": "API DOWN",
+    "checking": "CHECKING…",
+    "madeIn": "MADE IN GDL 🇲🇽"
+  },
+  "home": {
+    "fallbackName": "dev",
+    "greeting": {
+      "morning": "What's next, {name}?",
+      "afternoon": "You're doing fine, {name}.",
+      "night": "One last push, {name}?"
+    },
+    "sub": {
+      "cargando": "Reading your day…",
+      "entrega": "You have a deadline coming up. Everything else can wait.",
+      "revisar": "Your students did their part. Now they need your feedback.",
+      "proyecto": "Your workspace is breathing. Good moment to push something live.",
+      "vacio": "Everything left to build. That's good news too."
+    },
+    "hero": {
+      "nextDue": "Next deadline · {aula}",
+      "toReview": "Classroom · {aula}",
+      "reviewTitle": "You have {n} submissions to review",
+      "reviewTitleOne": "You have 1 submission to review",
+      "reviewBody": "Your students already handed in their repos. Jump into the classroom and give them feedback while it's warm.",
+      "goToAula": "Open classroom",
+      "submit": "Submit my repo",
+      "instructions": "View instructions",
+      "dueIn": "DUE IN {days} DAYS · {date}",
+      "dueToday": "DUE TODAY · {date}",
+      "dueTomorrow": "DUE TOMORROW · {date}",
+      "overdue": "OVERDUE · WAS DUE {date}",
+      "noDue": "NO DUE DATE",
+      "noInstructions": "No instructions. Your teacher trusts you.",
+      "progress": "YOUR CLASSROOM PROGRESS ▸ {percent}% · {done}/{total} SUBMITTED",
+      "projectKicker": "Your most recent project",
+      "projectUpdated": "UPDATED {when}",
+      "projectBody": "No deadlines in sight. Good moment to push it to production with the Deploy Wizard.",
+      "openProject": "Open project",
+      "deployCta": "Take it to deploy",
+      "emptyKicker": "Start here",
+      "emptyTitle": "A blank canvas.",
+      "emptyBody": "Create your first team with demo data, or join a classroom with your teacher's code. Five minutes and this comes alive.",
+      "seed": "Create demo data",
+      "joinAula": "Join a classroom",
+      "createTeam": "Create team"
+    },
+    "cards": {
+      "aulas": "My classrooms",
+      "aulasEmpty": "Join with a code or create your own.",
+      "deploy": "Latest deploy",
+      "deployLive": "LIVE",
+      "deployBuilding": "BUILDING",
+      "deployError": "ERROR",
+      "deployEmpty": "Nothing in production yet. Your first deploy is 4 steps away.",
+      "arcade": "Arcade",
+      "arcadeDay": "DAY {n}",
+      "arcadeStars": "stars",
+      "arcadePlay": "DevCrafting awaits: solve tickets, earn stars.",
+      "activity": "Activity",
+      "activityEmpty": "Absolute silence. Do something and this moves.",
+      "tasks": "My open tasks",
+      "tasksEmpty": "Zero pending. Breathe.",
+      "overdue": "OVERDUE"
+    },
+    "time": {
+      "now": "NOW",
+      "min": "{n} MIN AGO",
+      "hours": "{n} H AGO",
+      "yesterday": "YESTERDAY",
+      "days": "{n} D AGO"
+    },
+    "errors": {
+      "overview": "Couldn't load your overview. Is the backend running?",
+      "seed": "Couldn't create the demo playground.",
+      "retry": "Retry"
     }
   },
   "common": {

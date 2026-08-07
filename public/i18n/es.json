@@ -4,6 +4,7 @@
     "tagline": "Centraliza tu flujo de desarrollo"
   },
   "nav": {
+    "today": "Hoy",
     "dashboard": "Dashboard",
     "projects": "Proyectos",
     "tasks": "Tareas",
@@ -106,6 +107,91 @@
     "empty": {
       "title": "Aún no tienes actividad",
       "desc": "Crea tu primer proyecto para empezar a usar DevHub."
+    }
+  },
+  "shell": {
+    "more": "Más",
+    "menu": "Menú",
+    "project": "Proyecto",
+    "overview": "Resumen"
+  },
+  "statusbar": {
+    "apiOk": "API OK",
+    "apiDown": "API CAÍDA",
+    "checking": "VERIFICANDO…",
+    "madeIn": "HECHO EN GDL 🇲🇽"
+  },
+  "home": {
+    "fallbackName": "dev",
+    "greeting": {
+      "morning": "¿Qué sigue, {name}?",
+      "afternoon": "Vas bien, {name}.",
+      "night": "¿Último push del día, {name}?"
+    },
+    "sub": {
+      "cargando": "Leyendo tu día…",
+      "entrega": "Tienes una entrega cerca. Lo demás puede esperar.",
+      "revisar": "Tus alumnos ya hicieron su parte. Les toca saber qué tal.",
+      "proyecto": "Tu workspace respira. Buen momento para empujar algo a producción.",
+      "vacio": "Todo por construir. Eso también es una buena noticia."
+    },
+    "hero": {
+      "nextDue": "Siguiente entrega · {aula}",
+      "toReview": "Aula · {aula}",
+      "reviewTitle": "Tienes {n} entregas por revisar",
+      "reviewTitleOne": "Tienes 1 entrega por revisar",
+      "reviewBody": "Tus alumnos ya entregaron su repo. Entra al aula y dales feedback antes de que se enfríe.",
+      "goToAula": "Ir al aula",
+      "submit": "Entregar mi repo",
+      "instructions": "Ver instrucciones",
+      "dueIn": "VENCE EN {days} DÍAS · {date}",
+      "dueToday": "VENCE HOY · {date}",
+      "dueTomorrow": "VENCE MAÑANA · {date}",
+      "overdue": "VENCIDA · ERA PARA EL {date}",
+      "noDue": "SIN FECHA LÍMITE",
+      "noInstructions": "Sin instrucciones. Tu profe confía en ti.",
+      "progress": "TU AVANCE DEL AULA ▸ {percent}% · {done}/{total} ENTREGAS",
+      "projectKicker": "Tu proyecto más reciente",
+      "projectUpdated": "ACTUALIZADO {when}",
+      "projectBody": "Sin entregas pendientes a la vista. Buen momento para empujarlo a producción con el Deploy Wizard.",
+      "openProject": "Abrir proyecto",
+      "deployCta": "Llevarlo a deploy",
+      "emptyKicker": "Empieza aquí",
+      "emptyTitle": "Un lienzo en blanco.",
+      "emptyBody": "Crea tu primer equipo con datos demo, o únete a un aula con el código de tu profe. Cinco minutos y esto se llena de vida.",
+      "seed": "Crear datos demo",
+      "joinAula": "Unirme a un aula",
+      "createTeam": "Crear equipo"
+    },
+    "cards": {
+      "aulas": "Mis aulas",
+      "aulasEmpty": "Únete con un código o crea la tuya.",
+      "deploy": "Último deploy",
+      "deployLive": "LIVE",
+      "deployBuilding": "BUILDING",
+      "deployError": "ERROR",
+      "deployEmpty": "Nada en producción aún. Tu primer deploy está a 4 pasos.",
+      "arcade": "Arcade",
+      "arcadeDay": "DÍA {n}",
+      "arcadeStars": "estrellas",
+      "arcadePlay": "DevCrafting te espera: resuelve tickets, gana estrellas.",
+      "activity": "Actividad",
+      "activityEmpty": "Silencio absoluto. Haz algo y esto se mueve.",
+      "tasks": "Mis tareas abiertas",
+      "tasksEmpty": "Cero pendientes. Respira.",
+      "overdue": "VENCIDA"
+    },
+    "time": {
+      "now": "AHORA",
+      "min": "HACE {n} MIN",
+      "hours": "HACE {n} H",
+      "yesterday": "AYER",
+      "days": "HACE {n} D"
+    },
+    "errors": {
+      "overview": "No se pudo cargar tu resumen. ¿Está el backend corriendo?",
+      "seed": "No se pudo crear el playground demo.",
+      "retry": "Reintentar"
     }
   },
   "common": {

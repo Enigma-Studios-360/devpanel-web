@@ -56,7 +56,7 @@ export const TUTORIALS: Tutorial[] = [
         body:
           'Te llevo a la pantalla de Equipos. Pulsa el botón de abajo y abrimos ' +
           'el formulario juntos.',
-        placement: 'right',
+        placement: 'bottom',
         cta: {
           label: 'Vamos a equipos',
           route: '/app/teams',
@@ -199,22 +199,22 @@ export const TUTORIALS: Tutorial[] = [
       {
         id: 'whats-new',
         route: '/app/dashboard',
-        target: 'whats-new',
-        title: 'Lo que estrenamos esta semana',
+        target: 'dash-hero',
+        title: 'Tu página "Hoy"',
         body:
-          'En tu dashboard verás un banner con las novedades: asistente con IA, ' +
-          'detección automática de stack y el nuevo Deploy Wizard. Pásale el ratón ' +
-          'a cada tarjeta para descubrirlas.',
-        placement: 'bottom',
+          'Esta tarjeta grande es lo más importante de tu día: tu siguiente ' +
+          'entrega de aula, entregas por revisar o tu proyecto más reciente. ' +
+          'Alrededor viven tus aulas, tu último deploy, el arcade y tu actividad.',
+        placement: 'right',
       },
       {
         id: 'sidebar',
         target: 'sidebar-teams',
         title: 'Tu navegación principal',
         body:
-          'A la izquierda tienes Equipos, Proyectos, Documentación, GitHub, Deploy ' +
-          'y Planes. Siempre está visible a un click.',
-        placement: 'right',
+          'Arriba tienes Hoy, Proyectos, Equipos, Aulas, Deploy y Arcade. ' +
+          'Docs, Archivos, Actividad, Planes y GitHub viven en el menú "Más".',
+        placement: 'bottom',
       },
       {
         id: 'role-badge',
@@ -252,7 +252,7 @@ export const TUTORIALS: Tutorial[] = [
           'proyectos, vincular GitHub y lanzar tu primer deploy a Vercel.',
         tierInfo:
           'Tu equipo arranca con plan FREE: 1 proyecto activo · 3 miembros.',
-        placement: 'right',
+        placement: 'bottom',
         cta: {
           label: 'Crear mi primer equipo',
           route: '/app/teams',

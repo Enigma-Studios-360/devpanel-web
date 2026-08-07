@@ -1,0 +1,171 @@
+<header class="dp-topbar">
+  <div class="dp-topbar__row">
+    <!-- Brand ------------------------------------------------------------- -->
+    <a
+      class="dp-topbar__brand"
+      routerLink="/app/dashboard"
+      data-tour="sidebar-brand"
+      [attr.aria-label]="'app.name' | t"
+    >
+      <span class="dp-topbar__logo"><i class="pi pi-bolt"></i></span>
+      <b>{{ 'app.name' | t }}</b>
+    </a>
+
+    <!-- Horizontal nav (desktop) ------------------------------------------ -->
+    <nav class="dp-topbar__nav" aria-label="Main navigation">
+      @for (item of mainNav; track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="is-active"
+          class="dp-topbar__link"
+          [class.dp-topbar__link--teal]="item.accent === 'teal'"
+          [attr.data-tour]="item.tour"
+        >
+          {{ item.labelKey | t }}
+        </a>
+      }
+
+      <!-- "Más" dropdown: secondary routes so nothing is lost -->
+      <div class="dp-topbar__more">
+        <button
+          type="button"
+          class="dp-topbar__link dp-topbar__more-btn"
+          (click)="toggleMore()"
+          aria-haspopup="true"
+          [attr.aria-expanded]="moreOpen()"
+        >
+          <span>{{ 'shell.more' | t }}</span>
+          <i class="pi pi-angle-down" [class.is-flipped]="moreOpen()"></i>
+        </button>
+        @if (moreOpen()) {
+          <div class="dp-topbar__more-pop" role="menu">
+            @for (item of moreNav; track item.link) {
+              <a
+                [routerLink]="item.link"
+                class="dp-topbar__more-item"
+                role="menuitem"
+                [attr.data-tour]="item.tour"
+              >
+                {{ item.labelKey | t }}
+              </a>
+            }
+          </div>
+        }
+      </div>
+    </nav>
+
+    <!-- Search (⌘K) -------------------------------------------------------- -->
+    <div
+      class="dp-topbar__search"
+      role="button"
+      tabindex="0"
+      (click)="openSearch()"
+      (keydown.enter)="openSearch()"
+    >
+      <i class="pi pi-search"></i>
+      <span class="dp-topbar__search-label">{{ 'common.search' | t }}</span>
+      <span class="dp-topbar__kbd">⌘K</span>
+    </div>
+
+    <!-- Right cluster ------------------------------------------------------ -->
+    <div class="dp-topbar__right">
+      @if (role(); as r) {
+        <span
+          class="dp-role-badge"
+          [class.dp-role-badge--owner]="r === 'OWNER'"
+          [class.dp-role-badge--admin]="r === 'ADMIN'"
+          [class.dp-role-badge--dev]="r === 'DEVELOPER'"
+          [class.dp-role-badge--viewer]="r === 'VIEWER'"
+          data-tour="current-role"
+          [title]="roleTooltip()"
+        >
+          <i class="pi pi-id-card"></i>
+          <span>{{ r }}</span>
+        </span>
+      }
+      <span data-tour="language-switcher">
+        <dp-language-switcher></dp-language-switcher>
+      </span>
+      <span data-tour="theme-toggle">
+        <dp-theme-toggle></dp-theme-toggle>
+      </span>
+      <dp-notification-bell></dp-notification-bell>
+      <dp-help-button></dp-help-button>
+      <dp-user-menu></dp-user-menu>
+    </div>
+
+    <!-- Hamburger (mobile only) -------------------------------------------- -->
+    <button
+      type="button"
+      class="dp-topbar__burger"
+      (click)="toggleMobile()"
+      [attr.aria-expanded]="mobileOpen()"
+      [attr.aria-label]="'shell.menu' | t"
+    >
+      <i class="pi" [class.pi-bars]="!mobileOpen()" [class.pi-times]="mobileOpen()"></i>
+    </button>
+  </div>
+
+  <!-- Contextual project row (replaces the sidebar "Proyecto actual" group) -->
+  @if (projectId()) {
+    <div class="dp-topbar__ctx" aria-label="Project navigation">
+      <span class="dp-topbar__ctx-label">{{ 'shell.project' | t }}</span>
+      @for (item of projectNav(); track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="is-active"
+          class="dp-topbar__ctx-link"
+          [attr.data-tour]="item.tour"
+        >
+          {{ item.labelKey | t }}
+        </a>
+      }
+    </div>
+  }
+
+  <!-- Mobile drawer -------------------------------------------------------- -->
+  @if (mobileOpen()) {
+    <nav class="dp-topbar__mobile" aria-label="Mobile navigation">
+      @for (item of mainNav; track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="is-active"
+          class="dp-topbar__mobile-link"
+          [class.dp-topbar__mobile-link--teal]="item.accent === 'teal'"
+        >
+          {{ item.labelKey | t }}
+        </a>
+      }
+      <hr class="dp-topbar__mobile-sep" />
+      @for (item of moreNav; track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="is-active"
+          class="dp-topbar__mobile-link dp-topbar__mobile-link--muted"
+        >
+          {{ item.labelKey | t }}
+        </a>
+      }
+      @if (projectId()) {
+        <hr class="dp-topbar__mobile-sep" />
+        <span class="dp-topbar__ctx-label">{{ 'shell.project' | t }}</span>
+        @for (item of projectNav(); track item.link) {
+          <a
+            [routerLink]="item.link"
+            routerLinkActive="is-active"
+            class="dp-topbar__mobile-link dp-topbar__mobile-link--muted"
+          >
+            {{ item.labelKey | t }}
+          </a>
+        }
+      }
+      <hr class="dp-topbar__mobile-sep" />
+      <!-- Tools hidden from the compact mobile header live here instead. -->
+      <div class="dp-topbar__mobile-tools">
+        <dp-language-switcher></dp-language-switcher>
+        <dp-theme-toggle></dp-theme-toggle>
+        <dp-help-button></dp-help-button>
+      </div>
+    </nav>
+  }
+</header>

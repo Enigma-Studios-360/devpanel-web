@@ -3,7 +3,9 @@ import { TranslationService } from './translation.service';
 import { LanguageService } from './language.service';
 
 /**
- * Usage in templates:  {{ 'nav.projects' | t }}
+ * Usage in templates:
+ *   {{ 'nav.projects' | t }}
+ *   {{ 'home.greeting.morning' | t: { name: firstName() } }}
  *
  * The pipe is "impure" via reading two signals (current language + dictionary)
  * inside transform — Angular re-runs it when their values change.
@@ -13,9 +15,9 @@ export class TPipe implements PipeTransform {
   private readonly tr = inject(TranslationService);
   private readonly lang = inject(LanguageService);
 
-  transform(key: string): string {
+  transform(key: string, params?: Record<string, string | number>): string {
     // Read the language signal to make the pipe reactive to language changes.
     void this.lang.current();
-    return this.tr.t(key);
+    return this.tr.t(key, params);
   }
 }

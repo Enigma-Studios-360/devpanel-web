@@ -26,8 +26,12 @@ export class TranslationService {
   /**
    * Resolves a dotted key like "dashboard.apiStatus.connected".
    * Falls back to the key itself if missing.
+   *
+   * Optional `params` interpolate `{placeholders}` in the resolved string:
+   *   t('home.greeting.morning', { name: 'Diego' })
+   *   // "¿Qué sigue, Diego?"  ← from "¿Qué sigue, {name}?"
    */
-  t(key: string): string {
+  t(key: string, params?: Record<string, string | number>): string {
     const dict = this.dictSignal();
     const value = key
       .split('.')
@@ -36,7 +40,11 @@ export class TranslationService {
           acc && typeof acc === 'object' ? (acc as Dictionary)[part] : undefined,
         dict,
       );
-    return typeof value === 'string' ? value : key;
+    const raw = typeof value === 'string' ? value : key;
+    if (!params) return raw;
+    return raw.replace(/\{(\w+)\}/g, (match, name: string) =>
+      name in params ? String(params[name]) : match,
+    );
   }
 
   async load(code: LanguageCode): Promise<void> {

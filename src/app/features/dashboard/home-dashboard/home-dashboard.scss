@@ -1,398 +1,456 @@
-/* Pull in the shared button/spinner/modal primitives (.dp-btn, .dp-spinner,
-   .dp-modal*). They live in teams.scss and, like projects/tasks/docs/github,
-   this view must import them or its "Recargar"/empty-state CTAs render
+/* Pull in the shared button/spinner primitives (.dp-btn, .dp-spinner).
+   They live in teams.scss; without this import the hero CTAs render
    unstyled (Angular emulated encapsulation scopes them per component). */
 @use '../../teams/teams.scss';
 
-.dp-dashboard {
+/* ==========================================================================
+   "Hoy" — editorial home. Kicker + giant greeting + asymmetric bento.
+   ========================================================================== */
+
+.dp-today {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 
-  &__section-title {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--dp-text-muted);
-    font-weight: 700;
-    margin: 0;
-  }
-
-  /* --- Stats strip ------------------------------------------------------- */
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-
-  /* --- Two-column main grid (projects + tasks) --------------------------- */
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-
-    @media (max-width: 960px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  &__panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    padding: 1.1rem 1.25rem;
-  }
-
-  &__panel-head {
-    display: flex;
+  /* --- Kicker with blinking terminal cursor ------------------------------ */
+  &__kicker {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
     gap: 0.5rem;
-
-    h3 {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--dp-text);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-
-      i { color: var(--dp-text-muted); font-size: 13px; }
-    }
-  }
-
-  &__panel-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    color: var(--dp-text-muted);
-    font-size: 11.5px;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-    transition: color 140ms ease;
-
-    &:hover {
-      color: var(--dp-accent-blue, #3b82f6);
-    }
-
-    i { font-size: 10px; }
-  }
-
-  /* --- Recent projects list --------------------------------------------- */
-  &__projects {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  &__project-row {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.7rem;
-    align-items: center;
-    padding: 0.65rem 0.75rem;
-    border-radius: var(--dp-radius-md);
-    background: var(--dp-surface-2);
-    border: 1px solid transparent;
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 140ms ease, transform 140ms ease;
-
-    &:hover {
-      border-color: var(--dp-border);
-      transform: translateX(2px);
-    }
-
-    strong { color: var(--dp-text); font-size: 13px; }
-  }
-
-  &__project-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--accent, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-  }
-
-  &__project-meta { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
-
-  /* --- My tasks list ---------------------------------------------------- */
-  &__tasks {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  &__task-row {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.7rem;
-    align-items: center;
-    padding: 0.55rem 0.75rem;
-    border-radius: var(--dp-radius-md);
-    background: var(--dp-surface-2);
-    border: 1px solid transparent;
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 140ms ease, transform 140ms ease;
-
-    &:hover {
-      border-color: var(--dp-border);
-      transform: translateX(2px);
-    }
-
-    strong { color: var(--dp-text); font-size: 13px; }
-
-    &--overdue {
-      border-color: rgba(239, 68, 68, 0.32);
-    }
-  }
-
-  &__task-meta { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
-
-  &__overdue {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
+    font-family: var(--dp-font-mono);
     font-size: 10.5px;
-    font-weight: 700;
+    font-weight: 500;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--dp-accent-red, #ef4444);
-    padding: 0.15rem 0.45rem;
-    background: rgba(239, 68, 68, 0.12);
-    border-radius: 999px;
-
-    i { font-size: 9px; }
+    color: var(--dp-text-muted);
   }
 
-  /* --- Activity feed ---------------------------------------------------- */
-  &__activity {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.7rem;
-      align-items: flex-start;
-    }
-  }
-
-  &__activity-dot {
+  &__cursor {
     width: 8px;
     height: 8px;
-    border-radius: 999px;
-    background: var(--dp-accent-blue, #3b82f6);
-    margin-top: 5px;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+    background: var(--dp-accent-teal);
+    /* parpadea como cursor de terminal */
+    animation: dp-blink 1.1s steps(2, start) infinite;
   }
 
-  &__activity-msg {
-    margin: 0 0 0.15rem 0;
+  /* --- Giant greeting ---------------------------------------------------- */
+  &__title {
+    font-size: clamp(30px, 4.6vw, 44px);
+    margin: 0.6rem 0 0.25rem;
     color: var(--dp-text);
-    font-size: 13.5px;
-    line-height: 1.4;
+    min-height: 1.15em; /* keeps layout stable while the typewriter runs */
   }
 
-  /* --- Loading skeletons -------------------------------------------------- */
-  &__row-skeleton {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.7rem;
+  &__caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.95em;
+    margin-left: 0.08em;
+    vertical-align: text-bottom;
+    background: var(--dp-accent-teal);
+    animation: dp-blink 0.85s steps(2, start) infinite;
+  }
+
+  &__sub {
+    margin: 0 0 1.8rem;
+    color: var(--dp-text-muted);
+    font-size: 14.5px;
+  }
+
+  /* --- Error strip -------------------------------------------------------- */
+  &__error {
+    display: flex;
     align-items: center;
-    padding: 0.55rem 0.5rem;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: var(--dp-radius-md);
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--dp-text);
+    font-size: 13px;
   }
 
-  /* --- Empty workspace --------------------------------------------------- */
-  &__empty {
-    text-align: center;
-    padding: 2.5rem 1.5rem;
-    background:
-      radial-gradient(circle at 30% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-      radial-gradient(circle at 70% 100%, rgba(139, 92, 246, 0.13) 0%, transparent 60%),
-      var(--dp-surface);
+  &__error-retry {
+    margin-left: auto;
     border: 1px solid var(--dp-border);
-    border-radius: var(--dp-radius-lg);
+    background: transparent;
+    color: var(--dp-text);
+    border-radius: var(--dp-radius-sm);
+    padding: 0.25rem 0.7rem;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover { background: var(--dp-surface-2); }
+  }
+
+  /* --- Bento grid ---------------------------------------------------------- */
+  &__bento {
+    display: grid;
+    /* minmax(0, …) — sin piso de min-content: las tarjetas nunca desbordan */
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  &__card {
+    position: relative;
+    background: var(--dp-surface);
+    border: 1px solid var(--dp-border);
+    border-radius: 14px;
+    padding: 1.35rem 1.5rem;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+
+    &:hover {
+      text-decoration: none;
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--dp-accent-blue) 45%, var(--dp-border));
+      box-shadow: var(--dp-shadow-md);
+    }
+  }
+
+  /* --- Hero ----------------------------------------------------------------- */
+  &__hero {
+    grid-row: span 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.85rem;
+    overflow: hidden;
 
-    h2 {
-      margin: 0;
-      font-size: 19px;
-      font-weight: 600;
-      color: var(--dp-text);
+    &--aula {
+      border-color: rgba(45, 212, 191, 0.35);
+
+      &:hover {
+        border-color: rgba(45, 212, 191, 0.6);
+      }
+
+      /* Detalle pixel-art: escalera de 3 cuadritos teal en la esquina */
+      &::after {
+        content: '';
+        position: absolute;
+        top: 26px;
+        right: 26px;
+        width: 8px;
+        height: 8px;
+        background: var(--dp-accent-teal);
+        box-shadow:
+          8px -8px 0 var(--dp-accent-teal),
+          16px -16px 0 var(--dp-accent-teal);
+        opacity: 0.85;
+        pointer-events: none;
+      }
     }
 
-    p {
-      margin: 0;
-      color: var(--dp-text-muted);
-      font-size: 13.5px;
-      line-height: 1.55;
-      max-width: 52ch;
+    &--empty {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 85% 100%, rgba(139, 92, 246, 0.12) 0%, transparent 55%),
+        var(--dp-surface);
     }
   }
 
-  &__empty-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    display: grid;
-    place-items: center;
-    color: #fff;
-
-    i { font-size: 22px; }
-  }
-
-  &__empty-actions {
-    display: inline-flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 0.25rem;
-  }
-
-  /* --- Learn-more grid -------------------------------------------------- */
-  &__learn { display: flex; flex-direction: column; gap: 0.75rem; }
-
-  &__learn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* ============================================================================
-   Stat card — new compact widget used at the top of the dashboard. Lives
-   here (not in shared) because it's tightly coupled to the dashboard layout.
-   ========================================================================= */
-
-.dp-stat-card {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.85rem;
-  align-items: center;
-  padding: 1rem 1.15rem;
-  background: var(--dp-surface);
-  border: 1px solid var(--dp-border);
-  border-radius: var(--dp-radius-lg);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 140ms ease, transform 140ms ease;
-
-  &:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-1px);
-  }
-
-  &--loading {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-    padding: 1.1rem;
-  }
-
-  strong {
-    display: block;
-    font-size: 22px;
+  &__hero-title {
+    font-family: var(--dp-font-display);
+    font-size: 24px;
     font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin: 0 0 0.4rem;
     color: var(--dp-text);
-    line-height: 1;
-    margin-bottom: 0.25rem;
   }
 
-  small {
+  &__hero-body {
+    color: var(--dp-text-muted);
+    font-size: 13.5px;
+    margin: 0 0 auto;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__due {
+    font-family: var(--dp-font-mono);
+    font-size: 12px;
+    color: var(--dp-accent-yellow);
+    margin-bottom: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &--overdue { color: var(--dp-accent-red); }
+    &--muted { color: var(--dp-text-muted); text-transform: none; }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+  }
+
+  /* Aulas context: the primary CTA goes teal (D-tokens: teal = Classroom) */
+  &__btn-teal {
+    background: var(--dp-accent-teal) !important;
+    color: #052e2b !important;
+  }
+
+  /* --- Pixel progress bar --------------------------------------------------- */
+  &__progress { margin-top: 1.2rem; }
+
+  &__bar {
+    height: 8px;
+    background: var(--dp-surface-2);
+    position: relative;
+    overflow: hidden;
+
+    i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--dp-accent-teal) 0 8px,
+        #26b3a2 8px 16px
+      );
+      transition: width 600ms ease;
+    }
+  }
+
+  &__progress small {
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--dp-text-muted);
     display: block;
+    margin-top: 0.45rem;
+    text-transform: uppercase;
+  }
+
+  /* --- Labels / numbers ------------------------------------------------------ */
+  &__label {
+    display: block;
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dp-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  &__label--teal { color: var(--dp-accent-teal); }
+
+  &__num {
+    font-size: 34px;
+    line-height: 1;
+    color: var(--dp-text);
+  }
+
+  &__num-unit {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--dp-text-muted);
+    letter-spacing: 0;
+  }
+
+  &__meta {
+    display: block;
+    margin-top: 0.5rem;
     color: var(--dp-text-muted);
     font-size: 12px;
+    line-height: 1.45;
   }
 
-  &__icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--dp-radius-md);
-    display: grid;
-    place-items: center;
-    background: rgba(var(--c), 0.16);
-    color: rgb(var(--c));
-    flex-shrink: 0;
-
-    i { font-size: 16px; }
+  /* --- Satellites ------------------------------------------------------------ */
+  &__sat {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
-  &__hint {
+  &__sat-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__px {
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-accent-purple);
+  }
+
+  &__sat--arcade:hover {
+    border-color: color-mix(in srgb, var(--dp-accent-purple) 45%, var(--dp-border));
+  }
+
+  &__streak {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.8rem;
+
+    span {
+      width: 13px;
+      height: 13px;
+      background: var(--dp-surface-2);
+
+      &.is-on { background: var(--dp-accent-green); }
+    }
+  }
+
+  /* --- Deploy card ------------------------------------------------------------ */
+  &__live {
+    display: inline-block;
+    align-self: flex-start;
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    margin-bottom: 0.6rem;
+    border: 1px solid var(--dp-border);
+    color: var(--dp-text-muted);
+
+    &--ok   { color: var(--dp-accent-green);  border-color: rgba(34, 197, 94, 0.4); }
+    &--warn { color: var(--dp-accent-yellow); border-color: rgba(245, 158, 11, 0.4); }
+    &--err  { color: var(--dp-accent-red);    border-color: rgba(239, 68, 68, 0.4); }
+  }
+
+  &__url {
+    font-family: var(--dp-font-mono);
+    font-size: 11.5px;
+    color: var(--dp-accent-blue);
+    word-break: break-all;
+  }
+
+  /* --- Activity feed ----------------------------------------------------------- */
+  &__sat--feed { gap: 0; }
+
+  &__feed-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--dp-surface-2);
+    font-size: 12.5px;
+
+    &:last-child { border-bottom: 0; }
+  }
+
+  &__feed-msg {
+    color: var(--dp-text);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__feed-time {
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    color: var(--dp-text-muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* --- Tasks strip -------------------------------------------------------------- */
+  &__tasks {
+    grid-column: 1 / -1;
+  }
+
+  &__task-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  &__task-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    margin-top: 0.35rem;
-    color: var(--dp-text-muted);
-    font-size: 11px;
+    gap: 0.5rem;
+    max-width: 100%;
+    padding: 0.45rem 0.8rem;
+    background: var(--dp-surface-2);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    font-size: 12.5px;
+    overflow: hidden;
+    transition: border-color 130ms ease, transform 130ms ease;
 
-    &--danger {
-      color: var(--dp-accent-red, #ef4444);
-
-      i { font-size: 10px; }
+    &:hover {
+      text-decoration: none;
+      border-color: var(--dp-border);
+      transform: translateY(-1px);
     }
+
+    &--overdue { border-color: rgba(239, 68, 68, 0.35); }
+  }
+
+  &__task-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    background: var(--dp-accent-blue);
+
+    &.is-urgent { background: var(--dp-accent-red); }
+  }
+
+  &__task-title {
+    color: var(--dp-text);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 26ch;
+  }
+
+  &__task-project {
+    color: var(--dp-text-muted);
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+
+  &__task-overdue {
+    font-family: var(--dp-font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--dp-accent-red);
   }
 }
 
-/* Arcade (DevCrafting) panel ------------------------------------------------ */
-.dp-arcade {
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
+/* --- Blink (kicker cursor + typewriter caret) ------------------------------ */
+@keyframes dp-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp-today__cursor,
+  .dp-today__caret {
+    animation: none;
   }
-
-  &__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.7rem 0.9rem;
-    background: var(--dp-surface-2);
-    border: 1px solid var(--dp-border);
-    border-radius: var(--dp-radius-md);
-
-    strong { font-size: 15px; color: var(--dp-text); }
-    small { font-size: 11px; color: var(--dp-text-muted); }
+  .dp-today__card,
+  .dp-today__task-chip {
+    transition: none;
   }
+}
 
-  &__top {
-    list-style: none;
-    margin: 0.9rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+/* --- Responsive -------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .dp-today__bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    li {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 13px;
-      padding: 0.35rem 0.5rem;
-      border-radius: var(--dp-radius-sm, 6px);
-
-      &:hover { background: var(--dp-surface-2); }
-    }
+    .dp-today__hero { grid-column: 1 / -1; grid-row: auto; }
   }
+}
 
-  &__top-pos { color: var(--dp-text-muted); width: 2rem; }
-  &__top-name { color: var(--dp-text); flex: 1; }
-  &__top-stars { color: var(--dp-text-muted); font-size: 12px; }
+@media (max-width: 640px) {
+  .dp-today__bento {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dp-today__sub { margin-bottom: 1.2rem; }
 }

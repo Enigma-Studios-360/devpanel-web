@@ -1,359 +1,280 @@
-<dp-page-header
-  [title]="greeting() + (userFirstName() ? ', ' + userFirstName() : '') + ' 👋'"
-  subtitle="Aquí está el resumen de tu workspace en DevHub."
->
-  <button
-    type="button"
-    class="dp-btn dp-btn--ghost"
-    (click)="refreshOverview(); refreshHealth()"
-    [disabled]="overviewLoading()"
-    title="Recargar"
-  >
-    <i class="pi pi-refresh"></i>
-    <span>Recargar</span>
-  </button>
-</dp-page-header>
+<div class="dp-today">
+  <!-- Kicker: real date + blinking terminal cursor ------------------------- -->
+  <div class="dp-today__kicker">
+    <span class="dp-today__cursor" aria-hidden="true"></span>
+    <span>{{ todayLabel() }}</span>
+  </div>
 
-<div class="dp-dashboard">
-  <!-- "What's new" banner ------------------------------------------------- -->
-  <dp-whats-new
-    releaseId="2026-05"
-    headline="Tres cosas que estrenamos esta semana"
-    [items]="whatsNewItems"
-  />
+  <!-- Giant editorial greeting (rotates by hour, typewriter once a day) ----- -->
+  <h1 class="dp-today__title dp-display">
+    @if (typing()) {
+      {{ typed() }}<span class="dp-today__caret" aria-hidden="true"></span>
+    } @else {
+      {{ greetKey() | t: greetParams() }}
+    }
+  </h1>
+  <p class="dp-today__sub">{{ subKey() | t }}</p>
 
   @if (overviewError()) {
-    <div class="dp-modal__error">
+    <div class="dp-today__error">
       <i class="pi pi-exclamation-circle"></i> {{ overviewError() }}
+      <button type="button" class="dp-today__error-retry" (click)="refreshOverview()">
+        {{ 'home.errors.retry' | t }}
+      </button>
     </div>
   }
 
-  <!-- Stats overview --------------------------------------------------------- -->
-  <section class="dp-dashboard__stats">
-    @if (overviewLoading()) {
-      @for (_ of [1,2,3,4]; track $index) {
-        <div class="dp-stat-card dp-stat-card--loading">
-          <dp-skeleton variant="text" lines="2" />
-        </div>
-      }
-    } @else if (overview(); as o) {
-      <a [routerLink]="['/app/teams']" class="dp-stat-card" data-tour="stat-projects">
-        <span class="dp-stat-card__icon" style="--c: 59, 130, 246;">
-          <i class="pi pi-folder-open"></i>
-        </span>
-        <div>
-          <strong>{{ o.stats.activeProjects }}</strong>
-          <small>Proyectos activos</small>
-          @if (o.stats.totalProjects > o.stats.activeProjects) {
-            <span class="dp-stat-card__hint">
-              {{ o.stats.totalProjects - o.stats.activeProjects }} archivado(s)
+  <!-- Bento ------------------------------------------------------------------ -->
+  <div class="dp-today__bento">
+    <!-- HERO ----------------------------------------------------------------- -->
+    <section
+      class="dp-today__card dp-today__hero"
+      data-tour="dash-hero"
+      [class.dp-today__hero--aula]="heroVariant() === 'entrega' || heroVariant() === 'revisar'"
+      [class.dp-today__hero--empty]="heroVariant() === 'vacio'"
+    >
+      @switch (heroVariant()) {
+        @case ('loading') {
+          <dp-skeleton variant="text" lines="4" />
+        }
+
+        <!-- ALUMNO: next pending assignment -->
+        @case ('entrega') {
+          @if (aulaHero(); as h) {
+            <span class="dp-today__label dp-today__label--teal">
+              ■ {{ 'home.hero.nextDue' | t: { aula: h.classroomName } }}
             </span>
-          }
-        </div>
-      </a>
-
-      <a [routerLink]="['/app/teams']" class="dp-stat-card">
-        <span class="dp-stat-card__icon" style="--c: 139, 92, 246;">
-          <i class="pi pi-users"></i>
-        </span>
-        <div>
-          <strong>{{ o.stats.totalTeams }}</strong>
-          <small>Equipos</small>
-        </div>
-      </a>
-
-      <div class="dp-stat-card">
-        <span class="dp-stat-card__icon" style="--c: 34, 197, 94;">
-          <i class="pi pi-check-square"></i>
-        </span>
-        <div>
-          <strong>{{ o.stats.openTasksAssignedToMe }}</strong>
-          <small>Tareas asignadas a ti</small>
-          @if (o.stats.overdueTasksAssignedToMe > 0) {
-            <span class="dp-stat-card__hint dp-stat-card__hint--danger">
-              <i class="pi pi-exclamation-circle"></i>
-              {{ o.stats.overdueTasksAssignedToMe }} vencida(s)
-            </span>
-          }
-        </div>
-      </div>
-
-      <div class="dp-stat-card">
-        <span class="dp-stat-card__icon" style="--c: 245, 184, 92;">
-          <i class="pi pi-bolt"></i>
-        </span>
-        <div>
-          @if (healthState()?.available) {
-            <strong>API</strong>
-            <small>Conectada</small>
-            <span class="dp-stat-card__hint">
-              uptime {{ formatUptime(healthState()?.data?.uptime) }}
-            </span>
-          } @else {
-            <strong>API</strong>
-            <small class="dp-stat-card__hint--danger">No disponible</small>
-          }
-        </div>
-      </div>
-    }
-  </section>
-
-  <!-- Empty workspace state -------------------------------------------------- -->
-  @if (isEmptyWorkspace()) {
-    <section class="dp-dashboard__empty">
-      <div class="dp-dashboard__empty-icon"><i class="pi pi-rocket"></i></div>
-      <h2>Empieza por crear tu workspace</h2>
-      <p>
-        Crea un equipo desde cero, o deja que DevHub te genere un playground
-        (equipo + proyecto + 5 tareas de ejemplo) para que el tour guiado
-        tenga datos con los que jugar.
-      </p>
-      @if (seedError()) {
-        <div class="dp-modal__error">
-          <i class="pi pi-exclamation-circle"></i> {{ seedError() }}
-        </div>
-      }
-      <div class="dp-dashboard__empty-actions">
-        <a [routerLink]="['/app/teams']" class="dp-btn dp-btn--ghost">
-          <i class="pi pi-users"></i>
-          <span>Crear equipo manualmente</span>
-        </a>
-        <button
-          type="button"
-          class="dp-btn dp-btn--primary"
-          (click)="seedDemoData()"
-          [disabled]="seeding()"
-          data-tour="seed-demo"
-        >
-          @if (seeding()) { <span class="dp-spinner"></span> }
-          <i class="pi pi-sparkles"></i>
-          <span>Crear datos demo</span>
-        </button>
-      </div>
-    </section>
-  } @else {
-    <!-- Main grid: recent projects + my tasks -->
-    <div class="dp-dashboard__grid">
-      <!-- Recent projects ---------------------------------------------------- -->
-      <section class="dp-card dp-dashboard__panel" data-tour="dash-projects">
-        <header class="dp-dashboard__panel-head">
-          <h3>
-            <i class="pi pi-folder"></i>
-            Proyectos recientes
-          </h3>
-          <a [routerLink]="['/app/teams']" class="dp-dashboard__panel-link">
-            Ver todos <i class="pi pi-arrow-right"></i>
-          </a>
-        </header>
-
-        @if (overviewLoading()) {
-          @for (_ of [1,2,3]; track $index) {
-            <div class="dp-dashboard__row-skeleton">
-              <dp-skeleton variant="circle" size="32" />
-              <dp-skeleton variant="text" lines="2" />
+            <h2 class="dp-today__hero-title">{{ h.title }}</h2>
+            <div
+              class="dp-today__due"
+              [class.dp-today__due--overdue]="h.overdue"
+            >
+              {{ h.due.key | t: h.due.params ?? {} }}
+            </div>
+            <p class="dp-today__hero-body">
+              {{ h.instructions || ('home.hero.noInstructions' | t) }}
+            </p>
+            <div class="dp-today__progress">
+              <div class="dp-today__bar">
+                <i [style.width.%]="h.pct"></i>
+              </div>
+              <small>
+                {{ 'home.hero.progress' | t: { percent: h.pct, done: h.done, total: h.total } }}
+              </small>
+            </div>
+            <div class="dp-today__actions">
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary dp-today__btn-teal"
+                (click)="goToAula(h.classroomId)"
+              >
+                {{ 'home.hero.submit' | t }}
+              </button>
+              <button
+                type="button"
+                class="dp-btn dp-btn--ghost"
+                (click)="goToAula(h.classroomId)"
+              >
+                {{ 'home.hero.instructions' | t }}
+              </button>
             </div>
           }
-        } @else if (overview()?.recentProjects?.length === 0) {
-          <p class="dp-text-muted dp-text-sm">
-            Aún no hay proyectos. Crea uno desde la página de tu equipo.
-          </p>
-        } @else if (overview(); as o) {
-          <ul class="dp-dashboard__projects">
-            @for (p of o.recentProjects; track trackProject($index, p)) {
-              <li>
-                <a
-                  [routerLink]="['/app/projects', p._id, 'overview']"
-                  class="dp-dashboard__project-row"
-                  [style.--accent]="p.color"
-                >
-                  <span class="dp-dashboard__project-dot"></span>
-                  <div class="dp-dashboard__project-meta">
-                    <strong>{{ p.name }}</strong>
-                    <span class="dp-text-muted dp-text-sm">
-                      {{ p.teamName ?? '—' }} · actualizado {{ relativeTime(p.updatedAt) }}
-                    </span>
-                  </div>
-                  <dp-status-badge kind="project" [status]="p.status" [label]="p.status" />
-                </a>
-              </li>
-            }
-          </ul>
         }
-      </section>
 
-      <!-- My open tasks ------------------------------------------------------ -->
-      <section class="dp-card dp-dashboard__panel" data-tour="dash-mytasks">
-        <header class="dp-dashboard__panel-head">
-          <h3>
-            <i class="pi pi-check-square"></i>
-            Mis tareas
-          </h3>
-          @if (overview()?.stats?.openTasksAssignedToMe; as total) {
-            <span class="dp-dashboard__panel-link">
-              {{ total }} abiertas
+        <!-- PROFESOR: submissions waiting for review -->
+        @case ('revisar') {
+          @if (profesorHero(); as h) {
+            <span class="dp-today__label dp-today__label--teal">
+              ■ {{ 'home.hero.toReview' | t: { aula: h.classroomName } }}
             </span>
-          }
-        </header>
-
-        @if (overviewLoading()) {
-          @for (_ of [1,2,3]; track $index) {
-            <div class="dp-dashboard__row-skeleton">
-              <dp-skeleton variant="circle" size="22" />
-              <dp-skeleton variant="text" lines="2" />
+            <h2 class="dp-today__hero-title">
+              {{ (h.pending === 1 ? 'home.hero.reviewTitleOne' : 'home.hero.reviewTitle') | t: { n: h.pending } }}
+            </h2>
+            <p class="dp-today__hero-body">{{ 'home.hero.reviewBody' | t }}</p>
+            <div class="dp-today__actions">
+              <button
+                type="button"
+                class="dp-btn dp-btn--primary dp-today__btn-teal"
+                (click)="goToAula(h.classroomId)"
+              >
+                {{ 'home.hero.goToAula' | t }}
+              </button>
             </div>
           }
-        } @else if (overview()?.myOpenTasks?.length === 0) {
-          <p class="dp-text-muted dp-text-sm">
-            <i class="pi pi-check-circle" style="color: #22c55e;"></i>
-            No tienes tareas abiertas asignadas a ti.
-          </p>
-        } @else if (overview(); as o) {
-          <ul class="dp-dashboard__tasks">
-            @for (t of o.myOpenTasks; track trackTask($index, t)) {
-              <li>
-                <a
-                  [routerLink]="['/app/projects', t.projectId, 'tasks']"
-                  class="dp-dashboard__task-row"
-                  [class.dp-dashboard__task-row--overdue]="t.overdue"
-                >
-                  <dp-priority-badge [priority]="$any(t.priority)" />
-                  <div class="dp-dashboard__task-meta">
-                    <strong>{{ t.title }}</strong>
-                    <span class="dp-text-muted dp-text-sm">
-                      {{ t.projectName ?? '—' }}
-                      @if (t.dueDate) {
-                        · <i class="pi pi-calendar"></i> {{ formatDate(t.dueDate) }}
-                      }
-                    </span>
-                  </div>
-                  @if (t.overdue) {
-                    <span class="dp-dashboard__overdue">
-                      <i class="pi pi-exclamation-circle"></i>
-                      Vencida
-                    </span>
-                  }
-                </a>
-              </li>
-            }
-          </ul>
         }
-      </section>
-    </div>
 
-    <!-- Recent activity ----------------------------------------------------- -->
-    <section class="dp-card dp-dashboard__panel" data-tour="dash-activity">
-      <header class="dp-dashboard__panel-head">
-        <h3>
-          <i class="pi pi-history"></i>
-          Actividad reciente
-        </h3>
-        <span class="dp-dashboard__panel-link">
-          últimos 10 cambios
-        </span>
-      </header>
+        <!-- Fallback: most recent project → push it to production -->
+        @case ('proyecto') {
+          @if (heroProject(); as p) {
+            <span class="dp-today__label">■ {{ 'home.hero.projectKicker' | t }}</span>
+            <h2 class="dp-today__hero-title">{{ p.name }}</h2>
+            <div class="dp-today__due dp-today__due--muted">
+              {{ 'home.hero.projectUpdated' | t: { when: relativeTime(p.updatedAt) } }}
+              @if (p.teamName) { · {{ p.teamName }} }
+            </div>
+            <p class="dp-today__hero-body">{{ 'home.hero.projectBody' | t }}</p>
+            <div class="dp-today__actions">
+              <a
+                [routerLink]="['/app/projects', p._id, 'deploy']"
+                class="dp-btn dp-btn--primary"
+              >
+                {{ 'home.hero.deployCta' | t }}
+              </a>
+              <a
+                [routerLink]="['/app/projects', p._id, 'overview']"
+                class="dp-btn dp-btn--ghost"
+              >
+                {{ 'home.hero.openProject' | t }}
+              </a>
+            </div>
+          }
+        }
 
-      @if (overviewLoading()) {
-        @for (_ of [1,2,3,4]; track $index) {
-          <div class="dp-dashboard__row-skeleton">
-            <dp-skeleton variant="circle" size="28" />
-            <dp-skeleton variant="text" lines="2" />
+        <!-- Empty workspace: creative CTA -->
+        @case ('vacio') {
+          <span class="dp-today__label">■ {{ 'home.hero.emptyKicker' | t }}</span>
+          <h2 class="dp-today__hero-title">{{ 'home.hero.emptyTitle' | t }}</h2>
+          <p class="dp-today__hero-body">{{ 'home.hero.emptyBody' | t }}</p>
+          @if (seedError()) {
+            <div class="dp-today__error">
+              <i class="pi pi-exclamation-circle"></i> {{ seedError() }}
+            </div>
+          }
+          <div class="dp-today__actions">
+            <button
+              type="button"
+              class="dp-btn dp-btn--primary"
+              (click)="seedDemoData()"
+              [disabled]="seeding()"
+              data-tour="seed-demo"
+            >
+              @if (seeding()) { <span class="dp-spinner"></span> }
+              <i class="pi pi-sparkles"></i>
+              <span>{{ 'home.hero.seed' | t }}</span>
+            </button>
+            <a routerLink="/app/aulas" class="dp-btn dp-btn--ghost">
+              {{ 'home.hero.joinAula' | t }}
+            </a>
+            <a routerLink="/app/teams" class="dp-btn dp-btn--ghost">
+              {{ 'home.hero.createTeam' | t }}
+            </a>
           </div>
         }
-      } @else if (overview()?.recentActivity?.length === 0) {
-        <dp-empty-state
-          title="Sin actividad todavía"
-          description="Cuando alguien cree tareas, cambie estados o vincule un repo, lo verás aquí."
-          icon="pi-history"
-          [compact]="true"
-        />
-      } @else if (overview(); as o) {
-        <ul class="dp-dashboard__activity">
-          @for (a of o.recentActivity; track trackActivity($index, a)) {
-            <li>
-              <span class="dp-dashboard__activity-dot"></span>
-              <div>
-                <p class="dp-dashboard__activity-msg">{{ a.message }}</p>
-                <span class="dp-text-muted dp-text-sm">
-                  @if (a.actor?.name) { {{ a.actor!.name }} · }
-                  {{ relativeTime(a.createdAt) }}
-                </span>
-              </div>
-            </li>
-          }
-        </ul>
       }
     </section>
-  }
 
-  <!-- Arcade · DevCrafting ------------------------------------------------- -->
-  <section class="dp-card dp-dashboard__panel dp-arcade" data-tour="dash-arcade">
-    <header class="dp-dashboard__panel-head">
-      <h3>
-        <i class="pi pi-play-circle"></i>
-        Arcade · DevCrafting
-      </h3>
-      <span class="dp-dashboard__panel-link">tu progreso vive en el backend</span>
-    </header>
-
-    @if (arcadeLoading()) {
-      <div class="dp-dashboard__row-skeleton">
-        <dp-skeleton variant="circle" size="32" />
-        <dp-skeleton variant="text" lines="2" />
-      </div>
-    } @else if (arcade(); as a) {
-      <div class="dp-arcade__stats">
-        <div class="dp-arcade__stat">
-          <strong>Día {{ a.day }}</strong>
-          <small>campaña</small>
-        </div>
-        <div class="dp-arcade__stat">
-          <strong>⭐ {{ a.totalStars }}</strong>
-          <small>estrellas</small>
-        </div>
-        <div class="dp-arcade__stat">
-          <strong>${{ a.money }}</strong>
-          <small>sueldo</small>
-        </div>
-        <div class="dp-arcade__stat">
-          <strong>{{ a.ticketsResolved }}</strong>
-          <small>tickets resueltos</small>
-        </div>
-        <div class="dp-arcade__stat">
-          <strong>{{ a.rank }}</strong>
-          <small>rango · jugado {{ relativeTime(a.lastPlayedAt) }}</small>
-        </div>
-      </div>
-      @if (arcadeTop().length > 1) {
-        <ul class="dp-arcade__top">
-          @for (e of arcadeTop(); track e._id) {
-            <li>
-              <span class="dp-arcade__top-pos">#{{ $index + 1 }}</span>
-              <span class="dp-arcade__top-name">{{ arcadePlayerName(e) }}</span>
-              <span class="dp-arcade__top-stars">⭐ {{ e.totalStars }} · día {{ e.day }}</span>
-            </li>
-          }
-        </ul>
+    <!-- SATELLITE · Mis aulas ------------------------------------------------ -->
+    <a class="dp-today__card dp-today__sat" routerLink="/app/aulas">
+      <span class="dp-today__label dp-today__label--teal">{{ 'home.cards.aulas' | t }}</span>
+      @if (activeClassrooms().length > 0) {
+        <div class="dp-today__num dp-stat-number">{{ aulasCount() }}</div>
+        <small class="dp-today__meta">{{ classroomNames() }}</small>
+      } @else {
+        <div class="dp-today__num dp-stat-number">0</div>
+        <small class="dp-today__meta">{{ 'home.cards.aulasEmpty' | t }}</small>
       }
-    } @else {
-      <p class="dp-text-muted dp-text-sm">
-        <i class="pi pi-play-circle"></i>
-        Aún no has jugado. DevCrafting es nuestro simulador de tickets de TI:
-        resuelve bugs, poncha cables y diseña bases de datos — tu progreso se
-        guarda aquí, en tu cuenta de DevHub.
-      </p>
-    }
-  </section>
+    </a>
 
-  <!-- Learn more grid (kept compact at the bottom) -->
-  <section class="dp-dashboard__learn">
-    <h3 class="dp-dashboard__section-title">Aprende más sobre…</h3>
-    <div class="dp-dashboard__learn-grid">
-      <dp-learn-more-card [title]="('learn.readme.title' | t)" [body]="('learn.readme.body' | t)" />
-      <dp-learn-more-card [title]="('learn.project.title' | t)" [body]="('learn.project.body' | t)" />
-      <dp-learn-more-card [title]="('learn.team.title' | t)" [body]="('learn.team.body' | t)" />
-      <dp-learn-more-card [title]="('learn.saas.title' | t)" [body]="('learn.saas.body' | t)" />
-      <dp-learn-more-card [title]="('learn.deploy.title' | t)" [body]="('learn.deploy.body' | t)" />
-      <dp-learn-more-card [title]="('learn.envVar.title' | t)" [body]="('learn.envVar.body' | t)" />
+    <!-- SATELLITE · Último deploy -------------------------------------------- -->
+    @if (deployProjectId(); as pid) {
+      <a
+        class="dp-today__card dp-today__sat"
+        [routerLink]="['/app/projects', pid, 'deploy']"
+      >
+        <span class="dp-today__label">{{ 'home.cards.deploy' | t }}</span>
+        @if (lastDeploy(); as d) {
+          @if (deployBadge(); as badge) {
+            <span
+              class="dp-today__live"
+              [class.dp-today__live--ok]="d.status === 'READY'"
+              [class.dp-today__live--warn]="d.status === 'QUEUED' || d.status === 'BUILDING'"
+              [class.dp-today__live--err]="d.status === 'ERROR' || d.status === 'CANCELED'"
+            >
+              ● {{ badge.key | t }}
+            </span>
+          }
+          @if (deployHost()) {
+            <div class="dp-today__url">{{ deployHost() }}</div>
+          }
+        } @else {
+          <small class="dp-today__meta">{{ 'home.cards.deployEmpty' | t }}</small>
+        }
+      </a>
+    } @else {
+      <a class="dp-today__card dp-today__sat" routerLink="/app/deploy">
+        <span class="dp-today__label">{{ 'home.cards.deploy' | t }}</span>
+        <small class="dp-today__meta">{{ 'home.cards.deployEmpty' | t }}</small>
+      </a>
+    }
+
+    <!-- SATELLITE · Arcade ---------------------------------------------------- -->
+    <a class="dp-today__card dp-today__sat dp-today__sat--arcade" routerLink="/app/arcade">
+      <div class="dp-today__sat-row">
+        <span class="dp-today__label">{{ 'home.cards.arcade' | t }}</span>
+        @if (arcade(); as a) {
+          <span class="dp-today__px">{{ 'home.cards.arcadeDay' | t: { n: arcadeDay() } }}</span>
+        }
+      </div>
+      @if (arcade(); as a) {
+        <div class="dp-today__num dp-stat-number">
+          {{ arcadeStars() }}<span class="dp-today__num-unit"> ★ {{ 'home.cards.arcadeStars' | t }}</span>
+        </div>
+        <div class="dp-today__streak" aria-hidden="true">
+          @for (on of arcadePixels(); track $index) {
+            <span [class.is-on]="on"></span>
+          }
+        </div>
+      } @else {
+        <small class="dp-today__meta">{{ 'home.cards.arcadePlay' | t }}</small>
+      }
+    </a>
+
+    <!-- SATELLITE · Actividad -------------------------------------------------- -->
+    <div class="dp-today__card dp-today__sat dp-today__sat--feed">
+      <span class="dp-today__label">{{ 'home.cards.activity' | t }}</span>
+      @if (activity().length > 0) {
+        @for (a of activity(); track trackActivity($index, a)) {
+          <div class="dp-today__feed-item">
+            <span class="dp-today__feed-msg">{{ a.message }}</span>
+            <time class="dp-today__feed-time">{{ relativeTime(a.createdAt) }}</time>
+          </div>
+        }
+      } @else {
+        <small class="dp-today__meta">{{ 'home.cards.activityEmpty' | t }}</small>
+      }
     </div>
-  </section>
+
+    <!-- FULL ROW · Mis tareas -------------------------------------------------- -->
+    <section class="dp-today__card dp-today__tasks">
+      <div class="dp-today__sat-row">
+        <span class="dp-today__label">{{ 'home.cards.tasks' | t }}</span>
+        @if (tasksCount() > 0) {
+          <span class="dp-today__px">{{ tasksCount() }}</span>
+        }
+      </div>
+      @if (myTasks().length > 0) {
+        <div class="dp-today__task-chips">
+          @for (t of myTasks(); track trackTask($index, t)) {
+            <a
+              [routerLink]="['/app/projects', t.projectId, 'tasks']"
+              class="dp-today__task-chip"
+              [class.dp-today__task-chip--overdue]="t.overdue"
+            >
+              <span
+                class="dp-today__task-dot"
+                [class.is-urgent]="t.priority === 'URGENT' || t.priority === 'HIGH'"
+              ></span>
+              <span class="dp-today__task-title">{{ t.title }}</span>
+              <span class="dp-today__task-project">{{ t.projectName ?? '—' }}</span>
+              @if (t.overdue) {
+                <span class="dp-today__task-overdue">{{ 'home.cards.overdue' | t }}</span>
+              }
+            </a>
+          }
+        </div>
+      } @else {
+        <small class="dp-today__meta">{{ 'home.cards.tasksEmpty' | t }}</small>
+      }
+    </section>
+  </div>
 </div>
