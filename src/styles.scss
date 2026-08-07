@@ -22,6 +22,7 @@
   --dp-accent-green:    #{$dp-accent-green};
   --dp-accent-red:      #{$dp-accent-red};
   --dp-accent-yellow:   #{$dp-accent-yellow};
+  --dp-accent-teal:     #{$dp-accent-teal};
 
   --dp-radius-sm: 6px;
   --dp-radius-md: 10px;
@@ -44,9 +45,12 @@
   --dp-font-sans:
     'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
+  /* Display: titulares y números grandes — la voz visual de la marca */
+  --dp-font-display:
+    'Space Grotesk', 'Inter', system-ui, sans-serif;
   --dp-font-mono:
-    ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
 }
 
 /* Light variant — opt-in via [data-theme="light"] on <html> */

@@ -30,8 +30,10 @@ import { Component, Input } from '@angular/core';
         margin-bottom: 1.5rem;
 
         &__title {
-          font-size: 22px;
-          font-weight: 600;
+          font-family: var(--dp-font-display);
+          font-size: 23px;
+          font-weight: 700;
+          letter-spacing: -0.015em;
           color: var(--dp-text);
         }
         &__subtitle {

@@ -20,14 +20,19 @@
 
   &__label {
     color: var(--dp-text-muted);
-    font-size: 12px;
+    font-family: var(--dp-font-mono);
+    font-size: 11px;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
   }
 
   &__value {
-    font-size: 26px;
-    font-weight: 600;
+    font-family: var(--dp-font-display);
+    font-size: 28px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
     color: var(--dp-text);
     line-height: 1.1;
   }

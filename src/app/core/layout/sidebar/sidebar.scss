@@ -34,8 +34,8 @@
   }
 
   &__brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-  &__brand-name { color: var(--dp-text); font-weight: 700; font-size: 14.5px; }
-  &__brand-tag  { color: var(--dp-text-muted); font-size: 11px; }
+  &__brand-name { color: var(--dp-text); font-family: var(--dp-font-display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  &__brand-tag  { color: var(--dp-text-muted); font-family: var(--dp-font-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; }
 
   &__nav { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; }
 
