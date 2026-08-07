@@ -68,6 +68,22 @@ export const routes: Routes = [
           import('./features/arcade/arcade-page').then((m) => m.ArcadePageComponent),
       },
 
+      // Classroom (aulas) ------------------------------------------------------
+      {
+        path: 'aulas',
+        loadComponent: () =>
+          import('./features/classroom/classrooms-page').then(
+            (m) => m.ClassroomsPageComponent,
+          ),
+      },
+      {
+        path: 'aulas/:classroomId',
+        loadComponent: () =>
+          import('./features/classroom/classroom-detail-page').then(
+            (m) => m.ClassroomDetailPageComponent,
+          ),
+      },
+
       // Teams ----------------------------------------------------------------
       {
         path: 'teams',

@@ -13,6 +13,8 @@ interface NavItem {
   /** Tour anchor id, exposed as `data-tour="..."` on the rendered link */
   tour?: string;
   badge?: string;
+  /** Optional accent color marking a product context (e.g. teal = Classroom). */
+  accent?: 'teal';
 }
 
 @Component({
@@ -34,6 +36,8 @@ export class SidebarComponent {
     { labelKey: 'nav.projects',  icon: 'pi-folder',   link: '/app/projects',  tour: 'sidebar-projects' },
     { labelKey: 'nav.pricing',   icon: 'pi-tag',      link: '/app/pricing',   tour: 'sidebar-pricing' },
     { labelKey: 'nav.arcade',    icon: 'pi-play-circle', link: '/app/arcade', tour: 'sidebar-arcade' },
+    // Contexto Classroom: acento teal sutil para distinguirlo del workspace.
+    { labelKey: 'nav.classrooms', icon: 'pi-graduation-cap', link: '/app/aulas', tour: 'sidebar-classrooms', accent: 'teal' },
   ];
 
   /** Current project id, derived from the URL — drives the contextual group. */

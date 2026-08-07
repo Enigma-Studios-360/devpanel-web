@@ -1,0 +1,191 @@
+<dp-page-header
+  [title]="'classroom.list.title' | t"
+  [subtitle]="'classroom.list.subtitle' | t"
+>
+  <button type="button" class="dp-btn dp-btn--ghost" (click)="openJoin()">
+    <i class="pi pi-sign-in"></i>
+    <span>{{ 'classroom.list.join' | t }}</span>
+  </button>
+  <button type="button" class="dp-btn dp-btn--primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i>
+    <span>{{ 'classroom.list.create' | t }}</span>
+  </button>
+</dp-page-header>
+
+@if (loading()) {
+  <div class="dp-aulas-grid">
+    @for (_ of [1, 2, 3]; track $index) {
+      <article class="dp-aula-card dp-aula-card--skeleton">
+        <dp-skeleton variant="text" lines="2" />
+        <dp-skeleton variant="card" height="48" />
+      </article>
+    }
+  </div>
+} @else if (error()) {
+  <div class="dp-aula-error">
+    <i class="pi pi-exclamation-circle"></i>
+    <span>{{ error() }}</span>
+    <button type="button" class="dp-btn dp-btn--ghost" (click)="refresh()">
+      {{ 'classroom.errors.retry' | t }}
+    </button>
+  </div>
+} @else if (classrooms().length === 0) {
+  <div class="dp-aula-empty">
+    <span class="dp-aula-empty__icon"><i class="pi pi-graduation-cap"></i></span>
+    <span class="dp-kicker dp-kicker--teal">{{ 'classroom.detail.kicker' | t }}</span>
+    <h2 class="dp-display">{{ 'classroom.list.empty.title' | t }}</h2>
+    <p>{{ 'classroom.list.empty.desc' | t }}</p>
+    <div class="dp-aula-empty__actions">
+      <button type="button" class="dp-btn dp-btn--primary" (click)="openCreate()">
+        <i class="pi pi-plus"></i>
+        <span>{{ 'classroom.list.create' | t }}</span>
+      </button>
+      <button type="button" class="dp-btn dp-btn--ghost" (click)="openJoin()">
+        <i class="pi pi-sign-in"></i>
+        <span>{{ 'classroom.list.join' | t }}</span>
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="dp-aulas-grid">
+    @for (c of classrooms(); track c.classroom._id) {
+      <a class="dp-aula-card" [routerLink]="['/app/aulas', c.classroom._id]">
+        <header>
+          <h3 class="dp-display">{{ c.classroom.name }}</h3>
+          <span
+            class="dp-aula-role"
+            [class.dp-aula-role--profesor]="c.role === 'PROFESOR'"
+          >
+            {{ (c.role === 'PROFESOR' ? 'classroom.role.profesor' : 'classroom.role.alumno') | t }}
+          </span>
+        </header>
+        @if (c.classroom.description) {
+          <p class="dp-aula-card__desc">{{ c.classroom.description }}</p>
+        }
+        <footer>
+          <span class="dp-aula-card__members">
+            <i class="pi pi-users"></i>
+            {{ c.membersCount }} {{ 'classroom.list.members' | t }}
+          </span>
+          @if (c.classroom.archived) {
+            <span class="dp-aula-card__archived">{{ 'classroom.list.archived' | t }}</span>
+          }
+        </footer>
+      </a>
+    }
+  </div>
+}
+
+@if (createOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeCreate()">
+    <form
+      class="dp-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="createForm"
+      (ngSubmit)="submitCreate()"
+      novalidate
+    >
+      <header>
+        <h2>{{ 'classroom.create.title' | t }}</h2>
+        <button
+          type="button"
+          class="dp-modal__close"
+          (click)="closeCreate()"
+          [attr.aria-label]="'common.close' | t"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+      <p class="dp-text-muted dp-text-sm">{{ 'classroom.create.hint' | t }}</p>
+      <label class="dp-modal__field">
+        <span>{{ 'classroom.create.name' | t }}</span>
+        <input
+          type="text"
+          formControlName="name"
+          [placeholder]="'classroom.create.namePlaceholder' | t"
+          autocomplete="off"
+        />
+      </label>
+      <label class="dp-modal__field">
+        <span>{{ 'classroom.create.description' | t }}</span>
+        <textarea
+          formControlName="description"
+          [placeholder]="'classroom.create.descriptionPlaceholder' | t"
+        ></textarea>
+      </label>
+      @if (createError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ createError() }}
+        </div>
+      }
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeCreate()">
+          {{ 'common.cancel' | t }}
+        </button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          [disabled]="createForm.invalid || creating()"
+        >
+          @if (creating()) {<span class="dp-spinner"></span>}
+          {{ 'common.create' | t }}
+        </button>
+      </footer>
+    </form>
+  </div>
+}
+
+@if (joinOpen()) {
+  <div class="dp-modal__backdrop" (click)="closeJoin()">
+    <form
+      class="dp-modal"
+      (click)="$event.stopPropagation()"
+      [formGroup]="joinForm"
+      (ngSubmit)="submitJoin()"
+      novalidate
+    >
+      <header>
+        <h2>{{ 'classroom.join.title' | t }}</h2>
+        <button
+          type="button"
+          class="dp-modal__close"
+          (click)="closeJoin()"
+          [attr.aria-label]="'common.close' | t"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </header>
+      <p class="dp-text-muted dp-text-sm">{{ 'classroom.join.hint' | t }}</p>
+      <label class="dp-modal__field">
+        <span>{{ 'classroom.join.codeLabel' | t }}</span>
+        <input
+          class="dp-aula-code-input"
+          type="text"
+          formControlName="inviteCode"
+          maxlength="8"
+          [placeholder]="'classroom.join.codePlaceholder' | t"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </label>
+      @if (joinError()) {
+        <div class="dp-modal__error">
+          <i class="pi pi-exclamation-circle"></i> {{ joinError() }}
+        </div>
+      }
+      <footer>
+        <button type="button" class="dp-btn dp-btn--ghost" (click)="closeJoin()">
+          {{ 'common.cancel' | t }}
+        </button>
+        <button
+          type="submit"
+          class="dp-btn dp-btn--primary"
+          [disabled]="joinForm.invalid || joining()"
+        >
+          @if (joining()) {<span class="dp-spinner"></span>}
+          {{ 'classroom.join.submit' | t }}
+        </button>
+      </footer>
+    </form>
+  </div>
+}

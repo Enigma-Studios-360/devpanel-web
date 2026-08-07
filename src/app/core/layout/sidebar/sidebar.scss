@@ -80,6 +80,17 @@
       color: var(--dp-text);
       box-shadow: inset 2px 0 0 var(--dp-accent-blue);
     }
+
+    /* Acento del contexto Classroom: ícono teal siempre, y el estado activo
+       cambia su barra/fondo azul por teal. Sutil a propósito. */
+    &--teal {
+      i { color: var(--dp-accent-teal); }
+
+      &.dp-sidebar__link--active {
+        background: color-mix(in srgb, var(--dp-accent-teal) 12%, var(--dp-surface-2));
+        box-shadow: inset 2px 0 0 var(--dp-accent-teal);
+      }
+    }
   }
 
   &__badge {

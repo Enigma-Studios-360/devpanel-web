@@ -19,6 +19,7 @@
               [routerLink]="item.link"
               routerLinkActive="dp-sidebar__link--active"
               class="dp-sidebar__link"
+              [class.dp-sidebar__link--teal]="item.accent === 'teal'"
               [attr.data-tour]="item.tour"
             >
               <i [class]="'pi ' + item.icon"></i>

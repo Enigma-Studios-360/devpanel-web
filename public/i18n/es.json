@@ -15,6 +15,7 @@
     "files": "Archivos",
     "pricing": "Planes",
     "arcade": "Arcade",
+    "classrooms": "Aulas",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "register": "Crear cuenta"
@@ -115,8 +116,117 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "search": "Buscar",
+    "close": "Cerrar",
     "comingSoon": "Próximamente",
     "phase": "Fase"
+  },
+  "classroom": {
+    "list": {
+      "title": "Mis aulas",
+      "subtitle": "Crea un aula para tu grupo o únete con el código de tu profesor.",
+      "create": "Crear aula",
+      "join": "Unirme con código",
+      "members": "integrantes",
+      "archived": "Archivada",
+      "empty": {
+        "title": "Aún no tienes aulas",
+        "desc": "Un aula reúne a tu grupo, sus actividades y las entregas en un solo lugar. Crea la tuya si eres profe, o pide el código de 8 caracteres y únete como alumno."
+      }
+    },
+    "create": {
+      "title": "Crear aula",
+      "hint": "Tú quedas como profesor del aula y recibirás un código de invitación para compartir.",
+      "name": "Nombre del aula",
+      "namePlaceholder": "AWP 10°B TV",
+      "description": "Descripción (opcional)",
+      "descriptionPlaceholder": "¿De qué trata el curso o el grupo?"
+    },
+    "join": {
+      "title": "Unirme a un aula",
+      "hint": "Pídele a tu profesor el código de 8 caracteres del aula.",
+      "codeLabel": "Código de invitación",
+      "codePlaceholder": "ABCD2345",
+      "submit": "Unirme",
+      "invalidCode": "Ese código no existe o ya no es válido. Revísalo con tu profesor."
+    },
+    "role": {
+      "profesor": "Profesor",
+      "alumno": "Alumno"
+    },
+    "detail": {
+      "kicker": "Aula",
+      "back": "Mis aulas"
+    },
+    "code": {
+      "title": "Código de invitación",
+      "share": "Compártelo con tus alumnos para que se unan al aula.",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "rotate": "Rotar",
+      "rotateTitle": "Rotar código de invitación",
+      "rotateMessage": "El código actual dejará de funcionar y se generará uno nuevo. Quien ya está dentro del aula no se ve afectado.",
+      "rotateConfirm": "Rotar código",
+      "rotateError": "No se pudo rotar el código. Intenta de nuevo."
+    },
+    "assignments": {
+      "title": "Actividades",
+      "new": "Nueva actividad",
+      "emptyProfesor": "Aún no hay actividades. Crea la primera y tus alumnos podrán entregar su repositorio de GitHub.",
+      "emptyAlumno": "Tu profesor aún no publica actividades. Vuelve más tarde.",
+      "dueAt": "Entrega:",
+      "template": "Plantilla:",
+      "submissionsCount": "entregas",
+      "viewSubmissions": "Ver entregas",
+      "hideSubmissions": "Ocultar entregas",
+      "noSubmissions": "Aún no hay entregas para esta actividad.",
+      "createError": "No se pudo crear la actividad. Revisa los datos e intenta de nuevo.",
+      "form": {
+        "title": "Título",
+        "titlePlaceholder": "Práctica 1 — API REST",
+        "instructions": "Instrucciones (opcional)",
+        "instructionsPlaceholder": "¿Qué deben hacer y cómo se evalúa?",
+        "templateRepo": "Repo plantilla (opcional)",
+        "templateRepoPlaceholder": "owner/repo",
+        "dueAt": "Fecha límite (opcional)",
+        "submit": "Publicar actividad"
+      }
+    },
+    "status": {
+      "entregado": "Entregado",
+      "tarde": "Tarde"
+    },
+    "submit": {
+      "placeholder": "tu-usuario/tu-repo",
+      "hint": "Pega el nombre de tu repositorio de GitHub — pronto podrás elegirlo con un click.",
+      "action": "Entregar",
+      "resubmit": "Re-entregar",
+      "notSubmitted": "Sin entregar",
+      "submittedAt": "Entregaste el",
+      "invalidRepo": "El formato debe ser owner/repo, por ejemplo: ana-dev/practica-1.",
+      "error": "No se pudo registrar tu entrega. Intenta de nuevo."
+    },
+    "submissions": {
+      "student": "Alumno",
+      "repo": "Repositorio",
+      "submittedAt": "Fecha de entrega",
+      "status": "Estado",
+      "loadError": "No se pudieron cargar las entregas."
+    },
+    "roster": {
+      "title": "Integrantes",
+      "joined": "Se unió el",
+      "remove": "Quitar del aula",
+      "removeTitle": "Quitar del aula",
+      "removeMessage": "El alumno perderá acceso al aula y a sus actividades. Podrá volver a entrar con el código de invitación.",
+      "removeError": "No se pudo quitar al integrante."
+    },
+    "errors": {
+      "load": "No se pudieron cargar tus aulas.",
+      "loadDetail": "No se pudo cargar la información del aula.",
+      "create": "No se pudo crear el aula. Intenta de nuevo.",
+      "join": "No se pudo procesar el código. Intenta de nuevo.",
+      "retry": "Reintentar"
+    }
   },
   "learn": {
     "readme": {

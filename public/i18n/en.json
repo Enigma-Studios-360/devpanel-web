@@ -15,6 +15,7 @@
     "files": "Files",
     "pricing": "Plans",
     "arcade": "Arcade",
+    "classrooms": "Classrooms",
     "logout": "Sign out",
     "login": "Sign in",
     "register": "Create account"
@@ -115,8 +116,117 @@
     "edit": "Edit",
     "delete": "Delete",
     "search": "Search",
+    "close": "Close",
     "comingSoon": "Coming soon",
     "phase": "Phase"
+  },
+  "classroom": {
+    "list": {
+      "title": "My classrooms",
+      "subtitle": "Create a classroom for your group or join one with your teacher's code.",
+      "create": "Create classroom",
+      "join": "Join with code",
+      "members": "members",
+      "archived": "Archived",
+      "empty": {
+        "title": "No classrooms yet",
+        "desc": "A classroom gathers your group, its assignments and the submissions in one place. Create yours if you teach, or ask for the 8-character code and join as a student."
+      }
+    },
+    "create": {
+      "title": "Create classroom",
+      "hint": "You become the classroom's teacher and get an invite code to share.",
+      "name": "Classroom name",
+      "namePlaceholder": "AWP 10B",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "What is the course or group about?"
+    },
+    "join": {
+      "title": "Join a classroom",
+      "hint": "Ask your teacher for the classroom's 8-character code.",
+      "codeLabel": "Invite code",
+      "codePlaceholder": "ABCD2345",
+      "submit": "Join",
+      "invalidCode": "That code does not exist or is no longer valid. Check it with your teacher."
+    },
+    "role": {
+      "profesor": "Teacher",
+      "alumno": "Student"
+    },
+    "detail": {
+      "kicker": "Classroom",
+      "back": "My classrooms"
+    },
+    "code": {
+      "title": "Invite code",
+      "share": "Share it with your students so they can join the classroom.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "rotate": "Rotate",
+      "rotateTitle": "Rotate invite code",
+      "rotateMessage": "The current code will stop working and a new one will be generated. Members already in the classroom are not affected.",
+      "rotateConfirm": "Rotate code",
+      "rotateError": "Could not rotate the code. Try again."
+    },
+    "assignments": {
+      "title": "Assignments",
+      "new": "New assignment",
+      "emptyProfesor": "No assignments yet. Create the first one and your students will be able to submit their GitHub repository.",
+      "emptyAlumno": "Your teacher has not published any assignments yet. Check back later.",
+      "dueAt": "Due:",
+      "template": "Template:",
+      "submissionsCount": "submissions",
+      "viewSubmissions": "View submissions",
+      "hideSubmissions": "Hide submissions",
+      "noSubmissions": "No submissions for this assignment yet.",
+      "createError": "Could not create the assignment. Check the fields and try again.",
+      "form": {
+        "title": "Title",
+        "titlePlaceholder": "Lab 1 — REST API",
+        "instructions": "Instructions (optional)",
+        "instructionsPlaceholder": "What should they build and how is it graded?",
+        "templateRepo": "Template repo (optional)",
+        "templateRepoPlaceholder": "owner/repo",
+        "dueAt": "Due date (optional)",
+        "submit": "Publish assignment"
+      }
+    },
+    "status": {
+      "entregado": "Submitted",
+      "tarde": "Late"
+    },
+    "submit": {
+      "placeholder": "your-user/your-repo",
+      "hint": "Paste the name of your GitHub repository — soon you'll be able to pick it with one click.",
+      "action": "Submit",
+      "resubmit": "Resubmit",
+      "notSubmitted": "Not submitted",
+      "submittedAt": "You submitted on",
+      "invalidRepo": "The format must be owner/repo, for example: ana-dev/lab-1.",
+      "error": "Could not register your submission. Try again."
+    },
+    "submissions": {
+      "student": "Student",
+      "repo": "Repository",
+      "submittedAt": "Submitted at",
+      "status": "Status",
+      "loadError": "Could not load the submissions."
+    },
+    "roster": {
+      "title": "Members",
+      "joined": "Joined on",
+      "remove": "Remove from classroom",
+      "removeTitle": "Remove from classroom",
+      "removeMessage": "The student will lose access to the classroom and its assignments. They can rejoin with the invite code.",
+      "removeError": "Could not remove the member."
+    },
+    "errors": {
+      "load": "Could not load your classrooms.",
+      "loadDetail": "Could not load the classroom.",
+      "create": "Could not create the classroom. Try again.",
+      "join": "Could not process the code. Try again.",
+      "retry": "Retry"
+    }
   },
   "learn": {
     "readme": {

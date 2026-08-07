@@ -1,0 +1,529 @@
+/* Shared primitives (.dp-btn, .dp-modal__field, .dp-spinner) live in
+   teams.scss — pulled in explicitly because of emulated encapsulation. */
+@use '../teams/teams.scss';
+
+.dp-aula-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--dp-text-muted);
+  font-size: 12.5px;
+  margin-bottom: 1rem;
+
+  i { font-size: 11px; }
+
+  &:hover { color: var(--dp-text); text-decoration: none; }
+}
+
+/* ---- Header ---------------------------------------------------------------- */
+
+.dp-aula-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--dp-border);
+  margin-bottom: 1.25rem;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    h1 {
+      font-size: 26px;
+      color: var(--dp-text);
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__desc {
+    color: var(--dp-text-muted);
+    font-size: 13.5px;
+    margin: 0;
+    max-width: 720px;
+  }
+}
+
+/* Badge de rol — mono, uppercase, esquinas duras; PROFESOR en teal. */
+.dp-aula-role {
+  flex-shrink: 0;
+  font-family: var(--dp-font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 0;
+  background: var(--dp-surface-2);
+  color: var(--dp-text-muted);
+  border: 1px solid var(--dp-border);
+
+  &--profesor {
+    background: color-mix(in srgb, var(--dp-accent-teal) 12%, transparent);
+    color: var(--dp-accent-teal);
+    border-color: color-mix(in srgb, var(--dp-accent-teal) 40%, transparent);
+  }
+}
+
+/* ---- Invite code box (PROFESOR) -------------------------------------------- */
+
+.dp-aula-codebox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--dp-surface);
+  border: 1px solid color-mix(in srgb, var(--dp-accent-teal) 40%, var(--dp-border));
+  border-left: 3px solid var(--dp-accent-teal);
+  border-radius: var(--dp-radius-lg);
+  padding: 1.1rem 1.35rem;
+  margin-bottom: 1.25rem;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: var(--dp-font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dp-text-muted);
+  }
+
+  &__code {
+    font-family: var(--dp-font-mono);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    color: var(--dp-text);
+    line-height: 1.2;
+    user-select: all;
+  }
+
+  &__hint {
+    color: var(--dp-text-muted);
+    font-size: 12px;
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* ---- Layout ---------------------------------------------------------------- */
+
+.dp-aula-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  align-items: start;
+
+  @media (max-width: 960px) { grid-template-columns: 1fr; }
+}
+
+.dp-aula-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--dp-text-muted);
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+
+  &__count {
+    font-family: var(--dp-font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--dp-text);
+    font-size: 15px;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    text-align: center;
+    border: 1px dashed var(--dp-border);
+    border-radius: var(--dp-radius-md);
+
+    i { font-size: 20px; color: var(--dp-text-muted); }
+    p { color: var(--dp-text-muted); font-size: 13px; margin: 0; max-width: 340px; }
+  }
+}
+
+/* ---- Assignment creation form (PROFESOR) ----------------------------------- */
+
+.dp-aula-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: var(--dp-surface-2);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-md);
+  padding: 1rem 1.1rem;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+
+    @media (max-width: 640px) { grid-template-columns: 1fr; }
+  }
+
+  &__error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 0.5rem 0.7rem;
+    border-radius: var(--dp-radius-md);
+    font-size: 12.5px;
+  }
+
+  footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+/* ---- Assignment cards ------------------------------------------------------ */
+
+.dp-aula-assignments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dp-aula-assignment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--dp-surface-2);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-md);
+  padding: 0.9rem 1.1rem;
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+
+    h3 {
+      font-family: var(--dp-font-display);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      font-size: 15px;
+      color: var(--dp-text);
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__due {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--dp-text-muted);
+    font-size: 12px;
+
+    i { font-size: 11px; }
+  }
+
+  &__instructions {
+    color: var(--dp-text-muted);
+    font-size: 13px;
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  &__template {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    align-self: flex-start;
+    font-size: 12.5px;
+    color: var(--dp-text-muted);
+
+    i { font-size: 12px; }
+    code { font-family: var(--dp-font-mono); font-size: 12px; color: var(--dp-accent-blue); }
+    &:hover { text-decoration: none; code { text-decoration: underline; } }
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--dp-text-muted);
+    font-size: 12.5px;
+
+    i { font-size: 12px; }
+  }
+
+  &__nosubs {
+    color: var(--dp-text-muted);
+    font-size: 12.5px;
+    margin: 0;
+    padding: 0.5rem 0;
+  }
+
+  &__mine {
+    color: var(--dp-text-muted);
+    font-size: 12.5px;
+    margin: 0;
+
+    code { font-family: var(--dp-font-mono); font-size: 12px; }
+  }
+}
+
+/* Status badges: mono uppercase, esquinas duras (firma pixel).
+   ENTREGADO verde · TARDE amarillo · sin entregar muted (base). */
+.dp-aula-status {
+  flex-shrink: 0;
+  font-family: var(--dp-font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 0;
+  background: var(--dp-surface);
+  color: var(--dp-text-muted);
+  border: 1px solid var(--dp-border);
+
+  &--entregado {
+    background: color-mix(in srgb, var(--dp-accent-green) 12%, transparent);
+    color: var(--dp-accent-green);
+    border-color: color-mix(in srgb, var(--dp-accent-green) 40%, transparent);
+  }
+
+  &--tarde {
+    background: color-mix(in srgb, var(--dp-accent-yellow) 12%, transparent);
+    color: var(--dp-accent-yellow);
+    border-color: color-mix(in srgb, var(--dp-accent-yellow) 40%, transparent);
+  }
+}
+
+/* ---- Submissions table (PROFESOR) ------------------------------------------ */
+
+.dp-aula-subs {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    font-family: var(--dp-font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-text-muted);
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--dp-border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid var(--dp-border);
+    color: var(--dp-text);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: 0; }
+
+  &__student {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  &__name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+
+    small { color: var(--dp-text-muted); font-size: 11px; }
+  }
+
+  &__repo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    i { font-size: 12px; color: var(--dp-text-muted); }
+    code { font-family: var(--dp-font-mono); font-size: 12px; }
+  }
+}
+
+/* ---- Inline submit form (ALUMNO) ------------------------------------------- */
+
+.dp-aula-submitform {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  &__field {
+    display: flex;
+    gap: 0.5rem;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      background: var(--dp-bg);
+      color: var(--dp-text);
+      border: 1px solid var(--dp-border);
+      border-radius: var(--dp-radius-md);
+      padding: 0.5rem 0.7rem;
+      font-family: var(--dp-font-mono);
+      font-size: 13px;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+
+      &:focus {
+        outline: 0;
+        border-color: var(--dp-accent-teal);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dp-accent-teal) 18%, transparent);
+      }
+    }
+  }
+
+  &__hint {
+    color: var(--dp-text-muted);
+    font-size: 11.5px;
+    margin: 0;
+  }
+}
+
+/* ---- Roster ---------------------------------------------------------------- */
+
+.dp-aula-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--dp-radius-md);
+    background: var(--dp-surface-2);
+    border: 1px solid var(--dp-border);
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+
+    strong { color: var(--dp-text); font-size: 13.5px; overflow-wrap: anywhere; }
+    small { color: var(--dp-text-muted); font-size: 11px; overflow-wrap: anywhere; }
+  }
+
+  &__joined { font-size: 10.5px; }
+
+  &__remove {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--dp-radius-md);
+    color: var(--dp-text-muted);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+
+    i { font-size: 12px; }
+
+    &:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--dp-accent-red);
+    }
+
+    &:disabled { opacity: 0.6; cursor: default; }
+  }
+}
+
+.dp-aula-avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--dp-accent-teal) 22%, var(--dp-surface-2));
+  color: var(--dp-text);
+  font-weight: 700;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+/* ---- Errors ---------------------------------------------------------------- */
+
+.dp-aula-error {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--dp-radius-md);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 13px;
+
+  i { color: var(--dp-accent-red); }
+  span { flex: 1; }
+
+  &--inline { margin-bottom: 1rem; }
+}

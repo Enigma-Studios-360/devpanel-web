@@ -1,0 +1,178 @@
+/* Shared primitives (.dp-btn, .dp-modal*, .dp-spinner) live in teams.scss —
+   emulated encapsulation means each view must pull them in explicitly. */
+@use '../teams/teams.scss';
+
+.dp-aulas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.dp-aula-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+  padding: 1.1rem 1.25rem;
+  color: var(--dp-text);
+  text-decoration: none;
+  transition: border-color 150ms ease, transform 150ms ease;
+
+  /* El acento teal marca el contexto Classroom — sólo en el hover. */
+  &:hover {
+    border-color: color-mix(in srgb, var(--dp-accent-teal) 55%, var(--dp-border));
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    h3 {
+      font-size: 16px;
+      color: var(--dp-text);
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__desc {
+    color: var(--dp-text-muted);
+    font-size: 12.5px;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__members {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--dp-text-muted);
+    font-size: 12.5px;
+
+    i { font-size: 12px; }
+  }
+
+  &__archived {
+    font-family: var(--dp-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dp-text-muted);
+    border: 1px dashed var(--dp-border);
+    padding: 2px 7px;
+    /* firma pixel: esquinas duras */
+    border-radius: 0;
+  }
+
+  &--skeleton {
+    pointer-events: none;
+    transform: none;
+  }
+}
+
+/* Badge de MI rol en el aula — etiqueta técnica: mono, uppercase, esquinas
+   duras (firma pixel). PROFESOR lleva el teal del contexto Classroom. */
+.dp-aula-role {
+  flex-shrink: 0;
+  font-family: var(--dp-font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 0;
+  background: var(--dp-surface-2);
+  color: var(--dp-text-muted);
+  border: 1px solid var(--dp-border);
+
+  &--profesor {
+    background: color-mix(in srgb, var(--dp-accent-teal) 12%, transparent);
+    color: var(--dp-accent-teal);
+    border-color: color-mix(in srgb, var(--dp-accent-teal) 40%, transparent);
+  }
+}
+
+/* Empty state con personalidad propia (dos CTAs: crear o unirse). */
+.dp-aula-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  border: 1px dashed var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--dp-accent-teal) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--dp-accent-teal) 35%, transparent);
+    /* firma pixel */
+    border-radius: 0;
+    margin-bottom: 0.35rem;
+
+    i { font-size: 24px; color: var(--dp-accent-teal); }
+  }
+
+  h2 { font-size: 20px; color: var(--dp-text); margin: 0; }
+
+  p {
+    color: var(--dp-text-muted);
+    font-size: 13px;
+    max-width: 420px;
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.dp-aula-error {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--dp-radius-md);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 13px;
+
+  i { color: var(--dp-accent-red); }
+  span { flex: 1; }
+}
+
+/* Input del código de invitación: mono + espaciado de "código". */
+.dp-aula-code-input {
+  font-family: var(--dp-font-mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 16px !important;
+}

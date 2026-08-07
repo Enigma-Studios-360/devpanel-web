@@ -1,0 +1,389 @@
+@if (loading()) {
+  <dp-loading-state [label]="'common.loading' | t" />
+} @else if (!classroom()) {
+  <div class="dp-aula-error">
+    <i class="pi pi-exclamation-circle"></i>
+    <span>{{ error() || ('classroom.errors.loadDetail' | t) }}</span>
+    <button type="button" class="dp-btn dp-btn--ghost" (click)="refresh()">
+      {{ 'classroom.errors.retry' | t }}
+    </button>
+  </div>
+} @else {
+  @if (classroom(); as aula) {
+    <a routerLink="/app/aulas" class="dp-aula-back">
+      <i class="pi pi-arrow-left"></i>
+      <span>{{ 'classroom.detail.back' | t }}</span>
+    </a>
+
+    <header class="dp-aula-head">
+      <span class="dp-kicker dp-kicker--teal">{{ 'classroom.detail.kicker' | t }}</span>
+      <div class="dp-aula-head__row">
+        <h1 class="dp-display">{{ aula.name }}</h1>
+        <span
+          class="dp-aula-role"
+          [class.dp-aula-role--profesor]="isProfesor()"
+        >
+          {{ (isProfesor() ? 'classroom.role.profesor' : 'classroom.role.alumno') | t }}
+        </span>
+      </div>
+      @if (aula.description) {
+        <p class="dp-aula-head__desc">{{ aula.description }}</p>
+      }
+    </header>
+
+    @if (error()) {
+      <div class="dp-aula-error dp-aula-error--inline">
+        <i class="pi pi-exclamation-circle"></i>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    @if (isProfesor()) {
+      <section class="dp-aula-codebox">
+        <div class="dp-aula-codebox__info">
+          <span class="dp-aula-codebox__label">{{ 'classroom.code.title' | t }}</span>
+          <code class="dp-aula-codebox__code">{{ aula.inviteCode }}</code>
+          <p class="dp-aula-codebox__hint">{{ 'classroom.code.share' | t }}</p>
+        </div>
+        <div class="dp-aula-codebox__actions">
+          <button type="button" class="dp-btn dp-btn--ghost" (click)="copyCode()">
+            <i [class]="copied() ? 'pi pi-check' : 'pi pi-copy'"></i>
+            <span>{{ (copied() ? 'classroom.code.copied' : 'classroom.code.copy') | t }}</span>
+          </button>
+          <button
+            type="button"
+            class="dp-btn dp-btn--ghost"
+            (click)="rotateCode()"
+            [disabled]="rotating()"
+          >
+            @if (rotating()) {<span class="dp-spinner"></span>} @else {
+              <i class="pi pi-refresh"></i>
+            }
+            <span>{{ 'classroom.code.rotate' | t }}</span>
+          </button>
+        </div>
+      </section>
+    }
+
+    <div class="dp-aula-layout">
+      <!-- ================= Assignments ================= -->
+      <section class="dp-card dp-aula-section">
+        <div class="dp-aula-section__head">
+          <h2>{{ 'classroom.assignments.title' | t }}</h2>
+          @if (isProfesor()) {
+            <button
+              type="button"
+              class="dp-btn dp-btn--primary"
+              (click)="assignmentFormOpen() ? closeAssignmentForm() : openAssignmentForm()"
+            >
+              <i class="pi pi-plus"></i>
+              <span>{{ 'classroom.assignments.new' | t }}</span>
+            </button>
+          }
+        </div>
+
+        @if (isProfesor() && assignmentFormOpen()) {
+          <form
+            class="dp-aula-form"
+            [formGroup]="assignmentForm"
+            (ngSubmit)="submitAssignment()"
+            novalidate
+          >
+            <label class="dp-modal__field">
+              <span>{{ 'classroom.assignments.form.title' | t }}</span>
+              <input
+                type="text"
+                formControlName="title"
+                [placeholder]="'classroom.assignments.form.titlePlaceholder' | t"
+                autocomplete="off"
+              />
+            </label>
+            <label class="dp-modal__field">
+              <span>{{ 'classroom.assignments.form.instructions' | t }}</span>
+              <textarea
+                formControlName="instructions"
+                [placeholder]="'classroom.assignments.form.instructionsPlaceholder' | t"
+              ></textarea>
+            </label>
+            <div class="dp-aula-form__row">
+              <label class="dp-modal__field">
+                <span>{{ 'classroom.assignments.form.templateRepo' | t }}</span>
+                <input
+                  type="text"
+                  formControlName="templateRepoFullName"
+                  [placeholder]="'classroom.assignments.form.templateRepoPlaceholder' | t"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </label>
+              <label class="dp-modal__field">
+                <span>{{ 'classroom.assignments.form.dueAt' | t }}</span>
+                <input type="datetime-local" formControlName="dueAt" />
+              </label>
+            </div>
+            @if (assignmentForm.controls.templateRepoFullName.invalid && assignmentForm.controls.templateRepoFullName.value) {
+              <div class="dp-aula-form__error">{{ 'classroom.submit.invalidRepo' | t }}</div>
+            }
+            @if (assignmentError()) {
+              <div class="dp-aula-form__error">{{ assignmentError() }}</div>
+            }
+            <footer>
+              <button type="button" class="dp-btn dp-btn--ghost" (click)="closeAssignmentForm()">
+                {{ 'common.cancel' | t }}
+              </button>
+              <button
+                type="submit"
+                class="dp-btn dp-btn--primary"
+                [disabled]="assignmentForm.invalid || creatingAssignment()"
+              >
+                @if (creatingAssignment()) {<span class="dp-spinner"></span>}
+                {{ 'classroom.assignments.form.submit' | t }}
+              </button>
+            </footer>
+          </form>
+        }
+
+        @if (assignments().length === 0) {
+          <div class="dp-aula-section__empty">
+            <i class="pi pi-book"></i>
+            <p>
+              {{ (isProfesor() ? 'classroom.assignments.emptyProfesor' : 'classroom.assignments.emptyAlumno') | t }}
+            </p>
+          </div>
+        } @else {
+          <ul class="dp-aula-assignments">
+            @for (item of assignments(); track item.assignment._id) {
+              <li class="dp-aula-assignment">
+                <div class="dp-aula-assignment__head">
+                  <div class="dp-aula-assignment__title">
+                    <h3>{{ item.assignment.title }}</h3>
+                    @if (item.assignment.dueAt) {
+                      <span class="dp-aula-assignment__due">
+                        <i class="pi pi-clock"></i>
+                        {{ 'classroom.assignments.dueAt' | t }}
+                        {{ item.assignment.dueAt | date: 'dd/MM/yyyy HH:mm' }}
+                      </span>
+                    }
+                  </div>
+
+                  @if (!isProfesor()) {
+                    @if (item.mySubmission; as sub) {
+                      <span
+                        class="dp-aula-status"
+                        [class.dp-aula-status--entregado]="sub.status === 'ENTREGADO'"
+                        [class.dp-aula-status--tarde]="sub.status === 'TARDE'"
+                      >
+                        {{ (sub.status === 'TARDE' ? 'classroom.status.tarde' : 'classroom.status.entregado') | t }}
+                      </span>
+                    } @else {
+                      <span class="dp-aula-status">{{ 'classroom.submit.notSubmitted' | t }}</span>
+                    }
+                  }
+                </div>
+
+                @if (item.assignment.instructions) {
+                  <p class="dp-aula-assignment__instructions">{{ item.assignment.instructions }}</p>
+                }
+
+                @if (item.assignment.templateRepoFullName; as tpl) {
+                  <a
+                    class="dp-aula-assignment__template"
+                    [href]="githubUrl(tpl)"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <i class="pi pi-github"></i>
+                    <span>{{ 'classroom.assignments.template' | t }}</span>
+                    <code>{{ tpl }}</code>
+                  </a>
+                }
+
+                <!-- PROFESOR: contador + tabla de entregas -->
+                @if (isProfesor()) {
+                  <div class="dp-aula-assignment__foot">
+                    <span class="dp-aula-assignment__count">
+                      <i class="pi pi-inbox"></i>
+                      {{ item.submissionsCount ?? 0 }} {{ 'classroom.assignments.submissionsCount' | t }}
+                    </span>
+                    <button
+                      type="button"
+                      class="dp-btn dp-btn--ghost"
+                      (click)="toggleSubmissions(item.assignment._id)"
+                    >
+                      <i [class]="expandedAssignmentId() === item.assignment._id ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"></i>
+                      <span>
+                        {{ (expandedAssignmentId() === item.assignment._id ? 'classroom.assignments.hideSubmissions' : 'classroom.assignments.viewSubmissions') | t }}
+                      </span>
+                    </button>
+                  </div>
+
+                  @if (expandedAssignmentId() === item.assignment._id) {
+                    @if (submissionsLoading() === item.assignment._id) {
+                      <dp-loading-state [inline]="true" [label]="'common.loading' | t" />
+                    } @else if (submissionsError()) {
+                      <div class="dp-aula-form__error">{{ submissionsError() }}</div>
+                    } @else if (submissionsOf(item.assignment._id).length === 0) {
+                      <p class="dp-aula-assignment__nosubs">{{ 'classroom.assignments.noSubmissions' | t }}</p>
+                    } @else {
+                      <div class="dp-aula-subs">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>{{ 'classroom.submissions.student' | t }}</th>
+                              <th>{{ 'classroom.submissions.repo' | t }}</th>
+                              <th>{{ 'classroom.submissions.submittedAt' | t }}</th>
+                              <th>{{ 'classroom.submissions.status' | t }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (sub of submissionsOf(item.assignment._id); track sub._id) {
+                              <tr>
+                                <td>
+                                  <span class="dp-aula-subs__student">
+                                    <span class="dp-aula-avatar">
+                                      @if (sub.student.avatarUrl) {
+                                        <img [src]="sub.student.avatarUrl" alt="" />
+                                      } @else {
+                                        {{ initialOf(sub.student.name) }}
+                                      }
+                                    </span>
+                                    <span class="dp-aula-subs__name">
+                                      {{ sub.student.name }}
+                                      @if (sub.student.email) {
+                                        <small>{{ sub.student.email }}</small>
+                                      }
+                                    </span>
+                                  </span>
+                                </td>
+                                <td>
+                                  <a
+                                    class="dp-aula-subs__repo"
+                                    [href]="githubUrl(sub.repoFullName)"
+                                    target="_blank"
+                                    rel="noopener"
+                                  >
+                                    <i class="pi pi-github"></i>
+                                    <code>{{ sub.repoFullName }}</code>
+                                  </a>
+                                </td>
+                                <td>{{ sub.submittedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                <td>
+                                  <span
+                                    class="dp-aula-status"
+                                    [class.dp-aula-status--entregado]="sub.status === 'ENTREGADO'"
+                                    [class.dp-aula-status--tarde]="sub.status === 'TARDE'"
+                                  >
+                                    {{ (sub.status === 'TARDE' ? 'classroom.status.tarde' : 'classroom.status.entregado') | t }}
+                                  </span>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                  }
+                } @else {
+                  <!-- ALUMNO: mi entrega + form inline -->
+                  @if (item.mySubmission; as sub) {
+                    <p class="dp-aula-assignment__mine">
+                      {{ 'classroom.submit.submittedAt' | t }}
+                      {{ sub.submittedAt | date: 'dd/MM/yyyy HH:mm' }} ·
+                      <a [href]="githubUrl(sub.repoFullName)" target="_blank" rel="noopener">
+                        <code>{{ sub.repoFullName }}</code>
+                      </a>
+                    </p>
+                  }
+                  <div class="dp-aula-submitform">
+                    <div class="dp-aula-submitform__field">
+                      <input
+                        #repoInput
+                        type="text"
+                        [value]="item.mySubmission?.repoFullName ?? ''"
+                        [placeholder]="'classroom.submit.placeholder' | t"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                      <button
+                        type="button"
+                        class="dp-btn dp-btn--primary"
+                        (click)="submitRepo(item, repoInput)"
+                        [disabled]="submittingId() === item.assignment._id"
+                      >
+                        @if (submittingId() === item.assignment._id) {
+                          <span class="dp-spinner"></span>
+                        } @else {
+                          <i class="pi pi-upload"></i>
+                        }
+                        <span>
+                          {{ (item.mySubmission ? 'classroom.submit.resubmit' : 'classroom.submit.action') | t }}
+                        </span>
+                      </button>
+                    </div>
+                    <p class="dp-aula-submitform__hint">{{ 'classroom.submit.hint' | t }}</p>
+                    @if (submitErrorOf(item.assignment._id)) {
+                      <div class="dp-aula-form__error">{{ submitErrorOf(item.assignment._id) }}</div>
+                    }
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- ================= Roster ================= -->
+      <section class="dp-card dp-aula-section">
+        <div class="dp-aula-section__head">
+          <h2>{{ 'classroom.roster.title' | t }}</h2>
+          <span class="dp-aula-section__count">{{ members().length }}</span>
+        </div>
+
+        <ul class="dp-aula-roster">
+          @for (m of members(); track m.userId) {
+            <li>
+              <span class="dp-aula-avatar">
+                @if (m.avatarUrl) {
+                  <img [src]="m.avatarUrl" alt="" />
+                } @else {
+                  {{ initialOf(m.name) }}
+                }
+              </span>
+              <div class="dp-aula-roster__info">
+                <strong>{{ m.name }}</strong>
+                @if (m.email) {
+                  <small>{{ m.email }}</small>
+                }
+                <small class="dp-aula-roster__joined">
+                  {{ 'classroom.roster.joined' | t }} {{ m.joinedAt | date: 'dd/MM/yyyy' }}
+                </small>
+              </div>
+              <span
+                class="dp-aula-role"
+                [class.dp-aula-role--profesor]="m.role === 'PROFESOR'"
+              >
+                {{ (m.role === 'PROFESOR' ? 'classroom.role.profesor' : 'classroom.role.alumno') | t }}
+              </span>
+              @if (isProfesor() && m.role === 'ALUMNO') {
+                <button
+                  type="button"
+                  class="dp-aula-roster__remove"
+                  (click)="removeMember(m)"
+                  [disabled]="removingUserId() === m.userId"
+                  [attr.aria-label]="'classroom.roster.remove' | t"
+                  [title]="'classroom.roster.remove' | t"
+                >
+                  @if (removingUserId() === m.userId) {
+                    <span class="dp-spinner"></span>
+                  } @else {
+                    <i class="pi pi-user-minus"></i>
+                  }
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  }
+}
